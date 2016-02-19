@@ -1,0 +1,608 @@
+#include <TROOT.h>
+#include <TSystem.h>
+#include <TChain.h>
+#include <TFile.h>
+#include<iostream>
+#include<fstream>
+#include <iomanip>
+#include <stdlib.h>
+#include <sstream>
+#include <stdexcept>
+#include <TH1.h>
+#include <TH2.h>
+#include <TF1.h>
+#include <TStyle.h>
+#include <TCanvas.h>
+#include <TFile.h>
+#include <TObjArray.h>
+#include "TLegend.h"
+#include "TGraph.h"
+#include "stdio.h"
+#include <TLatex.h>
+#include <TColor.h>
+#include <TMarker.h>
+#include <TString.h>
+#include "TGraphAsymmErrors.h"
+#include <vector>
+#include <TRandom3.h>
+#include <TGaxis.h>
+#include <algorithm>
+#include "stylefile.h"
+
+// NON WORKING EXAMPLE, JUST HOPEFULLY TO SHOW THE MAIN SECTIONS OF THE CODE YOU NEED TO BE THINKING ABOUT
+
+int plotVBFDMresults_ConstantMass(TString variable="", TString PS="", TString Mass="", TString Norm="") {
+
+  gStyle->SetTitleBorderSize(0);
+  gStyle->SetFrameBorderMode(0);
+  gStyle->SetCanvasBorderMode(0);
+  gStyle->SetPadBorderMode(0);
+  gStyle->SetCanvasColor(kWhite);
+  gStyle->SetPadColor(kWhite);
+  gStyle->SetHistLineWidth(2);
+  gStyle->SetTextFont(42);
+
+  gROOT->SetStyle("ATLAS");
+  gROOT->ForceStyle();
+
+  gSystem->Exec("mkdir Figures/"+Mass+"/"+Norm+"");
+
+  TString xaxis = "NULL";
+  TString yaxis = "";
+
+  
+  //  yaxis = "1/#sigma^{"+PS+"}_{W}#upoint ";
+  if (variable.Contains("Count")) {
+    xaxis = "Phase Space";
+    yaxis += "#sigma . Accepted/Total";
+  }
+  if (variable.Contains("Mjj")) {
+    xaxis = "Dijet mass [GeV]";
+    yaxis += "d#sigma/dm_{jj}"; 
+  }
+  if (variable.Contains("Jet1PT")) {
+    xaxis = "Leading jet p_{T} [GeV]";
+    yaxis += "d#sigma/dp_{T}"; 
+  }
+  if (variable.Contains("Jet2PT")) {
+    xaxis = "Second jet p_{T} [GeV]";
+    yaxis += "d#sigma/dp_{T}"; 
+  }
+  if (variable.Contains("NumJets")) {
+    xaxis = "Number of Jets";
+    yaxis += "d#sigma/dN"; 
+  }
+  if (variable.Contains("Jet1Eta")) {
+    xaxis = "Leading Jet #eta";
+    yaxis += "d#sigma/d#eta";
+  }
+  if (variable.Contains("Jet2Eta")) {
+    xaxis = "Leading Jet #eta";
+    yaxis += "d#sigma/d#eta";
+  }
+  if (variable.Contains("DeltaEta")) {
+    xaxis = "#Delta#eta(j_{1}, j_{2})";
+    yaxis += "d#sigma/d#Delta#eta";
+  }
+  if (variable.Contains("DeltaPhi")) {
+    xaxis = "#Delta#phi(j_{1}, j_{2})";
+    yaxis += "d#sigma/d#Delta#phi"; 
+  }
+  if (variable.Contains("Etmiss")) {
+    xaxis = "Missing Transverse Energy [GeV]";
+    yaxis += "d#sigma/dETMiss"; 
+  }
+
+
+  //  -- READ IN YOUR VARIOUS FILES HERE (SEE HOW VARIABLE AND PS ARE PASSED IN THE FILENAME) AND PULL OUT THE HISTOGRAMS YOU WANT
+
+  
+  TFile* file_D5a = new TFile("~/Documents/Rivet_Analyses/MC_VBFDM/D5a/"""+Mass+"""/"""+Norm+"""/Rivet.root", "READ");
+  file_D5a->cd("MC_VBFDM_"+Norm+"");
+  TH1F* D5a = (TH1F*)gDirectory->Get(""+variable+"_PS_"+PS+"");
+
+  TFile* file_D5b = new TFile("~/Documents/Rivet_Analyses/MC_VBFDM/D5b/"""+Mass+"""/"""+Norm+"""/Rivet.root", "READ");
+  file_D5b->cd("MC_VBFDM_"+Norm+"");
+  TH1F* D5b = (TH1F*)gDirectory->Get(""+variable+"_PS_"+PS+"");
+  
+  TFile* file_D5c = new TFile("~/Documents/Rivet_Analyses/MC_VBFDM/D5c/"""+Mass+"""/"""+Norm+"""/Rivet.root", "READ");
+  file_D5c->cd("MC_VBFDM_"+Norm+"");  
+  TH1F* D5c = (TH1F*)gDirectory->Get(""+variable+"_PS_"+PS+"");
+
+  TFile* file_D5d = new TFile("~/Documents/Rivet_Analyses/MC_VBFDM/D5d/"""+Mass+"""/"""+Norm+"""/Rivet.root", "READ");
+  file_D5d->cd("MC_VBFDM_"+Norm+"");
+  TH1F* D5d = (TH1F*)gDirectory->Get(""+variable+"_PS_"+PS+"");
+
+  TFile* file_D6a = new TFile("~/Documents/Rivet_Analyses/MC_VBFDM/D6a/"""+Mass+"""/"""+Norm+"""/Rivet.root", "READ");
+  file_D6a->cd("MC_VBFDM_"+Norm+"");
+  TH1F* D6a = (TH1F*)gDirectory->Get(""+variable+"_PS_"+PS+"");
+
+  TFile* file_D6b = new TFile("~/Documents/Rivet_Analyses/MC_VBFDM/D6b/"""+Mass+"""/"""+Norm+"""/Rivet.root", "READ");
+  file_D6b->cd("MC_VBFDM_"+Norm+"");
+  TH1F* D6b = (TH1F*)gDirectory->Get(""+variable+"_PS_"+PS+"");
+
+  TFile* file_D7a = new TFile("~/Documents/Rivet_Analyses/MC_VBFDM/D7a/"""+Mass+"""/"""+Norm+"""/Rivet.root", "READ");
+  file_D7a->cd("MC_VBFDM_"+Norm+"");
+  TH1F* D7a = (TH1F*)gDirectory->Get(""+variable+"_PS_"+PS+"");
+
+  TFile* file_D7b = new TFile("~/Documents/Rivet_Analyses/MC_VBFDM/D7b/"""+Mass+"""/"""+Norm+"""/Rivet.root", "READ");
+  file_D7b->cd("MC_VBFDM_"+Norm+"");
+  TH1F* D7b = (TH1F*)gDirectory->Get(""+variable+"_PS_"+PS+"");
+
+  TFile* file_D7c = new TFile("~/Documents/Rivet_Analyses/MC_VBFDM/D7c/"""+Mass+"""/"""+Norm+"""/Rivet.root", "READ");
+  file_D7c->cd("MC_VBFDM_"+Norm+"");
+  TH1F* D7c = (TH1F*)gDirectory->Get(""+variable+"_PS_"+PS+"");
+
+  TFile* file_D7d = new TFile("~/Documents/Rivet_Analyses/MC_VBFDM/D7d/"""+Mass+"""/"""+Norm+"""/Rivet.root", "READ");
+  file_D7d->cd("MC_VBFDM_"+Norm+"");
+  TH1F* D7d = (TH1F*)gDirectory->Get(""+variable+"_PS_"+PS+"");
+
+  TFile* file_Higgs = new TFile("~/Documents/Rivet_Analyses/MC_VBFDM/Higgs/"""+Mass+"""/"""+Norm+"""/Rivet.root", "READ");
+  file_Higgs->cd("MC_VBFDM_"+Norm+"");
+  TH1F* Higgs = (TH1F*)gDirectory->Get(""+variable+"_PS_"+PS+"");
+
+  TFile* file_QCD = new TFile("~/Documents/Rivet_Analyses/MC_VBFDM/Backgrounds/QCD/"""+Norm+"""/Rivet.root", "READ");
+  file_QCD->cd("MC_VBFDM_"+Norm+"");
+  TH1F* QCD = (TH1F*)gDirectory->Get(""+variable+"_PS_"+PS+"");
+  QCD->Scale(0.2);
+
+  TFile* file_EWK = new TFile("~/Documents/Rivet_Analyses/MC_VBFDM/Backgrounds/EWK/"""+Norm+"""/Rivet.root", "READ");
+  file_EWK->cd("MC_VBFDM_"+Norm+"");
+  TH1F* EWK = (TH1F*)gDirectory->Get(""+variable+"_PS_"+PS+"");          
+
+  TFile* file_Inclusive = new TFile("~/Documents/Rivet_Analyses/MC_VBFDM/Backgrounds/Inclusive/"""+Norm+"""/Rivet.root", "READ");
+  file_Inclusive->cd("MC_VBFDM_"+Norm+"");
+  TH1F* Inclusive = (TH1F*)gDirectory->Get(""+variable+"_PS_"+PS+"");          
+  
+
+  TH1F* QCD_Copy = (TH1F*)QCD->Clone("QCD_Copy");
+  TH1F* EWK_Copy = (TH1F*)EWK->Clone("EWK_Copy");
+
+  TH1F EWK_and_fifthQCD_NotP = (*QCD_Copy)+(*EWK_Copy);
+  TH1F* EWK_and_fifthQCD = &EWK_and_fifthQCD_NotP;
+  //  -- HERE YOU COULD MANIPULATE THEM IF YOU WANTED TO, BUT THERE IS NO NEED RIGHT NOW (AS FAR AS I REMEMBER)
+
+  //  YOU COULD LATER MAKE HISTOGRAMS OF EVERY SAMPLE TO SOME FIXED SAMPLE (LIKE ZNUNU+2J) HERE, AND THEN LATER PLOT THESE IN THE SMALL PANE IN THE LOWER PART OF THE PDF, TO SHOW THE RELATIVE SHAPE DIFFERENCES BETWEEN THIS SM PROCESS AND THE VARIOUS OTHER SAMPLES
+
+  //////////////////////////////////////////////////////////////////////////////////////////
+
+
+  //  -- THIS IS WHERE THE ROOT CANVAS IS BUILT, THE ACTUAL PLOT
+
+  //////////////////////////////////////////////////////////////////////////////////////////
+  TCanvas *canv;
+  if (Norm=="Normalised") {
+   canv = new TCanvas("canv","",1500,1800);
+  }
+  else {
+    canv = new TCanvas("canv","",1500,1500);
+  }
+
+  gStyle->SetOptFit(0);
+  gStyle->SetOptStat(0);
+  gStyle->SetTitleFillColor(0);
+  gStyle->SetFuncColor(kRed);
+  gStyle->SetTitleBorderSize(0);
+  gStyle->SetTextAlign(22);
+  gStyle->SetStatW(0.2);
+  gStyle->SetStatH(0.1);
+
+  canv->cd();  
+
+  // THIS DEFINES THE MAIN PAD IN THE OUTPUT PLOTS, AND A RATIO PAD (AT THE BOTTOM OF THE PDF FILES) IS DEFINED LATER
+  
+  TPad *mainPad;
+  if (Norm=="Normalised") {
+    mainPad = new TPad("mainPad","", 0.01, 0.02, 0.99, 0.99);
+  }
+  else{
+    mainPad = new TPad("mainPad","", 0.01, 0.2, 0.99, 0.99);
+  }
+    mainPad->Draw();
+    mainPad->cd();
+
+  
+
+  Double_t margin = 0.1;
+  //  -- THIS IS JUST ME TWEAKING THE BOUNDARIES OF THE AXES FOR PRESENTATIONAL REASONS...
+  //  if (variable.Contains("JC") || variable.Contains("LC") || variable.Contains("DeltaPhi")) {
+  //    margin = 0.01;
+  //  }
+
+  Double_t upperRange = D5a->GetXaxis()->GetBinLowEdge(D5a->GetNbinsX()+1) + margin;
+
+  //  if (variable.Contains("dijetpt") && PS.Contains("highmass20") ) {
+  //    upperRange = 730+margin;
+  //    cout << "WARNING: manually setting binning for dijet pt in highmass20 to upper range 730 GeV! " << endl;
+  //  }
+
+  // MAKES A DUMMY HISTOGRAM WITH ONE BIN -- I MAKE THE STYLE FOR THIS RIGHT, AND AXIS LABELS ETC, THEN CAN PLOT ANY HISTOGRAM I WANT "ON TOP" OF THIS AND IT WILL STILL HAVE THE SAME HISTOGRAM LABELS AS THE DUMMY
+  TH1F *frame = new TH1F("frame",";"+xaxis+";"+yaxis+";",1, D5a->GetXaxis()->GetBinLowEdge(1)-margin, upperRange);
+
+  Double_t font_size = 60;
+  frame->GetYaxis()->SetTitleOffset( 2.0 );
+  frame->GetYaxis()->SetLabelOffset( 0.005 );
+  frame->GetYaxis()->SetTitleFont( 43 );
+  frame->GetYaxis()->SetLabelFont( 43 );
+  frame->GetYaxis()->SetLabelSize( font_size );
+  frame->GetYaxis()->SetTitleSize( font_size );
+
+  frame->GetXaxis()->SetTitleOffset( 2.0 );
+  frame->GetXaxis()->SetLabelOffset( 0.005 );
+  frame->GetXaxis()->SetTitleFont( 43 );
+  frame->GetXaxis()->SetLabelFont( 43 );
+  frame->GetXaxis()->SetLabelSize( font_size );
+  frame->GetXaxis()->SetTitleSize( font_size );
+
+
+  // HERE YOU CAN SET ALL THE COLOURS AND STYLES AND MARKERS FOR YOUR HISTOGRAMS (VARIABLES DEFINED IN THE HEADER FILE)
+  
+  D5a->SetLineColor(D5a_line_color);D5a->SetLineStyle(D5a_line_style);D5a->SetLineWidth(D5a_line_width);D5a->SetFillColor(D5a_fill_color);D5a->SetFillStyle(D5a_fill_style);
+  D5a->SetMarkerColor(D5a_line_color);D5a->SetMarkerStyle(D5a_marker_style);D5a->SetMarkerSize(D5a_marker_size);
+  
+  D5b->SetLineColor(D5b_line_color);D5b->SetLineStyle(D5b_line_style);D5b->SetLineWidth(D5b_line_width);D5b->SetFillColor(D5b_fill_color);D5b->SetFillStyle(D5b_fill_style);
+  D5b->SetMarkerColor(D5b_line_color);D5b->SetMarkerStyle(D5b_marker_style);D5b->SetMarkerSize(D5b_marker_size);
+    
+  D5c->SetLineColor(D5c_line_color);D5c->SetLineStyle(D5c_line_style);D5c->SetLineWidth(D5c_line_width);D5c->SetFillColor(D5c_fill_color);D5c->SetFillStyle(D5c_fill_style);
+  D5c->SetMarkerColor(D5c_line_color);D5c->SetMarkerStyle(D5c_marker_style);D5c->SetMarkerSize(D5c_marker_size);
+
+  D5d->SetLineColor(D5d_line_color);D5d->SetLineStyle(D5d_line_style);D5d->SetLineWidth(D5d_line_width);D5d->SetFillColor(D5d_fill_color);D5d->SetFillStyle(D5d_fill_style);
+  D5d->SetMarkerColor(D5d_line_color);D5d->SetMarkerStyle(D5d_marker_style);D5d->SetMarkerSize(D5d_marker_size);
+
+  D6a->SetLineColor(D6a_line_color);D6a->SetLineStyle(D6a_line_style);D6a->SetLineWidth(D6a_line_width);D6a->SetFillColor(D6a_fill_color);D6a->SetFillStyle(D6a_fill_style);
+  D6a->SetMarkerColor(D6a_line_color);D6a->SetMarkerStyle(D6a_marker_style);D6a->SetMarkerSize(D6a_marker_size);
+
+  D6b->SetLineColor(D6b_line_color);D6b->SetLineStyle(D6b_line_style);D6b->SetLineWidth(D6b_line_width);D6b->SetFillColor(D6b_fill_color);D6b->SetFillStyle(D6b_fill_style);
+  D6b->SetMarkerColor(D6b_line_color);D6b->SetMarkerStyle(D6b_marker_style);D6b->SetMarkerSize(D6b_marker_size);
+
+  D7a->SetLineColor(D7a_line_color);D7a->SetLineStyle(D7a_line_style);D7a->SetLineWidth(D7a_line_width);D7a->SetFillColor(D7a_fill_color);D7a->SetFillStyle(D7a_fill_style);
+  D7a->SetMarkerColor(D7a_line_color);D7a->SetMarkerStyle(D7a_marker_style);D7a->SetMarkerSize(D7a_marker_size);
+
+  D7b->SetLineColor(D7b_line_color);D7b->SetLineStyle(D7b_line_style);D7b->SetLineWidth(D7b_line_width);D7b->SetFillColor(D7b_fill_color);D7b->SetFillStyle(D7b_fill_style);
+  D7b->SetMarkerColor(D7b_line_color);D7b->SetMarkerStyle(D7b_marker_style);D7b->SetMarkerSize(D7b_marker_size);
+
+  D7c->SetLineColor(D7c_line_color);D7c->SetLineStyle(D7c_line_style);D7c->SetLineWidth(D7c_line_width);D7c->SetFillColor(D7c_fill_color);D7c->SetFillStyle(D7c_fill_style);
+  D7c->SetMarkerColor(D7c_line_color);D7c->SetMarkerStyle(D7c_marker_style);D7c->SetMarkerSize(D7c_marker_size);
+
+  D7d->SetLineColor(D7d_line_color);D7d->SetLineStyle(D7d_line_style);D7d->SetLineWidth(D7d_line_width);D7d->SetFillColor(D7d_fill_color);D7d->SetFillStyle(D7d_fill_style);
+  D7d->SetMarkerColor(D7d_line_color);D7d->SetMarkerStyle(D7d_marker_style);D7d->SetMarkerSize(D7d_marker_size);
+  
+  Higgs->SetLineColor(Higgs_line_color);Higgs->SetLineStyle(Higgs_line_style);Higgs->SetLineWidth(Higgs_line_width);Higgs->SetFillColor(Higgs_fill_color);
+  Higgs->SetFillStyle(Higgs_fill_style);Higgs->SetMarkerColor(Higgs_line_color);Higgs->SetMarkerStyle(Higgs_marker_style);Higgs->SetMarkerSize(Higgs_marker_size);
+
+  QCD->SetLineColor(QCD_line_color);QCD->SetLineStyle(QCD_line_style);QCD->SetLineWidth(QCD_line_width);QCD->SetFillColor(QCD_fill_color);QCD->SetFillStyle(QCD_fill_style);
+  QCD->SetMarkerColor(QCD_line_color);QCD->SetMarkerStyle(QCD_marker_style);QCD->SetMarkerSize(QCD_marker_size);
+
+  EWK->SetLineColor(EWK_line_color);EWK->SetLineStyle(EWK_line_style);EWK->SetLineWidth(EWK_line_width);EWK->SetFillColor(EWK_fill_color);EWK->SetFillStyle(EWK_fill_style);
+  EWK->SetMarkerColor(EWK_line_color);EWK->SetMarkerStyle(EWK_marker_style);EWK->SetMarkerSize(EWK_marker_size);
+
+  EWK_and_fifthQCD->SetLineColor(Inclusive_line_color);EWK_and_fifthQCD->SetLineStyle(Inclusive_line_style);EWK_and_fifthQCD->SetLineWidth(Inclusive_line_width);
+  EWK_and_fifthQCD->SetFillColor(Inclusive_fill_color);EWK_and_fifthQCD->SetFillStyle(Inclusive_fill_style);EWK_and_fifthQCD->SetMarkerColor(Inclusive_line_color);
+  EWK_and_fifthQCD->SetMarkerStyle(Inclusive_marker_style);EWK_and_fifthQCD->SetMarkerSize(Inclusive_marker_size);
+
+
+  // MAXIMUM AND MINIMUM OF Y-AXIS
+  
+  Double_t max = 1e0;
+  Double_t min = 1e-4;
+
+  if(Norm=="Normalised"){
+    if (variable.Contains("Count")) {
+      max = 2e0;
+      min = 1e-2;
+    }                                                                                                                                                                        
+    if (variable.Contains("Mjj")) {
+      max = 1e0;
+      min = 1e-4;
+    }
+    if (variable.Contains("Jet1PT")) {
+      max = 1e0;
+      min = 1e-4;
+    }
+    if (variable.Contains("Jet2PT")) {
+      max = 1e0;
+      min = 1e-4;
+    }
+    if (variable.Contains("NumJets")) {
+      max = 1e0;
+      min = 1e-4;
+    }
+    if (variable.Contains("Jet1Eta")) {
+      max = 1e0;
+      min = 1e-4;
+    }
+    if (variable.Contains("Jet2Eta")) {
+      max = 1e0;
+      min = 1e-4;
+    }
+    if (variable.Contains("DeltaEta")) {
+      max = 1e0;
+      min = 1e-4;
+    }
+    if (variable.Contains("DeltaPhi")) {
+      if(PS=="VBFZ_Baseline" || PS=="VBFZ_Search"){
+	max = 1e0;
+      }
+      else if (PS=="VBFZ_HighMass"){
+	max = 1e0;
+      }
+      else{
+	max = 1e0;
+      }
+      min = 1e-3;
+    }
+    if (variable.Contains("Etmiss")) {
+      max = 1e0;
+      min = 1e-2;
+    }
+  }
+
+  if(Norm=="Absolute"){
+    if (variable.Contains("Count")) {
+      max = 1e8;
+      min = 1e-2;
+    }
+    if (variable.Contains("Mjj")) {
+      max = 1e5;
+      min = 1e-4;
+    }
+    if (variable.Contains("Jet1PT")) {
+      max = 1e4;
+      min = 1e-4;
+    }
+    if (variable.Contains("Jet2PT")) {
+      max = 1e5;
+      min = 1e-4;
+    }
+    if (variable.Contains("NumJets")) {
+      max = 1e5;
+      min = 1e-4;
+    }
+    if (variable.Contains("Jet") && variable.Contains("Eta")) {
+      max = 1e5;
+      min = 1e-4;
+    }
+    if (variable.Contains("DeltaEta")) {
+      max = 1e4;
+      min = 1e-4;
+    }
+    if (variable.Contains("DeltaPhi")) {
+      max = 1e4;
+      min = 1e-4;
+    }
+    if (variable.Contains("Etmiss")) {
+      max = 1e5;
+      min = 1e-4;
+    }
+  }
+
+  frame->SetMaximum(max);
+  frame->SetMinimum(min);
+
+  gPad->SetTopMargin(0.02);
+  gPad->SetBottomMargin(0.15);
+  gPad->SetLeftMargin(0.17);
+  gPad->SetRightMargin(0.02);
+  
+  frame->Draw("P");
+
+  //if (!variable.Contains("PT") && !variable.Contains("Mjj") && !variable.Contains("NumJets")) {
+    gPad->SetLogy(1);
+    //}
+  
+  //  if (!variable.Contains("") && !variable.Contains("JC")) {
+  // gPad->SetLogy(1);
+    // }
+  if ( variable.Contains("Mjj") ) {
+  gPad->SetLogx(1);//frame->GetXaxis()->SetMoreLogLabels();
+  }
+
+  //  gStyle->SetEndErrorSize(5);
+
+
+  // ACTUAL DRAWING OF THE HISTOGRAMS
+  
+  if (Norm == "Absolute"){
+    D5c->Scale(pow(((0.1)/(3.3)),4));
+    D5d->Scale(pow(((0.1)/(6.6)),4));
+    D6a->Scale(pow(((1)/(2.3)),5));
+    D6b->Scale(pow(((1)/(3.3)),5));
+  }
+  
+
+  EWK_and_fifthQCD->Draw("HIST same");
+  //    Inclusive->Draw("HIST same");
+  QCD->Draw("HIST same");
+  EWK->Draw("HIST same");
+  D5a->Draw("PH same");
+  D5b->Draw("PH same");
+  D5c->Draw("PH same");
+  D5d->Draw("PH same");
+  D6a->Draw("PH same");
+  D6b->Draw("PH same");
+  D7a->Draw("PH same");
+  D7b->Draw("PH same");
+  D7c->Draw("PH same");
+  D7d->Draw("PH same");
+  Higgs->Draw("PH same");
+
+  /*
+  TGraphAsymmErrors* double_data_err = (TGraphAsymmErrors*)data_err->Clone("double_data_err");
+  double_data_err->SetMarkerSize(1.0*data_marker_size);// was 0.9
+  if (drawData) {
+    double_data_err->Draw("Psame");
+  }
+  */
+  TLatex txt_PS;txt_PS.SetNDC();txt_PS.SetTextAlign(11);txt_PS.SetTextSize(0.03);txt_PS.DrawLatex(0.22,0.20,"pp->2DM+2jets: ""DM"+Mass+"GeV "+PS+" phase space");
+
+  // BUILDING THE LEGEND...
+
+  Double_t yval1 = 0.96;
+  Double_t xval;
+
+  //if (variable.Contains("Eta") || variable.Contains("Mjj")){
+  //xval = 0.6;
+  //}
+  //else { 
+  xval = 0.55;
+// }
+
+  Double_t finalVal = yval1-0.1;
+   
+  
+  TLegend *leg_main = new TLegend(xval,finalVal,xval+0.4,yval1);
+  leg_main->SetNColumns(3);
+  leg_main->SetFillColor(0);
+  leg_main->SetTextSize(0.02);
+  leg_main->SetBorderSize(0);
+  leg_main->SetTextFont(42);
+  leg_main->AddEntry(D5a,"DM D5a (#Lambda > 100GeV) ","PL");
+  leg_main->AddEntry(D5b,"DM D5b (#Lambda > 100GeV)","PL");
+  leg_main->AddEntry(D5c,"DM D5c (#Lambda > 3.3TeV)","PL");
+  leg_main->AddEntry(D5d,"DM D5d (#Lambda > 6.6TeV)","PL");
+  leg_main->AddEntry(D6a,"DM D6a (#Lambda > 230GeV)","PL");
+  leg_main->AddEntry(D6b,"DM D6b (#Lambda > 330GeV)","PL");
+  leg_main->AddEntry(D7a,"DM D7a (#Lambda > 100GeV)","PL");
+  leg_main->AddEntry(D7b,"DM D7b (#Lambda > 100GeV)","PL");
+  leg_main->AddEntry(D7c,"DM D7c (#Lambda > 100GeV)","PL");
+  leg_main->AddEntry(D7d,"DM D7d (#Lambda > 100GeV)","PL");
+  leg_main->AddEntry(Higgs,"Higgs DM Portal","PL");
+  leg_main->AddEntry(QCD,"QCD Z(#nu#nu)jj","f");
+  leg_main->AddEntry(EWK,"EWK Z(#nu#nu)jj","f");
+  leg_main->AddEntry(EWK_and_fifthQCD,"QCD+EWK Z(#nu#nu)jj","f");
+  leg_main->Draw("same");
+  
+
+  // BELOW HERE, THE RATIO PANE AT THE BOTTOM OF THE PDF IS DRAWN
+  
+  if (Norm=="Normalised"){
+
+    TLine *ratioline= new TLine(frame->GetBinLowEdge(1),1.0,frame->GetBinLowEdge(frame->GetNbinsX()+1),1.0);
+    ratioline->SetLineColor(1);ratioline->SetLineStyle(1);ratioline->SetLineWidth(1);
+
+    canv->cd();
+
+    TPad *ratioPad = new TPad("ratioPad","", 0.01, 0.02, 0.99, 0.285);
+    ratioPad->SetGridy();
+    ratioPad->Draw();
+    ratioPad->cd();
+
+    gPad->SetTopMargin(0.02);
+    gPad->SetBottomMargin(0.3);
+    gPad->SetLeftMargin(0.17);
+    gPad->SetRightMargin(0.02);
+
+    TH1F* D5a_ratio = (TH1F*)EWK->Clone("D5a_ratio");
+    TH1F* D5b_ratio = (TH1F*)EWK->Clone("D5b_ratio");
+    TH1F* D5c_ratio = (TH1F*)EWK->Clone("D5c_ratio");
+    TH1F* D5d_ratio = (TH1F*)EWK->Clone("D5d_ratio");
+    TH1F* D6a_ratio = (TH1F*)EWK->Clone("D6a_ratio");
+    TH1F* D6b_ratio = (TH1F*)EWK->Clone("D6b_ratio");
+    TH1F* D7a_ratio = (TH1F*)EWK->Clone("D7a_ratio");
+    TH1F* D7b_ratio = (TH1F*)EWK->Clone("D7b_ratio");
+    TH1F* D7c_ratio = (TH1F*)EWK->Clone("D7c_ratio");
+    TH1F* D7d_ratio = (TH1F*)EWK->Clone("D7d_ratio");
+
+    D5a_ratio->GetYaxis()->SetTitle("DM/EWK");
+    D5a_ratio->GetYaxis()->SetTitleSize(40);
+    D5a_ratio->GetYaxis()->SetTitleFont(43);
+    D5a_ratio->GetYaxis()->SetTitleOffset(1.55);
+    D5a_ratio->GetXaxis()->SetTitleSize(40);
+    D5a_ratio->GetXaxis()->SetTitleFont(43);
+    D5a_ratio->GetXaxis()->SetTitleOffset(4.);
+    D5a_ratio->SetMaximum(3);
+    D5a_ratio->SetMinimum(-1);
+    D5a_ratio->Sumw2();
+    D5a_ratio->Divide(D5a);
+    D5b_ratio->Divide(D5b);
+    D5c_ratio->Divide(D5c);
+    D5d_ratio->Divide(D5d);
+    D6a_ratio->Divide(D6a);
+    D6b_ratio->Divide(D6b);
+    D7a_ratio->Divide(D7a);
+    D7b_ratio->Divide(D7b);
+    D7c_ratio->Divide(D7c);
+    D7d_ratio->Divide(D7d);
+
+    D5a_ratio->GetYaxis()->SetNdivisions(10);
+    D5a_ratio->SetTickLength(0.08);
+    D5a_ratio->SetMarkerStyle(D5a_marker_style);
+    D5b_ratio->SetMarkerStyle(D5b_marker_style);
+    D5c_ratio->SetMarkerStyle(D5c_marker_style);
+    D5d_ratio->SetMarkerStyle(D5d_marker_style);
+    D6a_ratio->SetMarkerStyle(D6a_marker_style);
+    D6b_ratio->SetMarkerStyle(D6b_marker_style);
+    D7a_ratio->SetMarkerStyle(D7a_marker_style);
+    D7b_ratio->SetMarkerStyle(D7b_marker_style);
+    D7c_ratio->SetMarkerStyle(D7c_marker_style);
+    D7d_ratio->SetMarkerStyle(D7d_marker_style);
+
+    D5a_ratio->SetMarkerColor(D5a_line_color);
+    D5b_ratio->SetMarkerColor(D5b_line_color);
+    D5c_ratio->SetMarkerColor(D5c_line_color);
+    D5d_ratio->SetMarkerColor(D5d_line_color);
+    D6a_ratio->SetMarkerColor(D6a_line_color);
+    D6b_ratio->SetMarkerColor(D6b_line_color);
+    D7a_ratio->SetMarkerColor(D7a_line_color);
+    D7b_ratio->SetMarkerColor(D7b_line_color);
+    D7c_ratio->SetMarkerColor(D7c_line_color);
+    D7d_ratio->SetMarkerColor(D7d_line_color);    
+
+    D5a_ratio->SetLineColor(D5a_line_color);
+    D5b_ratio->SetLineColor(D5b_line_color);
+    D5c_ratio->SetLineColor(D5c_line_color);
+    D5d_ratio->SetLineColor(D5d_line_color);
+    D6a_ratio->SetLineColor(D6a_line_color);
+    D6b_ratio->SetLineColor(D6b_line_color);
+    D7a_ratio->SetLineColor(D7a_line_color);
+    D7b_ratio->SetLineColor(D7b_line_color);
+    D7c_ratio->SetLineColor(D7c_line_color);
+    D7d_ratio->SetLineColor(D7d_line_color);
+
+    D5a_ratio->Draw("ep same");
+    D5b_ratio->Draw("ep same");
+    D5c_ratio->Draw("ep same");
+    D5d_ratio->Draw("ep same");
+    D6a_ratio->Draw("ep same");
+    D6b_ratio->Draw("ep same");
+    D7a_ratio->Draw("ep same");
+    D7b_ratio->Draw("ep same");
+    D7c_ratio->Draw("ep same");
+    D7d_ratio->Draw("ep same");
+
+  }
+
+
+  // SAVE ALL THESE HISTOGRAMS YOU MIGHT HAVE READ FROM VARIOUS FILES, OR DONE VARIOUS MODIFICATIONS TO,  TO A ROOT FILE, SO YOU CAN EASILY GET HOLD OF THEM AGAIN!
+  
+  TFile * outfile = new TFile("Figures/"+Mass+"/"+Norm+"/"+Mass+"_"+variable+"_PS_"+PS+".root", "RECREATE");
+  outfile->cd();
+
+  QCD->Write("QCD");
+  EWK->Write("EWK");
+  EWK_and_fifthQCD->Write("EWK_and_fifthQCD");
+  D5a->Write("D5a");
+  D5b->Write("D5b");
+  D5c->Write("D5c");
+  D5d->Write("D5d");
+  D6a->Write("D6a");
+  D6b->Write("D6b");
+  D7a->Write("D7a");
+  D7b->Write("D7b");
+  D7c->Write("D7c");
+  D7d->Write("D7d");
+  Higgs->Write("Higgs");
+  frame->Write("frame"); // just store for ease of use / plotting later
+
+  outfile->Close();
+
+  // THIS ACTUALLY WRITES OUT THE PLOTS (PDF/PNG/EPS FORMAT)
+
+  gPad->RedrawAxis();canv->Print("Figures/"+Mass+"/"+Norm+"/"+Mass+"_"+variable+"_PS_"+PS+".pdf");
+  gPad->RedrawAxis();canv->Print("Figures/"+Mass+"/"+Norm+"/"+Mass+"_"+variable+"_PS_"+PS+".png");
+  gPad->RedrawAxis();canv->Print("Figures/"+Mass+"/"+Norm+"/"+Mass+"_"+variable+"_PS_"+PS+".eps");
+
+  return 0;
+} 
+	  
+
