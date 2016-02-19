@@ -1,0 +1,74 @@
+% The LHC as an electroweak boson collider: A novel laboratory for dark matter, the origin of neutrino mass and other new electroweak phenomena.
+% Rebecca Pickles
+
+% Initial Introductory talk of Plans for project and preliminary test runs.
+
+\documentclass[12pt, a4paper]{article}
+
+\usepackage{fullpage}
+\usepackage{float}
+
+\usepackage{syntonly}
+
+\usepackage{amssymb}
+
+\usepackage{mathtools}
+
+\usepackage{gensymb}
+\usepackage{leftidx}
+
+\usepackage[utf8]{inputenc}
+\usepackage{csquotes}
+
+\begin{document}
+\title{\Large{The LHC as an electroweak boson collider: A novel laboratory for dark matter, the origin of neutrino mass and other new electroweak phenomena. \\ Introductory talk}}
+\author{Rebecca Pickles}
+\date{{23/10/15}}
+\maketitle
+
+\section{Main Project}
+\subsection{Inroduction}
+
+The plan for my project is to use new techniques to search for and measure dark matter and the mechanism for the origin of neutrino mass at the ATLAS experiment at the LHC. 
+Vector boson fusion has been looked at previously by Manchester with W and Z bosons:
+2 jets,
+No colour flow,
+Z -> l+ l-,
+W -> l v 
+These techniques involve using weak boson fusion as a mechanism for the production of exotic particles, such as dark matter and neutrinos.
+These would both be seen as missing energy in the detector. 
+
+\subsubsection{Theory}
+Vector boson fusion has been looked at previously by Manchester with W and Z bosons:
+2 jets,
+No colour flow,
+Z -> l+ l-,
+W -> l v
+
+\subsubsection{Plans} 
+
+\subsection{Method and results so far}
+MadGraph is a programme that allows me to generate an event in ATLAS that abides by my specifications for parameter values.
+I have used it to produce diagrams for a number of dark matter events:
+One of which is shown here, with parameter cuts...
+(Diagrams) 
+
+When run, MadGraph produces a file which can be fed into the analysis software, Rivet. This then uses the output from the generated event details in MadGraph to produce histograms... (Histograms).
+  
+\subsection{Next steps}
+
+\section{Qualification Project - Jet Energy Resolution}
+\subsection{Inroduction}
+
+The plan for my project is to determine jet resolution from data in order to make precise jet measurements.
+\subsubsection{Theory}
+
+
+\subsubsection{Plans}
+
+\subsection{Method and results so far}
+
+
+\subsection{Next steps}
+
+\end{document}
