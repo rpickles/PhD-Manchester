@@ -2,7 +2,7 @@
 
 # variable, PS, Mass (Constant Mass)
 
-for variable in Mjj Jet1PT Jet2PT NumJets Jet1Eta Jet2Eta DeltaEta DeltaPhi
+for variable in Mjj Jet1PT Jet2PT NumJets Jet1Eta Jet2Eta DeltaEta DeltaPhi Etmiss
 do
     for PS in VBFZ_Baseline VBFZ_HighMass VBFZ_Search VBFDM VBFDM_100 Monojet Monojet_HighPt VBFDM_OR_Monojet VBFDM_OR_Monojet_HighPt 
     do
@@ -16,7 +16,7 @@ do
     done
 done
 
-for variable in Mjj Jet1PT Jet2PT NumJets Jet1Eta Jet2Eta DeltaEta DeltaPhi
+for variable in Mjj Jet1PT Jet2PT NumJets Jet1Eta Jet2Eta DeltaEta DeltaPhi Etmiss
 do
     for PS in VBFZ_Baseline VBFZ_HighMass VBFZ_Search VBFDM VBFDM_100 Monojet Monojet_HighPt VBFDM_OR_Monojet VBFDM_OR_Monojet_HighPt
     do

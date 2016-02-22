@@ -160,6 +160,29 @@ int plotVBFDMresults_ConstantMass(TString variable="", TString PS="", TString Ma
 
   TH1F EWK_and_fifthQCD_NotP = (*QCD_Copy)+(*EWK_Copy);
   TH1F* EWK_and_fifthQCD = &EWK_and_fifthQCD_NotP;
+
+  //Adding all contributants together for ratio plot
+  TH1F EWK_and_fifthQCD_and_D5a_NotP = (*EWK_and_fifthQCD)+(*D5a);
+  TH1F EWK_and_fifthQCD_and_D5b_NotP = (*EWK_and_fifthQCD)+(*D5b);
+  TH1F EWK_and_fifthQCD_and_D5c_NotP = (*EWK_and_fifthQCD)+(*D5c);
+  TH1F EWK_and_fifthQCD_and_D5d_NotP = (*EWK_and_fifthQCD)+(*D5d);
+  TH1F EWK_and_fifthQCD_and_D6a_NotP = (*EWK_and_fifthQCD)+(*D6a);
+  TH1F EWK_and_fifthQCD_and_D6b_NotP = (*EWK_and_fifthQCD)+(*D6b);
+  TH1F EWK_and_fifthQCD_and_D7a_NotP = (*EWK_and_fifthQCD)+(*D7a);
+  TH1F EWK_and_fifthQCD_and_D7b_NotP = (*EWK_and_fifthQCD)+(*D7b);
+  TH1F EWK_and_fifthQCD_and_D7c_NotP = (*EWK_and_fifthQCD)+(*D7c);
+  TH1F EWK_and_fifthQCD_and_D7d_NotP = (*EWK_and_fifthQCD)+(*D7d);
+
+  TH1F* EWK_and_fifthQCD_and_D5a = &EWK_and_fifthQCD_and_D5a_NotP;
+  TH1F* EWK_and_fifthQCD_and_D5b = &EWK_and_fifthQCD_and_D5b_NotP;
+  TH1F* EWK_and_fifthQCD_and_D5c = &EWK_and_fifthQCD_and_D5c_NotP;
+  TH1F* EWK_and_fifthQCD_and_D5d = &EWK_and_fifthQCD_and_D5d_NotP;
+  TH1F* EWK_and_fifthQCD_and_D6a = &EWK_and_fifthQCD_and_D6a_NotP;
+  TH1F* EWK_and_fifthQCD_and_D6b = &EWK_and_fifthQCD_and_D6b_NotP;
+  TH1F* EWK_and_fifthQCD_and_D7a = &EWK_and_fifthQCD_and_D7a_NotP;
+  TH1F* EWK_and_fifthQCD_and_D7b = &EWK_and_fifthQCD_and_D7b_NotP;
+  TH1F* EWK_and_fifthQCD_and_D7c = &EWK_and_fifthQCD_and_D7c_NotP;
+  TH1F* EWK_and_fifthQCD_and_D7d = &EWK_and_fifthQCD_and_D7d_NotP;
   //  -- HERE YOU COULD MANIPULATE THEM IF YOU WANTED TO, BUT THERE IS NO NEED RIGHT NOW (AS FAR AS I REMEMBER)
 
   //  YOU COULD LATER MAKE HISTOGRAMS OF EVERY SAMPLE TO SOME FIXED SAMPLE (LIKE ZNUNU+2J) HERE, AND THEN LATER PLOT THESE IN THE SMALL PANE IN THE LOWER PART OF THE PDF, TO SHOW THE RELATIVE SHAPE DIFFERENCES BETWEEN THIS SM PROCESS AND THE VARIOUS OTHER SAMPLES
@@ -171,12 +194,12 @@ int plotVBFDMresults_ConstantMass(TString variable="", TString PS="", TString Ma
 
   //////////////////////////////////////////////////////////////////////////////////////////
   TCanvas *canv;
-  if (Norm=="Normalised") {
+  //if (Norm=="Normalised") {
    canv = new TCanvas("canv","",1500,1800);
-  }
-  else {
-    canv = new TCanvas("canv","",1500,1500);
-  }
+   //}
+  //else {
+    //canv = new TCanvas("canv","",1500,1500);
+    //}
 
   gStyle->SetOptFit(0);
   gStyle->SetOptStat(0);
@@ -192,12 +215,12 @@ int plotVBFDMresults_ConstantMass(TString variable="", TString PS="", TString Ma
   // THIS DEFINES THE MAIN PAD IN THE OUTPUT PLOTS, AND A RATIO PAD (AT THE BOTTOM OF THE PDF FILES) IS DEFINED LATER
   
   TPad *mainPad;
-  if (Norm=="Normalised") {
+  //if (Norm=="Normalised") {
     mainPad = new TPad("mainPad","", 0.01, 0.02, 0.99, 0.99);
-  }
-  else{
-    mainPad = new TPad("mainPad","", 0.01, 0.2, 0.99, 0.99);
-  }
+    //}
+    //else{
+    //mainPad = new TPad("mainPad","", 0.01, 0.2, 0.99, 0.99);
+    //}
     mainPad->Draw();
     mainPad->cd();
 
@@ -393,9 +416,9 @@ int plotVBFDMresults_ConstantMass(TString variable="", TString PS="", TString Ma
   //  if (!variable.Contains("") && !variable.Contains("JC")) {
   // gPad->SetLogy(1);
     // }
-  if ( variable.Contains("Mjj") ) {
-  gPad->SetLogx(1);//frame->GetXaxis()->SetMoreLogLabels();
-  }
+    //if ( variable.Contains("Mjj") ) {
+    //gPad->SetLogx(1);//frame->GetXaxis()->SetMoreLogLabels();
+    //}
 
   //  gStyle->SetEndErrorSize(5);
 
@@ -438,19 +461,18 @@ int plotVBFDMresults_ConstantMass(TString variable="", TString PS="", TString Ma
   // BUILDING THE LEGEND...
 
   Double_t yval1 = 0.96;
-  Double_t xval;
+  Double_t xval = 0.2;
 
   //if (variable.Contains("Eta") || variable.Contains("Mjj")){
   //xval = 0.6;
   //}
   //else { 
-  xval = 0.55;
 // }
 
   Double_t finalVal = yval1-0.1;
    
   
-  TLegend *leg_main = new TLegend(xval,finalVal,xval+0.4,yval1);
+  TLegend *leg_main = new TLegend(xval,finalVal,xval+0.8,yval1);
   leg_main->SetNColumns(3);
   leg_main->SetFillColor(0);
   leg_main->SetTextSize(0.02);
@@ -475,14 +497,14 @@ int plotVBFDMresults_ConstantMass(TString variable="", TString PS="", TString Ma
 
   // BELOW HERE, THE RATIO PANE AT THE BOTTOM OF THE PDF IS DRAWN
   
-  if (Norm=="Normalised"){
+  //  if (Norm=="Normalised"){
 
     TLine *ratioline= new TLine(frame->GetBinLowEdge(1),1.0,frame->GetBinLowEdge(frame->GetNbinsX()+1),1.0);
     ratioline->SetLineColor(1);ratioline->SetLineStyle(1);ratioline->SetLineWidth(1);
 
     canv->cd();
 
-    TPad *ratioPad = new TPad("ratioPad","", 0.01, 0.02, 0.99, 0.285);
+    TPad *ratioPad = new TPad("ratioPad","", 0.01, 0.02, 0.99, 0.2);
     ratioPad->SetGridy();
     ratioPad->Draw();
     ratioPad->cd();
@@ -492,26 +514,37 @@ int plotVBFDMresults_ConstantMass(TString variable="", TString PS="", TString Ma
     gPad->SetLeftMargin(0.17);
     gPad->SetRightMargin(0.02);
 
-    TH1F* D5a_ratio = (TH1F*)D5a->Clone("D5a_ratio");
-    TH1F* D5b_ratio = (TH1F*)D5b->Clone("D5b_ratio");
-    TH1F* D5c_ratio = (TH1F*)D5c->Clone("D5c_ratio");
-    TH1F* D5d_ratio = (TH1F*)D5d->Clone("D5d_ratio");
-    TH1F* D6a_ratio = (TH1F*)D6a->Clone("D6a_ratio");
-    TH1F* D6b_ratio = (TH1F*)D6b->Clone("D6b_ratio");
-    TH1F* D7a_ratio = (TH1F*)D7a->Clone("D7a_ratio");
-    TH1F* D7b_ratio = (TH1F*)D7b->Clone("D7b_ratio");
-    TH1F* D7c_ratio = (TH1F*)D7c->Clone("D7c_ratio");
-    TH1F* D7d_ratio = (TH1F*)D7d->Clone("D7d_ratio");
+    TH1F* D5a_ratio = (TH1F*)EWK_and_fifthQCD_and_D5a->Clone("D5a_ratio");
+    TH1F* D5b_ratio = (TH1F*)EWK_and_fifthQCD_and_D5b->Clone("D5b_ratio");
+    TH1F* D5c_ratio = (TH1F*)EWK_and_fifthQCD_and_D5c->Clone("D5c_ratio");
+    TH1F* D5d_ratio = (TH1F*)EWK_and_fifthQCD_and_D5d->Clone("D5d_ratio");
+    TH1F* D6a_ratio = (TH1F*)EWK_and_fifthQCD_and_D6a->Clone("D6a_ratio");
+    TH1F* D6b_ratio = (TH1F*)EWK_and_fifthQCD_and_D6b->Clone("D6b_ratio");
+    TH1F* D7a_ratio = (TH1F*)EWK_and_fifthQCD_and_D7a->Clone("D7a_ratio");
+    TH1F* D7b_ratio = (TH1F*)EWK_and_fifthQCD_and_D7b->Clone("D7b_ratio");
+    TH1F* D7c_ratio = (TH1F*)EWK_and_fifthQCD_and_D7c->Clone("D7c_ratio");
+    TH1F* D7d_ratio = (TH1F*)EWK_and_fifthQCD_and_D7d->Clone("D7d_ratio");
 
-    D5a_ratio->GetYaxis()->SetTitle("DM/EWK");
-    D5a_ratio->GetYaxis()->SetTitleSize(40);
+    D5a_ratio->GetYaxis()->SetTitle("(Z->#nu#nu + DM)/(Z->#nu#nu)");
+    D5a_ratio->GetYaxis()->SetTitleSize(30);
     D5a_ratio->GetYaxis()->SetTitleFont(43);
     D5a_ratio->GetYaxis()->SetTitleOffset(1.55);
     D5a_ratio->GetXaxis()->SetTitleSize(40);
     D5a_ratio->GetXaxis()->SetTitleFont(43);
     D5a_ratio->GetXaxis()->SetTitleOffset(4.);
-    D5a_ratio->SetMaximum(4);
-    D5a_ratio->SetMinimum(-2);
+    /*
+    double ratioMax, ratioMin;
+    if ( Norm=="Normalised" ){
+      ratioMax = 10;
+      ratioMin = -1;
+    }
+    else {
+      ratioMax = 100;
+      ratioMin = -1;
+    }
+    D5a->SetMaximum(ratioMax);
+    D5a->SetMinimum(ratioMin);
+    */
     D5a_ratio->Sumw2();
     D5a_ratio->Divide(EWK);
     D5b_ratio->Divide(EWK);
@@ -570,7 +603,7 @@ int plotVBFDMresults_ConstantMass(TString variable="", TString PS="", TString Ma
     D7c_ratio->Draw("ep same");
     D7d_ratio->Draw("ep same");
 
-  }
+    //}
 
 
   // SAVE ALL THESE HISTOGRAMS YOU MIGHT HAVE READ FROM VARIOUS FILES, OR DONE VARIOUS MODIFICATIONS TO,  TO A ROOT FILE, SO YOU CAN EASILY GET HOLD OF THEM AGAIN!

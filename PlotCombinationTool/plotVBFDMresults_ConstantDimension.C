@@ -128,8 +128,19 @@ int plotVBFDMresults_ConstantDimension(TString variable="", TString PS="", TStri
     TH1F* QCD_Copy = (TH1F*)QCD->Clone("QCD_Copy");
     TH1F* EWK_Copy = (TH1F*)EWK->Clone("EWK_Copy");
 
+    //Creating histogram of Ewk + 0.2QCD to replicate how 3 jet events affect the background
     TH1F EWK_and_fifthQCD_NotP = (*QCD_Copy)+(*EWK_Copy);
     TH1F* EWK_and_fifthQCD = &EWK_and_fifthQCD_NotP;
+
+    TH1F EWK_and_fifthQCD_and_Mass10_NotP = (*EWK_and_fifthQCD)+(*Mass10);
+    TH1F EWK_and_fifthQCD_and_Mass100_NotP = (*EWK_and_fifthQCD)+(*Mass100);
+    TH1F EWK_and_fifthQCD_and_Mass1000_NotP = (*EWK_and_fifthQCD)+(*Mass1000);
+    TH1F* EWK_and_fifthQCD_and_Mass10 = &EWK_and_fifthQCD_and_Mass10_NotP;
+    TH1F* EWK_and_fifthQCD_and_Mass100 = &EWK_and_fifthQCD_and_Mass100_NotP;
+    TH1F* EWK_and_fifthQCD_and_Mass1000 = &EWK_and_fifthQCD_and_Mass1000_NotP;
+
+
+
   //  -- HERE YOU COULD MANIPULATE THEM IF YOU WANTED TO, BUT THERE IS NO NEED RIGHT NOW (AS FAR AS I REMEMBER)
 
   //  YOU COULD LATER MAKE HISTOGRAMS OF EVERY SAMPLE TO SOME FIXED SAMPLE (LIKE ZNUNU+2J) HERE, AND THEN LATER PLOT THESE IN THE SMALL PANE IN THE LOWER PART OF THE PDF, TO SHOW THE RELATIVE SHAPE DIFFERENCES BETWEEN THIS SM PROCESS AND THE VARIOUS OTHER SAMPLES
@@ -141,12 +152,12 @@ int plotVBFDMresults_ConstantDimension(TString variable="", TString PS="", TStri
 
   //////////////////////////////////////////////////////////////////////////////////////////
   TCanvas *canv;
-  if (Norm=="Normalised") {
+  //if (Norm=="Normalised") {
     canv = new TCanvas("canv","",1500,1800);
-  } 
+    /*} 
   else {
     canv = new TCanvas("canv","",1500,1500);
-    }
+    }*/
 
   gStyle->SetOptFit(0);
   gStyle->SetOptStat(0);
@@ -162,12 +173,12 @@ int plotVBFDMresults_ConstantDimension(TString variable="", TString PS="", TStri
   // THIS DEFINES THE MAIN PAD IN THE OUTPUT PLOTS, AND A RATIO PAD (AT THE BOTTOM OF THE PDF FILES) IS DEFINED LATER
   
   TPad *mainPad;
-  if (Norm=="Normalised") {
+  //if (Norm=="Normalised") {
     mainPad = new TPad("mainPad","", 0.01, 0.2, 0.99, 0.99);
-  }
+    /*}
   else{
     mainPad = new TPad("mainPad","", 0.01, 0.02, 0.99, 0.99);    
-  }
+    }*/
   mainPad->Draw();
   mainPad->cd();
   
@@ -345,9 +356,9 @@ int plotVBFDMresults_ConstantDimension(TString variable="", TString PS="", TStri
   //if (!variable.Contains("PT") && !variable.Contains("Mjj") && !variable.Contains("NumJets")) {
   gPad->SetLogy(1);
   //}
-  if (variable.Contains("Mjj") ) {
-  gPad->SetLogx(1);//frame->GetXaxis()->SetMoreLogLabels();
-  }
+  
+  //frame->GetXaxis()->SetMoreLogLabels();
+  
 
   //gStyle->SetEndErrorSize(5);
 
@@ -453,14 +464,14 @@ int plotVBFDMresults_ConstantDimension(TString variable="", TString PS="", TStri
   //  Double_t ytitle_offset = 0.6;
     
 
-  if (Norm=="Normalised"){
+  //  if (Norm=="Normalised"){
 
     TLine *ratioline= new TLine(frame->GetBinLowEdge(1),1.0,frame->GetBinLowEdge(frame->GetNbinsX()+1),1.0);
     ratioline->SetLineColor(1);ratioline->SetLineStyle(1);ratioline->SetLineWidth(1);
 
     canv->cd();
     //    TPad *ratioPad_1 = new TPad("ratioPad_1","", 0.01, topPady-height, 0.99, topPady);
-    TPad *ratioPad = new TPad("ratioPad","", 0.01, 0.02, 0.99, 0.285);
+    TPad *ratioPad = new TPad("ratioPad","", 0.01, 0.02, 0.99, 0.2);
     ratioPad->SetGridy();
     ratioPad->Draw();
     ratioPad->cd();
@@ -470,23 +481,36 @@ int plotVBFDMresults_ConstantDimension(TString variable="", TString PS="", TStri
     gPad->SetLeftMargin(0.17);
     gPad->SetRightMargin(0.02);
     
-    TH1F* M10_ratio = (TH1F*)Mass10->Clone("M10_ratio");
-    TH1F* M100_ratio = (TH1F*)Mass100->Clone("M100_ratio");
-    TH1F* M1000_ratio = (TH1F*)Mass1000->Clone("M1000_ratio");
+    TH1F* M10_ratio = (TH1F*)EWK_and_fifthQCD_and_Mass10->Clone("M10_ratio");
+    TH1F* M100_ratio = (TH1F*)EWK_and_fifthQCD_and_Mass10->Clone("M100_ratio");
+    TH1F* M1000_ratio = (TH1F*)EWK_and_fifthQCD_and_Mass10->Clone("M1000_ratio");
     
-    M10_ratio->GetYaxis()->SetTitle("DM/EWK");
-    M10_ratio->GetYaxis()->SetTitleSize(40);
+    M10_ratio->GetYaxis()->SetTitle("(Z->#nu#nu + DM)/(Z->#nu#nu)");
+    M10_ratio->GetYaxis()->SetTitleSize(30);
     M10_ratio->GetYaxis()->SetTitleFont(43);
     M10_ratio->GetYaxis()->SetTitleOffset(1.55);
     M10_ratio->GetXaxis()->SetTitleSize(40);
     M10_ratio->GetXaxis()->SetTitleFont(43);
     M10_ratio->GetXaxis()->SetTitleOffset(4.);
-    M10_ratio->SetMaximum(4);
-    M10_ratio->SetMinimum(-2);
+
+    /*
+    double ratioMax, ratioMin;    
+    if ( Norm=="Normalised" ){
+      ratioMax = 10;
+      ratioMin = -1;
+    }
+    else {
+      ratioMax = 100;
+      ratioMin = -1;
+    }
+
+    M10_ratio->SetMaximum(ratioMax);
+    M10_ratio->SetMinimum(ratioMin);
+    */
     M10_ratio->Sumw2();
-    M10_ratio->Divide(EWK);
-    M100_ratio->Divide(EWK);
-    M1000_ratio->Divide(EWK);
+    M10_ratio->Divide(EWK_and_fifthQCD);
+    M100_ratio->Divide(EWK_and_fifthQCD);
+    M1000_ratio->Divide(EWK_and_fifthQCD);
     M10_ratio->GetYaxis()->SetNdivisions(10);
     M10_ratio->SetTickLength(0.08);
     M10_ratio->SetMarkerStyle(Mass10_marker_style);
@@ -522,7 +546,7 @@ int plotVBFDMresults_ConstantDimension(TString variable="", TString PS="", TStri
     M100_ratio->Draw("ep same");
     M1000_ratio->Draw("ep same");
 
-  }
+    //}
 
 
     
