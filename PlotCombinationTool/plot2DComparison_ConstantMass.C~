@@ -1,0 +1,436 @@
+#include <TROOT.h>
+#include <TSystem.h>
+#include <TChain.h>
+#include <TFile.h>
+#include<iostream>
+#include<fstream>
+#include <iomanip>
+#include <stdlib.h>
+#include <sstream>
+#include <stdexcept>
+#include <TH1.h>
+#include <TH2.h>
+#include <TF1.h>
+#include <TStyle.h>
+#include <TCanvas.h>
+#include <TFile.h>
+#include <TObjArray.h>
+#include "TLegend.h"
+#include "TGraph.h"
+#include "stdio.h"
+#include <TLatex.h>
+#include <TColor.h>
+#include <TMarker.h>
+#include <TString.h>
+#include "TGraphAsymmErrors.h"
+#include <vector>
+#include <TRandom3.h>
+#include <TGaxis.h>
+#include <algorithm>
+#include "stylefile.h"
+#include <TColor.h>
+
+int plot2DComparison_ConstantMass(TString Dimension="", TString variable1="", TString variable2="", TString PS="", TString Mass="", TString Norm="") {
+
+  gStyle->SetTitleBorderSize(0);
+  gStyle->SetFrameBorderMode(0);
+  gStyle->SetCanvasBorderMode(0);
+  gStyle->SetPadBorderMode(0);
+  gStyle->SetCanvasColor(kWhite);
+  gStyle->SetPadColor(kWhite);
+  gStyle->SetHistLineWidth(2);
+  gStyle->SetTextFont(42);
+
+  gROOT->SetStyle("ATLAS");
+  gROOT->ForceStyle();
+
+  gSystem->Exec("mkdir -p Figures/2DHists/"+Dimension+"/"+Mass+"/"+Norm+"");
+
+  TString xaxis = ""+variable1+"";
+  TString yaxis = ""+variable2+"";
+
+  /*
+  //  yaxis = "1/#sigma^{"+PS+"}_{W}#upoint ";
+  if (variable.Contains("Count")) {
+    xaxis = "Phase Space";
+    yaxis += "#sigma . Accepted/Total";
+  }
+  if (variable.Contains("Mjj")) {
+    xaxis = "Dijet mass [GeV]";
+    yaxis += "d#sigma/dm_{jj}"; 
+  }
+  if (variable.Contains("Jet1PT")) {
+    xaxis = "Leading jet p_{T} [GeV]";
+    yaxis += "d#sigma/dp_{T}"; 
+  }
+  if (variable.Contains("Jet2PT")) {
+    xaxis = "Second jet p_{T} [GeV]";
+    yaxis += "d#sigma/dp_{T}"; 
+  }
+  if (variable.Contains("NumJets")) {
+    xaxis = "Number of Jets";
+    yaxis += "d#sigma/dN"; 
+  }
+  if (variable.Contains("Jet1Eta")) {
+    xaxis = "Leading Jet #eta";
+    yaxis += "d#sigma/d#eta";
+  }
+  if (variable.Contains("Jet2Eta")) {
+    xaxis = "Leading Jet #eta";
+    yaxis += "d#sigma/d#eta";
+  }
+  if (variable.Contains("DeltaEta")) {
+    xaxis = "#Delta#eta(j_{1}, j_{2})";
+    yaxis += "d#sigma/d#Delta#eta";
+  }
+  if (variable.Contains("DeltaPhi")) {
+    xaxis = "#Delta#phi(j_{1}, j_{2})";
+    yaxis += "d#sigma/d#Delta#phi"; 
+  }
+  if (variable.Contains("Etmiss")) {
+    xaxis = "Missing Transverse Energy [GeV]";
+    yaxis += "d#sigma/dETMiss"; 
+  }
+*/
+
+  //  -- READ IN YOUR VARIOUS FILES HERE (SEE HOW VARIABLE AND PS ARE PASSED IN THE FILENAME) AND PULL OUT THE HISTOGRAMS YOU WANT
+
+  
+  TFile* file_D5a = new TFile("~/Documents/Rivet_Analyses/MC_VBFDM/D5a/"""+Mass+"""/"""+Norm+"""/Rivet.root", "READ");
+  file_D5a->cd("MC_VBFDM_"+Norm+"");
+  TH1F* D5a1 = (TH1F*)gDirectory->Get(""+variable1+"_PS_"+PS+"");
+  TH1F* D5a2 = (TH1F*)gDirectory->Get(""+variable2+"_PS_"+PS+"");
+
+  TFile* file_D5b = new TFile("~/Documents/Rivet_Analyses/MC_VBFDM/D5b/"""+Mass+"""/"""+Norm+"""/Rivet.root", "READ");
+  file_D5b->cd("MC_VBFDM_"+Norm+"");
+  TH1F* D5b1 = (TH1F*)gDirectory->Get(""+variable1+"_PS_"+PS+"");
+  TH1F* D5b2 = (TH1F*)gDirectory->Get(""+variable2+"_PS_"+PS+"");  
+
+  TFile* file_D5c = new TFile("~/Documents/Rivet_Analyses/MC_VBFDM/D5c/"""+Mass+"""/"""+Norm+"""/Rivet.root", "READ");
+  file_D5c->cd("MC_VBFDM_"+Norm+"");  
+  TH1F* D5c1 = (TH1F*)gDirectory->Get(""+variable1+"_PS_"+PS+"");
+  TH1F* D5c2 = (TH1F*)gDirectory->Get(""+variable2+"_PS_"+PS+"");
+
+  TFile* file_D5d = new TFile("~/Documents/Rivet_Analyses/MC_VBFDM/D5d/"""+Mass+"""/"""+Norm+"""/Rivet.root", "READ");
+  file_D5d->cd("MC_VBFDM_"+Norm+"");
+  TH1F* D5d1 = (TH1F*)gDirectory->Get(""+variable1+"_PS_"+PS+"");
+  TH1F* D5d2 = (TH1F*)gDirectory->Get(""+variable2+"_PS_"+PS+"");
+
+  TFile* file_D6a = new TFile("~/Documents/Rivet_Analyses/MC_VBFDM/D6a/"""+Mass+"""/"""+Norm+"""/Rivet.root", "READ");
+  file_D6a->cd("MC_VBFDM_"+Norm+"");
+  TH1F* D6a1 = (TH1F*)gDirectory->Get(""+variable1+"_PS_"+PS+"");
+  TH1F* D6a2 = (TH1F*)gDirectory->Get(""+variable2+"_PS_"+PS+"");
+
+  TFile* file_D6b = new TFile("~/Documents/Rivet_Analyses/MC_VBFDM/D6b/"""+Mass+"""/"""+Norm+"""/Rivet.root", "READ");
+  file_D6b->cd("MC_VBFDM_"+Norm+"");
+  TH1F* D6b1 = (TH1F*)gDirectory->Get(""+variable1+"_PS_"+PS+"");
+  TH1F* D6b2 = (TH1F*)gDirectory->Get(""+variable2+"_PS_"+PS+"");
+
+  TFile* file_D7a = new TFile("~/Documents/Rivet_Analyses/MC_VBFDM/D7a/"""+Mass+"""/"""+Norm+"""/Rivet.root", "READ");
+  file_D7a->cd("MC_VBFDM_"+Norm+"");
+  TH1F* D7a1 = (TH1F*)gDirectory->Get(""+variable1+"_PS_"+PS+"");
+  TH1F* D7a2 = (TH1F*)gDirectory->Get(""+variable2+"_PS_"+PS+"");
+
+  TFile* file_D7b = new TFile("~/Documents/Rivet_Analyses/MC_VBFDM/D7b/"""+Mass+"""/"""+Norm+"""/Rivet.root", "READ");
+  file_D7b->cd("MC_VBFDM_"+Norm+"");
+  TH1F* D7b1 = (TH1F*)gDirectory->Get(""+variable1+"_PS_"+PS+"");
+  TH1F* D7b2 = (TH1F*)gDirectory->Get(""+variable2+"_PS_"+PS+"");
+
+  TFile* file_D7c = new TFile("~/Documents/Rivet_Analyses/MC_VBFDM/D7c/"""+Mass+"""/"""+Norm+"""/Rivet.root", "READ");
+  file_D7c->cd("MC_VBFDM_"+Norm+"");
+  TH1F* D7c1 = (TH1F*)gDirectory->Get(""+variable1+"_PS_"+PS+"");
+  TH1F* D7c2 = (TH1F*)gDirectory->Get(""+variable2+"_PS_"+PS+"");
+
+  TFile* file_D7d = new TFile("~/Documents/Rivet_Analyses/MC_VBFDM/D7d/"""+Mass+"""/"""+Norm+"""/Rivet.root", "READ");
+  file_D7d->cd("MC_VBFDM_"+Norm+"");
+  TH1F* D7d1 = (TH1F*)gDirectory->Get(""+variable1+"_PS_"+PS+"");
+  TH1F* D7d2 = (TH1F*)gDirectory->Get(""+variable2+"_PS_"+PS+"");
+
+  TFile* file_Higgs = new TFile("~/Documents/Rivet_Analyses/MC_VBFDM/Higgs/"""+Mass+"""/"""+Norm+"""/Rivet.root", "READ");
+  file_Higgs->cd("MC_VBFDM_"+Norm+"");
+  TH1F* Higgs1 = (TH1F*)gDirectory->Get(""+variable1+"_PS_"+PS+"");
+  TH1F* Higgs2 = (TH1F*)gDirectory->Get(""+variable2+"_PS_"+PS+"");
+
+  TFile* file_QCD = new TFile("~/Documents/Rivet_Analyses/MC_VBFDM/Backgrounds/QCD/"""+Norm+"""/Rivet.root", "READ");
+  file_QCD->cd("MC_VBFDM_"+Norm+"");
+  TH1F* QCD1 = (TH1F*)gDirectory->Get(""+variable1+"_PS_"+PS+"");
+  TH1F* QCD2 = (TH1F*)gDirectory->Get(""+variable2+"_PS_"+PS+"");
+  QCD1->Scale(0.2);
+  QCD2->Scale(0.2);
+
+  TFile* file_EWK = new TFile("~/Documents/Rivet_Analyses/MC_VBFDM/Backgrounds/EWK/"""+Norm+"""/Rivet.root", "READ");
+  file_EWK->cd("MC_VBFDM_"+Norm+"");
+  TH1F* EWK1 = (TH1F*)gDirectory->Get(""+variable1+"_PS_"+PS+"");          
+  TH1F* EWK2 = (TH1F*)gDirectory->Get(""+variable2+"_PS_"+PS+"");
+  
+
+  TH1F* QCD_Copy1 = (TH1F*)QCD1->Clone("QCD_Copy1");
+  TH1F* EWK_Copy1 = (TH1F*)EWK1->Clone("EWK_Copy1");
+  TH1F EWK_and_fifthQCD_NotP1 = (*QCD_Copy1)+(*EWK_Copy1);
+  TH1F* EWK_and_fifthQCD1 = &EWK_and_fifthQCD_NotP1;
+
+  TH1F* QCD_Copy2 = (TH1F*)QCD2->Clone("QCD_Copy2");
+  TH1F* EWK_Copy2 = (TH1F*)EWK2->Clone("EWK_Copy2");
+  TH1F EWK_and_fifthQCD_NotP2 = (*QCD_Copy2)+(*EWK_Copy2);
+  TH1F* EWK_and_fifthQCD2 = &EWK_and_fifthQCD_NotP2;
+
+  D5c1->Scale(pow(((0.1)/(3.3)),4));
+  D5c2->Scale(pow(((0.1)/(3.3)),4));
+  D5d1->Scale(pow(((0.1)/(6.6)),4));
+  D5d2->Scale(pow(((0.1)/(6.6)),4));
+  D6a1->Scale(pow(((1)/(2.3)),5));
+  D6a2->Scale(pow(((1)/(2.3)),5));
+  D6b1->Scale(pow(((1)/(3.3)),5));
+  D6b2->Scale(pow(((1)/(3.3)),5));
+
+  TH1F* Hist1 = (TH1F*)D5a1->Clone(""+Dimension+"_"+variable1+"");
+  TH1F* Hist2 = (TH1F*)D5a2->Clone(""+Dimension+"_"+variable2+"");
+
+  //  if (Dimension == "D5a"){
+  //    Hist1 = (TH1F*)D5a1->Clone(""+Dimension+"_"+variable1+"");
+  //Hist2 = (TH1F*)D5a2->Clone(""+Dimension+"_"+variable2+"");
+    //}
+// else{ Hist1 = D5b1; Hist2 = D5b2;}
+
+  // Defining 2D Histograms
+
+  TH2F* Hist2D = new TH2F("Hist2D", ""+Dimension+"_"+variable1+"_vs_"+variable2+"", Hist1->GetNbinsX(), Hist1->GetXaxis()->GetBinLowEdge(1), Hist1->GetXaxis()->GetBinUpEdge(Hist1->GetNbinsX()), Hist2->GetNbinsX(), Hist2->GetXaxis()->GetBinLowEdge(1), Hist2->GetXaxis()->GetBinUpEdge(Hist2->GetNbinsX()));
+
+  TH2F* EWK_and_fifthQCD_Hist2D = new TH2F("EWK_and_fifthQCD_Hist2D", ""+variable1+"_vs_"+variable2+"", EWK_and_fifthQCD1->GetNbinsX(), EWK_and_fifthQCD1->GetXaxis()->GetBinLowEdge(1), EWK_and_fifthQCD1->GetXaxis()->GetBinUpEdge(EWK_and_fifthQCD1->GetNbinsX()), EWK_and_fifthQCD2->GetNbinsX(), EWK_and_fifthQCD2->GetXaxis()->GetBinLowEdge(1), EWK_and_fifthQCD2->GetXaxis()->GetBinUpEdge(EWK_and_fifthQCD2->GetNbinsX()));
+
+
+  TCanvas *canv;
+  canv = new TCanvas("canv","",1500,1500);
+  
+  gStyle->SetOptFit(0);
+  gStyle->SetOptStat(0);
+  gStyle->SetTitleFillColor(0);
+  gStyle->SetFuncColor(kRed);
+  gStyle->SetTitleBorderSize(0);
+  gStyle->SetTextAlign(22);
+  gStyle->SetStatW(0.2);
+  gStyle->SetStatH(0.1);
+
+  canv->cd();  
+
+  // THIS DEFINES THE MAIN PAD IN THE OUTPUT PLOTS, AND A RATIO PAD (AT THE BOTTOM OF THE PDF FILES) IS DEFINED LATER
+  
+  TPad *mainPad;
+  mainPad = new TPad("mainPad","", 0.01, 0.02, 0.99, 0.99);
+  mainPad->Draw();
+  mainPad->cd();
+
+
+  /*
+  Double_t margin = 0.1;
+
+  Double_t upperRange = D5a->GetXaxis()->GetBinLowEdge(D5a->GetNbinsX()+1) + margin;
+
+
+  // MAKES A DUMMY HISTOGRAM WITH ONE BIN -- I MAKE THE STYLE FOR THIS RIGHT, AND AXIS LABELS ETC, THEN CAN PLOT ANY HISTOGRAM I WANT "ON TOP" OF THIS AND IT WILL STILL HAVE THE SAME HISTOGRAM LABELS AS THE DUMMY
+  TH1F *frame = new TH1F("frame",";"+xaxis+";"+yaxis+";",1, D5a->GetXaxis()->GetBinLowEdge(1)-margin, upperRange);
+
+  Double_t font_size = 60;
+  frame->GetYaxis()->SetTitleOffset( 2.0 );
+  frame->GetYaxis()->SetLabelOffset( 0.005 );
+  frame->GetYaxis()->SetTitleFont( 43 );
+  frame->GetYaxis()->SetLabelFont( 43 );
+  frame->GetYaxis()->SetLabelSize( font_size );
+  frame->GetYaxis()->SetTitleSize( font_size );
+
+  frame->GetXaxis()->SetTitleOffset( 2.0 );
+  frame->GetXaxis()->SetLabelOffset( 0.005 );
+  frame->GetXaxis()->SetTitleFont( 43 );
+  frame->GetXaxis()->SetLabelFont( 43 );
+  frame->GetXaxis()->SetLabelSize( font_size );
+  frame->GetXaxis()->SetTitleSize( font_size );
+  frame->GetXaxis()->SetLabelColor( 0 );
+  */
+
+  // HERE YOU CAN SET ALL THE COLOURS AND STYLES AND MARKERS FOR YOUR HISTOGRAMS (VARIABLES DEFINED IN THE HEADER FILE)
+  /*
+  D5a_Hist2D->SetLineColor(D5a_line_color);D5a_Hist2D->SetLineStyle(D5a_line_style);D5a_Hist2D->SetLineWidth(D5a_line_width);D5a_Hist2D->SetFillColor(D5a_fill_color);D5a_Hist2D->SetFillStyle(D5a_fill_style);
+  D5a_Hist2D->SetMarkerColor(D5a_line_color);D5a_Hist2D->SetMarkerStyle(D5a_marker_style);D5a_Hist2D->SetMarkerSize(D5a_marker_size);
+  
+
+  EWK_and_fifthQCD_Hist2D->SetLineColor(Inclusive_line_color);EWK_and_fifthQCD_Hist2D->SetLineStyle(Inclusive_line_style);EWK_and_fifthQCD_Hist2D->SetLineWidth(Inclusive_line_width);
+  EWK_and_fifthQCD_Hist2D->SetFillColor(Inclusive_fill_color);EWK_and_fifthQCD_Hist2D->SetFillStyle(Inclusive_fill_style);EWK_and_fifthQCD_Hist2D->SetMarkerColor(Inclusive_line_color);
+  EWK_and_fifthQCD_Hist2D->SetMarkerStyle(Inclusive_marker_style);EWK_and_fifthQCD_Hist2D->SetMarkerSize(Inclusive_marker_size);
+  */
+
+  // MAXIMUM AND MINIMUM OF Y-AXIS
+  /*
+  Double_t max = 1e0;
+  Double_t min = 1e-4;
+  
+  if(Norm=="Normalised"){
+    if (variable.Contains("Count")) {
+      max = 2e0;
+      min = 1e-2;
+    }                                                                                                                                                                        
+    if (variable.Contains("Mjj")) {
+      max = 1e0;
+      min = 1e-4;
+    }
+    if (variable.Contains("Jet1PT")) {
+      max = 1e0;
+      min = 1e-4;
+    }
+    if (variable.Contains("Jet2PT")) {
+      max = 1e0;
+      min = 1e-4;
+    }
+    if (variable.Contains("NumJets")) {
+      max = 1e0;
+      min = 1e-4;
+    }
+    if (variable.Contains("Jet1Eta")) {
+      max = 1e0;
+      min = 1e-4;
+    }
+    if (variable.Contains("Jet2Eta")) {
+      max = 1e0;
+      min = 1e-4;
+    }
+    if (variable.Contains("DeltaEta")) {
+      max = 1e0;
+      min = 1e-4;
+    }
+    if (variable.Contains("DeltaPhi")) {
+      if(PS=="VBFZ_Baseline" || PS=="VBFZ_Search"){
+	max = 1e0;
+      }
+      else if (PS=="VBFZ_HighMass"){
+	max = 1e0;
+      }
+      else{
+	max = 1e0;
+      }
+      min = 1e-3;
+    }
+    if (variable.Contains("Etmiss")) {
+      max = 1e0;
+      min = 1e-4;
+    }
+  }
+
+  if(Norm=="Absolute"){
+    if (variable.Contains("Count")) {
+      max = 1e8;
+      min = 1e-2;
+    }
+    if (variable.Contains("Mjj")) {
+      max = 1e5;
+      min = 1e-4;
+    }
+    if (variable.Contains("Jet1PT")) {
+      max = 1e4;
+      min = 1e-4;
+    }
+    if (variable.Contains("Jet2PT")) {
+      max = 1e5;
+      min = 1e-4;
+    }
+    if (variable.Contains("NumJets")) {
+      max = 1e5;
+      min = 1e-4;
+    }
+    if (variable.Contains("Jet") && variable.Contains("Eta")) {
+      max = 1e5;
+      min = 1e-4;
+    }
+    if (variable.Contains("DeltaEta")) {
+      max = 1e4;
+      min = 1e-4;
+    }
+    if (variable.Contains("DeltaPhi")) {
+      max = 1e4;
+      min = 1e-4;
+    }
+    if (variable.Contains("Etmiss")) {
+      max = 1e5;
+      min = 1e-4;
+    }
+  }
+  */
+  //  frame->SetMaximum(max);
+  //frame->SetMinimum(min);
+
+  gPad->SetTopMargin(0.02);
+  gPad->SetBottomMargin(0.15);
+  gPad->SetLeftMargin(0.17);
+  gPad->SetRightMargin(0.02);
+  
+  //  frame->Draw("P");
+
+  //      gPad->SetLogy(1);
+
+  // ACTUAL DRAWING OF THE HISTOGRAMS
+  for (int i = 0; i < Hist1->GetNbinsX() ; ++i ){
+    for (int j = 0; j < Hist2->GetNbinsX() ; ++j ){
+      Hist2D->SetBinContent(Hist1->GetBin(i,0,0), Hist2->GetBin(j,0,0),(Hist1->GetBinContent(i))*(Hist2->GetBinContent(j)));
+      EWK_and_fifthQCD_Hist2D->SetBinContent(EWK_and_fifthQCD1->GetBin(i,0,0), EWK_and_fifthQCD2->GetBin(j,0,0), (EWK_and_fifthQCD1->GetBinContent(i))*(EWK_and_fifthQCD2->GetBinContent(j)));
+    }
+  }
+
+
+  EWK_and_fifthQCD_Hist2D->SetFillColor(2);
+  Hist2D->SetFillColor(4);
+  //  gStyle->SetPalette(52);
+  EWK_and_fifthQCD_Hist2D->Draw("same");
+  // gStyle->SetPalette(61);
+  Hist2D->Draw("same");
+  Hist2D->GetXaxis()->SetTitle(""+variable1+"");
+  Hist2D->GetYaxis()->SetTitle(""+variable2+"");
+  /*
+  Double_t yval1 = 0.96;
+  Double_t xval = 0.2;
+
+  Double_t finalVal = yval1-0.1;
+   
+  
+  TLegend *leg_main = new TLegend(xval,finalVal,xval+0.75,yval1);
+  leg_main->SetNColumns(3);
+  leg_main->SetFillColor(0);
+  leg_main->SetTextSize(0.02);
+  leg_main->SetBorderSize(0);
+  leg_main->SetTextFont(42);
+  leg_main->AddEntry(D5a,"DM D5a (#Lambda > 100GeV) ","PL");
+  leg_main->AddEntry(D5b,"DM D5b (#Lambda > 100GeV)","PL");
+  leg_main->AddEntry(D5c,"DM D5c (#Lambda > 3.3TeV)","PL");
+  leg_main->AddEntry(D5d,"DM D5d (#Lambda > 6.6TeV)","PL");
+  leg_main->AddEntry(D6a,"DM D6a (#Lambda > 230GeV)","PL");
+  leg_main->AddEntry(D6b,"DM D6b (#Lambda > 330GeV)","PL");
+  leg_main->AddEntry(D7a,"DM D7a (#Lambda > 100GeV)","PL");
+  leg_main->AddEntry(D7b,"DM D7b (#Lambda > 100GeV)","PL");
+  leg_main->AddEntry(D7c,"DM D7c (#Lambda > 100GeV)","PL");
+  leg_main->AddEntry(D7d,"DM D7d (#Lambda > 100GeV)","PL");
+  leg_main->AddEntry(Higgs,"Higgs DM Portal","PL");
+  leg_main->AddEntry(QCD,"QCD Z(#nu#nu)jj","f");
+  leg_main->AddEntry(EWK,"EWK Z(#nu#nu)jj","f");
+  leg_main->AddEntry(EWK_and_fifthQCD,"QCD+EWK Z(#nu#nu)jj","f");
+  leg_main->Draw("same");
+  
+			   */
+
+
+  // SAVE ALL THESE HISTOGRAMS YOU MIGHT HAVE READ FROM VARIOUS FILES, OR DONE VARIOUS MODIFICATIONS TO,  TO A ROOT FILE, SO YOU CAN EASILY GET HOLD OF THEM AGAIN!
+  
+  TFile * outfile = new TFile("Figures/2DHists/"+Dimension+"/"+Mass+"/"+Norm+"/"+Dimension+"_"+Mass+"_"+variable1+"vs"+variable2+"_PS_"+PS+".root", "RECREATE");
+  outfile->cd();
+
+  EWK_and_fifthQCD_Hist2D->Write("2DHist_EWK_and_fifthQCD");
+  Hist2D->Write("2DHist_"+Dimension+"");
+
+  outfile->Close();
+
+  // THIS ACTUALLY WRITES OUT THE PLOTS (PDF/PNG/EPS FORMAT)
+
+  gPad->RedrawAxis();canv->Print("Figures/2DHists/"+Dimension+"/"+Mass+"/"+Norm+"/"+Dimension+"_"+Mass+"_"+variable1+"vs"+variable2+"_PS_"+PS+".pdf");
+  gPad->RedrawAxis();canv->Print("Figures/2DHists/"+Dimension+"/"+Mass+"/"+Norm+"/"+Dimension+"_"+Mass+"_"+variable1+"vs"+variable2+"_PS_"+PS+".png");
+  gPad->RedrawAxis();canv->Print("Figures/2DHists/"+Dimension+"/"+Mass+"/"+Norm+"/"+Dimension+"_"+Mass+"_"+variable1+"vs"+variable2+"_PS_"+PS+".eps");
+
+  return 0;
+} 
+	  
+

@@ -1,0 +1,212 @@
+#include<iostream>
+#include<fstream>
+#include <stdlib.h>
+#include <sstream>
+#include <TH1.h>
+#include <TH2.h>
+#include <TF1.h>
+#include <TFile.h>
+#include <TCanvas.h>
+#include <TString.h>
+#include "stylefile.h"
+#include <TStyle.h>
+#include <TROOT.h>
+#include "stdio.h"
+#include <TSystem.h>
+#include "TLegend.h"
+using namespace std;
+
+Double_t statTest(TH1F* modelRatio, TH1F* dataRatio, TString statOption) {
+
+  if ( statOption == "chi2" ) {
+    return dataRatio->Chi2Test(modelRatio,"WW_P",0);
+  }
+  else if ( statOption == "KS" ) {
+    return 2;
+  }
+  else { return 3; }
+
+};
+
+int statisticsTest(TString variable="", TString PS="", TString Dimension="", TString StatOption=""){
+
+  gStyle->SetTitleBorderSize(0);
+  gStyle->SetFrameBorderMode(0);
+  gStyle->SetCanvasBorderMode(0);
+  gStyle->SetPadBorderMode(0);
+  gStyle->SetCanvasColor(kWhite);
+  gStyle->SetPadColor(kWhite);
+  gStyle->SetHistLineWidth(2);
+  gStyle->SetTextFont(42);
+
+  gROOT->SetStyle("ATLAS");
+  gROOT->ForceStyle();
+
+  gSystem->Exec("mkdir Figures/StatPlots/"+Dimension+"");
+
+  TCanvas *statCanv;
+  statCanv = new TCanvas("statCanv","",3000,1500);
+
+  gStyle->SetOptFit(0);
+  gStyle->SetOptStat(0);
+  gStyle->SetTitleFillColor(0);
+  gStyle->SetFuncColor(kRed);
+  gStyle->SetTitleBorderSize(0);
+  gStyle->SetTextAlign(22);
+  gStyle->SetStatW(0.2);
+  gStyle->SetStatH(0.1);
+  statCanv->cd();
+  
+  // Reading in root file containing data histograms                                                                                                                           
+  
+
+  TFile* dataFile = new TFile("~/Documents/Rivet_Analyses/MC_VBFDM/PlotCombinationTool/corrected.root", "READ");
+  dataFile->cd();
+  TH1F* dataCurve;
+
+  if ( variable == "Mjj" ){
+    dataCurve = (TH1F*)gDirectory->Get("Mjj_search");
+  }
+  else if ( variable == "Etmiss" ){
+    dataCurve = (TH1F*)gDirectory->Get("MET_mono");
+  }
+  else { dataCurve = (TH1F*)gDirectory->Get("MET_mono");}
+
+  cout<<"Number of data bins = "<<dataCurve->GetXaxis()->GetNbins()<<endl;
+
+  // Scale of number of leptons for ratio
+  //double ratioScale(6.03);
+  int EFTScaleSize(2);
+  int DMmassSize(3);
+
+  // Defining low limit on the EFT Scale for each Dimension.
+  Double_t EFTScaleMin;
+  
+  if ( Dimension == "D5c" ) { EFTScaleMin = 3300.; }
+  else if ( Dimension == "D5d" ) { EFTScaleMin = 6600.; }
+  else if ( Dimension == "D6a" ) { EFTScaleMin = 230.; }
+  else if ( Dimension == "D6b" ) { EFTScaleMin = 330.; }
+  else { EFTScaleMin = 100. ; }
+
+  Double_t EFTScale[2] = { EFTScaleMin, 10000*EFTScaleMin}; //, 100*EFTScaleMin, 1000*EFTScaleMin, 10000*EFTScaleMin };
+
+  // Defining different mass options
+  Double_t DMmass[3] = { 10., 100., 1000. };
+
+  // Different plot labels: (x,y) bins
+  TString EFTScaleString[2] = { "#Lambda_Min", "10000#Lambda_Min"}; //, "100#Lambda_Min", "1000#Lambda_Min", "10000#Lambda_Min", };
+
+  TString DMmassString[3];
+  for ( int i = 0 ; i < DMmassSize ; ++i ){
+    DMmassString[i] = Form("%.0f",DMmass[i]);
+  }
+
+  // Initialising statistics result 2d histogram
+  TH2F* statHist = new TH2F("statHist", "statHist", DMmassSize, DMmass[0]-(DMmass[0]/2), DMmass[2]+(DMmass[2]/2), EFTScaleSize, EFTScale[0]-(EFTScale[0]/2), EFTScale[1]+(EFTScale[1]/2));
+
+  TH1F* ratioHist[DMmassSize][EFTScaleSize];
+  Double_t statTestResult[DMmassSize][EFTScaleSize];
+  double EFTScaleForRatio[DMmassSize][EFTScaleSize];
+
+  for ( int i = 0 ; i < DMmassSize ; ++i ){
+
+    // Reading in root file containing DM model and background histograms
+    TFile* modelFile = new TFile("~/Documents/Rivet_Analyses/MC_VBFDM/PlotCombinationTool/Figures/"+Dimension+"/Normalised/"+Dimension+"_"+variable+"_PS_"+PS+".root", "READ");
+    modelFile->cd();
+    TH1F* DMcurve = (TH1F*)gDirectory->Get("Mass"+DMmassString[i]+"");
+    TH1F* EWK_and_fifthQCD = (TH1F*)gDirectory->Get("EWK_and_fifthQCD");
+    TH1F* cRatio = (TH1F*)gDirectory->Get("cRatio");
+
+    cout<<"Number of DM bins = "<<DMcurve->GetXaxis()->GetNbins()<<endl;
+
+    // Producing the ratio of DM+Backgrounds/Backgrounds and scaling due to number of leptons
+    TH1F EWK_and_fifthQCD_and_DMcurve_NotP = (*EWK_and_fifthQCD)+(*DMcurve);
+    TH1F* EWK_and_fifthQCD_and_DMcurve = &EWK_and_fifthQCD_and_DMcurve_NotP;
+    TH1F* modelRatio = (TH1F*)EWK_and_fifthQCD_and_DMcurve->Clone("modelRatio");
+    modelRatio->Sumw2();
+    modelRatio->Divide(EWK_and_fifthQCD);
+    modelRatio->Multiply(cRatio);
+    //    modelRatio->Scale(ratioScale);
+
+    for ( int j = 0 ; j < EFTScaleSize ; ++j ){
+      
+      // Defining the scaling power for each dimension
+      double power = 0.;
+      if ( Dimension == "D5a" || Dimension == "D5b" || Dimension == "D5c" || Dimension == "D5d" ) { power = 4; }
+      if ( Dimension == "D6a" || Dimension == "D6b" ) { power = 5; }
+      if ( Dimension == "D7a" || Dimension == "D7b" || Dimension == "D7c" || Dimension == "D7d" ) { power = 6; }
+
+      EFTScaleForRatio[i][j] = pow(((EFTScaleMin)/(EFTScale[j])),power);
+      //cout<<"scale = "<<EFTScaleForRatio<<endl;
+
+      ratioHist[i][j] = (TH1F*)modelRatio->Clone("ratioHist");
+      ratioHist[i][j]->Scale(EFTScaleForRatio[i][j]);
+      ratioHist[i][j]->GetXaxis()->SetNdivisions(5);
+
+      // Running the histograms through a statistical test and outputting the p-value
+      statTestResult[i][j] = statTest(ratioHist[i][j], dataCurve, StatOption);
+      cout<<"EFTScaleForRatio = "<<EFTScaleForRatio[i][j]<<endl;
+      statHist->Fill(DMmassString[i], EFTScaleString[j], statTestResult[i][j]);
+  
+    }
+  }
+
+  // Writing output to a root file.
+  TFile * outfile = new TFile("Figures/StatPlots/"+Dimension+"/Stats_"+Dimension+"_"+variable+"_PS_"+PS+".root", "RECREATE");
+  outfile->cd();
+
+  for ( int i = 0 ; i < DMmassSize ; ++i ){
+    for ( int j = 0 ; j < EFTScaleSize ; ++j ){
+      ratioHist[i][j]->Write();
+    }
+  }
+
+  statHist->Write();
+  outfile->Close();
+  
+  TPad* mainPad = new TPad("mainPad","", 0.01, 0.15, 0.48, 0.99); mainPad->Draw();
+  TPad* ratioPad = new TPad("ratioPad","", 0.52, 0.15, 0.99, 0.99); ratioPad->Draw();
+  TLegend* ratioLegend = new TLegend(0.4,0.04,0.99,0.15); ratioLegend->Draw();
+
+  mainPad->cd(); statHist->Draw("TEXT"); statHist->GetXaxis()->SetTitle("DM mass (GeV)"); statHist->GetYaxis()->SetTitle("EFT Scale"); statHist->GetYaxis()->SetTitleOffset(1.8);
+
+  ratioPad->cd(); ratioHist[0][0]->GetYaxis()->SetTitle("(Z->#nu#nu + DM)/(Z->#nu#nu)"); ratioHist[0][0]->GetYaxis()->SetTitleSize(50); ratioHist[0][0]->GetYaxis()->SetTitleFont(43); ratioHist[0][0]->GetYaxis()->SetTitleOffset(2.2); ratioHist[0][0]->GetXaxis()->SetTitle("DM mass (GeV)"); ratioHist[0][0]->GetXaxis()->SetTitleSize(50); ratioHist[0][0]->GetXaxis()->SetTitleFont(43); ratioHist[0][0]->GetXaxis()->SetTitleOffset(2.2); ratioHist[0][0]->SetTickLength(0.08);
+  int k(2);
+  for ( int i = 0 ; i < DMmassSize ; ++i ){
+    for ( int j = 0 ; j < EFTScaleSize ; ++j ){
+      ratioHist[i][j]->SetMarkerStyle(k);
+      ratioHist[i][j]->SetMarkerColor(k);
+      ratioHist[i][j]->SetLineColor(k);
+      ratioHist[i][j]->Draw("ep same");
+      k++;
+    }
+  }
+  dataCurve->SetMarkerStyle(1);
+  dataCurve->SetMarkerColor(1);
+  dataCurve->SetLineColor(1);
+  dataCurve->Draw("ep same");
+
+  ratioLegend->SetNColumns(3);
+  ratioLegend->SetFillColor(0);
+  ratioLegend->SetTextSize(0.02);
+  ratioLegend->SetBorderSize(0);
+  ratioLegend->SetTextFont(42);
+  ratioLegend->AddEntry(dataCurve,"Data","PL");
+  for ( int i = 0 ; i < DMmassSize ; ++i ){
+    for ( int j = 0 ; j < EFTScaleSize ; ++j ){
+    ratioLegend->AddEntry(ratioHist[i][j], Form(""+Dimension+", DM mass = %.0f, #Lambda = %.0f",DMmass[i],EFTScale[j]), "PL");
+  }
+}
+
+  statCanv->cd();
+
+  // THIS ACTUALLY WRITES OUT THE PLOTS (PDF/PNG/EPS FORMAT)
+  gPad->RedrawAxis();statCanv->Print("Figures/StatPlots/"+Dimension+"/Stats_"+Dimension+"_"+variable+"_PS_"+PS+".pdf");
+  gPad->RedrawAxis();statCanv->Print("Figures/StatPlots/"+Dimension+"/Stats_"+Dimension+"_"+variable+"_PS_"+PS+".png");
+  gPad->RedrawAxis();statCanv->Print("Figures/StatPlots/"+Dimension+"/Stats_"+Dimension+"_"+variable+"_PS_"+PS+".eps");
+
+  return 0;
+
+}
+
+
