@@ -29,8 +29,6 @@
 #include <algorithm>
 #include "stylefile.h"
 
-// NON WORKING EXAMPLE, JUST HOPEFULLY TO SHOW THE MAIN SECTIONS OF THE CODE YOU NEED TO BE THINKING ABOUT
-
 int plotVBFDMresults_ConstantMass(TString variable="", TString PS="", TString Mass="", TString Norm="") {
 
   gStyle->SetTitleBorderSize(0);
@@ -153,7 +151,18 @@ int plotVBFDMresults_ConstantMass(TString variable="", TString PS="", TString Ma
   TFile* file_Inclusive = new TFile("~/Documents/Rivet_Analyses/MC_VBFDM/Backgrounds/Inclusive/"""+Norm+"""/Rivet.root", "READ");
   file_Inclusive->cd("MC_VBFDM_"+Norm+"");
   TH1F* Inclusive = (TH1F*)gDirectory->Get(""+variable+"_PS_"+PS+"");          
-  
+
+  TFile* file_zvv = new TFile("~/Documents/Rivet_Analyses/MC_VBFDM/Backgrounds/zvv/"+Norm+"/Rivet.root", "READ");
+  file_zvv->cd("MC_VBFDM_"+Norm+"");
+  TH1F* zvv = (TH1F*)gDirectory->Get(""+variable+"_PS_"+PS+"");
+
+  TFile* file_zmumu = new TFile("~/Documents/Rivet_Analyses/MC_VBFDM/Backgrounds/zmumu/"+Norm+"/Rivet.root", "READ");
+  file_zmumu->cd("MC_VBFDM_"+Norm+"");
+  TH1F* zmumu = (TH1F*)gDirectory->Get(""+variable+"_PS_"+PS+"");
+
+  TH1F* cRatio = (TH1F*)zvv->Clone("cRatio");
+  cRatio->Sumw2();
+  cRatio->Divide(zmumu);  
 
   TH1F* QCD_Copy = (TH1F*)QCD->Clone("QCD_Copy");
   TH1F* EWK_Copy = (TH1F*)EWK->Clone("EWK_Copy");
@@ -161,28 +170,6 @@ int plotVBFDMresults_ConstantMass(TString variable="", TString PS="", TString Ma
   TH1F EWK_and_fifthQCD_NotP = (*QCD_Copy)+(*EWK_Copy);
   TH1F* EWK_and_fifthQCD = &EWK_and_fifthQCD_NotP;
 
-  //Adding all contributants together for ratio plot
-  TH1F EWK_and_fifthQCD_and_D5a_NotP = (*EWK_and_fifthQCD)+(*D5a);
-  TH1F EWK_and_fifthQCD_and_D5b_NotP = (*EWK_and_fifthQCD)+(*D5b);
-  TH1F EWK_and_fifthQCD_and_D5c_NotP = (*EWK_and_fifthQCD)+(*D5c);
-  TH1F EWK_and_fifthQCD_and_D5d_NotP = (*EWK_and_fifthQCD)+(*D5d);
-  TH1F EWK_and_fifthQCD_and_D6a_NotP = (*EWK_and_fifthQCD)+(*D6a);
-  TH1F EWK_and_fifthQCD_and_D6b_NotP = (*EWK_and_fifthQCD)+(*D6b);
-  TH1F EWK_and_fifthQCD_and_D7a_NotP = (*EWK_and_fifthQCD)+(*D7a);
-  TH1F EWK_and_fifthQCD_and_D7b_NotP = (*EWK_and_fifthQCD)+(*D7b);
-  TH1F EWK_and_fifthQCD_and_D7c_NotP = (*EWK_and_fifthQCD)+(*D7c);
-  TH1F EWK_and_fifthQCD_and_D7d_NotP = (*EWK_and_fifthQCD)+(*D7d);
-
-  TH1F* EWK_and_fifthQCD_and_D5a = &EWK_and_fifthQCD_and_D5a_NotP;
-  TH1F* EWK_and_fifthQCD_and_D5b = &EWK_and_fifthQCD_and_D5b_NotP;
-  TH1F* EWK_and_fifthQCD_and_D5c = &EWK_and_fifthQCD_and_D5c_NotP;
-  TH1F* EWK_and_fifthQCD_and_D5d = &EWK_and_fifthQCD_and_D5d_NotP;
-  TH1F* EWK_and_fifthQCD_and_D6a = &EWK_and_fifthQCD_and_D6a_NotP;
-  TH1F* EWK_and_fifthQCD_and_D6b = &EWK_and_fifthQCD_and_D6b_NotP;
-  TH1F* EWK_and_fifthQCD_and_D7a = &EWK_and_fifthQCD_and_D7a_NotP;
-  TH1F* EWK_and_fifthQCD_and_D7b = &EWK_and_fifthQCD_and_D7b_NotP;
-  TH1F* EWK_and_fifthQCD_and_D7c = &EWK_and_fifthQCD_and_D7c_NotP;
-  TH1F* EWK_and_fifthQCD_and_D7d = &EWK_and_fifthQCD_and_D7d_NotP;
   //  -- HERE YOU COULD MANIPULATE THEM IF YOU WANTED TO, BUT THERE IS NO NEED RIGHT NOW (AS FAR AS I REMEMBER)
 
   //  YOU COULD LATER MAKE HISTOGRAMS OF EVERY SAMPLE TO SOME FIXED SAMPLE (LIKE ZNUNU+2J) HERE, AND THEN LATER PLOT THESE IN THE SMALL PANE IN THE LOWER PART OF THE PDF, TO SHOW THE RELATIVE SHAPE DIFFERENCES BETWEEN THIS SM PROCESS AND THE VARIOUS OTHER SAMPLES
@@ -194,13 +181,8 @@ int plotVBFDMresults_ConstantMass(TString variable="", TString PS="", TString Ma
 
   //////////////////////////////////////////////////////////////////////////////////////////
   TCanvas *canv;
-  //if (Norm=="Normalised") {
-   canv = new TCanvas("canv","",1500,1800);
-   //}
-  //else {
-    //canv = new TCanvas("canv","",1500,1500);
-    //}
-
+  canv = new TCanvas("canv","",1500,1800);
+  
   gStyle->SetOptFit(0);
   gStyle->SetOptStat(0);
   gStyle->SetTitleFillColor(0);
@@ -215,16 +197,9 @@ int plotVBFDMresults_ConstantMass(TString variable="", TString PS="", TString Ma
   // THIS DEFINES THE MAIN PAD IN THE OUTPUT PLOTS, AND A RATIO PAD (AT THE BOTTOM OF THE PDF FILES) IS DEFINED LATER
   
   TPad *mainPad;
-  //if (Norm=="Normalised") {
-    mainPad = new TPad("mainPad","", 0.01, 0.02, 0.99, 0.99);
-    //}
-    //else{
-    //mainPad = new TPad("mainPad","", 0.01, 0.2, 0.99, 0.99);
-    //}
-    mainPad->Draw();
-    mainPad->cd();
-
-  
+  mainPad = new TPad("mainPad","", 0.01, 0.2, 0.99, 0.99);
+  mainPad->Draw();
+  mainPad->cd();
 
   Double_t margin = 0.1;
   //  -- THIS IS JUST ME TWEAKING THE BOUNDARIES OF THE AXES FOR PRESENTATIONAL REASONS...
@@ -256,6 +231,7 @@ int plotVBFDMresults_ConstantMass(TString variable="", TString PS="", TString Ma
   frame->GetXaxis()->SetLabelFont( 43 );
   frame->GetXaxis()->SetLabelSize( font_size );
   frame->GetXaxis()->SetTitleSize( font_size );
+  frame->GetXaxis()->SetLabelColor( 0 );
 
 
   // HERE YOU CAN SET ALL THE COLOURS AND STYLES AND MARKERS FOR YOUR HISTOGRAMS (VARIABLES DEFINED IN THE HEADER FILE)
@@ -356,7 +332,7 @@ int plotVBFDMresults_ConstantMass(TString variable="", TString PS="", TString Ma
     }
     if (variable.Contains("Etmiss")) {
       max = 1e0;
-      min = 1e-2;
+      min = 1e-4;
     }
   }
 
@@ -410,7 +386,7 @@ int plotVBFDMresults_ConstantMass(TString variable="", TString PS="", TString Ma
   frame->Draw("P");
 
   //if (!variable.Contains("PT") && !variable.Contains("Mjj") && !variable.Contains("NumJets")) {
-    gPad->SetLogy(1);
+  gPad->SetLogy(1);
     //}
   
   //  if (!variable.Contains("") && !variable.Contains("JC")) {
@@ -425,18 +401,16 @@ int plotVBFDMresults_ConstantMass(TString variable="", TString PS="", TString Ma
 
   // ACTUAL DRAWING OF THE HISTOGRAMS
   
-  if (Norm == "Absolute"){
-    D5c->Scale(pow(((0.1)/(3.3)),4));
-    D5d->Scale(pow(((0.1)/(6.6)),4));
-    D6a->Scale(pow(((1)/(2.3)),5));
-    D6b->Scale(pow(((1)/(3.3)),5));
-  }
+  D5c->Scale(pow(((0.1)/(3.3)),4));
+  D5d->Scale(pow(((0.1)/(6.6)),4));
+  D6a->Scale(pow(((1)/(2.3)),5));
+  D6b->Scale(pow(((1)/(3.3)),5));
   
-
   EWK_and_fifthQCD->Draw("HIST same");
   //    Inclusive->Draw("HIST same");
   QCD->Draw("HIST same");
   EWK->Draw("HIST same");
+  cRatio->Draw("L same");
   D5a->Draw("PH same");
   D5b->Draw("PH same");
   D5c->Draw("PH same");
@@ -456,9 +430,34 @@ int plotVBFDMresults_ConstantMass(TString variable="", TString PS="", TString Ma
     double_data_err->Draw("Psame");
   }
   */
-  TLatex txt_PS;txt_PS.SetNDC();txt_PS.SetTextAlign(11);txt_PS.SetTextSize(0.03);txt_PS.DrawLatex(0.22,0.20,"pp->2DM+2jets: ""DM"+Mass+"GeV "+PS+" phase space");
+  //  TLatex txt_PS;txt_PS.SetNDC();txt_PS.SetTextAlign(11);txt_PS.SetTextSize(0.03);txt_PS.DrawLatex(0.22,0.20,"pp->2DM+2jets: ""DM"+Mass+"GeV "+PS+" phase space");
 
   // BUILDING THE LEGEND...
+
+  //Adding all contributants together for ratio plot                                                                                                                              
+  TH1F EWK_and_fifthQCD_and_D5a_NotP = (*EWK_and_fifthQCD)+(*D5a);
+  TH1F EWK_and_fifthQCD_and_D5b_NotP = (*EWK_and_fifthQCD)+(*D5b);
+  TH1F EWK_and_fifthQCD_and_D5c_NotP = (*EWK_and_fifthQCD)+(*D5c);
+  TH1F EWK_and_fifthQCD_and_D5d_NotP = (*EWK_and_fifthQCD)+(*D5d);
+  TH1F EWK_and_fifthQCD_and_D6a_NotP = (*EWK_and_fifthQCD)+(*D6a);
+  TH1F EWK_and_fifthQCD_and_D6b_NotP = (*EWK_and_fifthQCD)+(*D6b);
+  TH1F EWK_and_fifthQCD_and_D7a_NotP = (*EWK_and_fifthQCD)+(*D7a);
+  TH1F EWK_and_fifthQCD_and_D7b_NotP = (*EWK_and_fifthQCD)+(*D7b);
+  TH1F EWK_and_fifthQCD_and_D7c_NotP = (*EWK_and_fifthQCD)+(*D7c);
+  TH1F EWK_and_fifthQCD_and_D7d_NotP = (*EWK_and_fifthQCD)+(*D7d);
+  TH1F EWK_and_fifthQCD_and_Higgs_NotP = (*EWK_and_fifthQCD)+(*Higgs);
+
+  TH1F* EWK_and_fifthQCD_and_D5a = &EWK_and_fifthQCD_and_D5a_NotP;
+  TH1F* EWK_and_fifthQCD_and_D5b = &EWK_and_fifthQCD_and_D5b_NotP;
+  TH1F* EWK_and_fifthQCD_and_D5c = &EWK_and_fifthQCD_and_D5c_NotP;
+  TH1F* EWK_and_fifthQCD_and_D5d = &EWK_and_fifthQCD_and_D5d_NotP;
+  TH1F* EWK_and_fifthQCD_and_D6a = &EWK_and_fifthQCD_and_D6a_NotP;
+  TH1F* EWK_and_fifthQCD_and_D6b = &EWK_and_fifthQCD_and_D6b_NotP;
+  TH1F* EWK_and_fifthQCD_and_D7a = &EWK_and_fifthQCD_and_D7a_NotP;
+  TH1F* EWK_and_fifthQCD_and_D7b = &EWK_and_fifthQCD_and_D7b_NotP;
+  TH1F* EWK_and_fifthQCD_and_D7c = &EWK_and_fifthQCD_and_D7c_NotP;
+  TH1F* EWK_and_fifthQCD_and_D7d = &EWK_and_fifthQCD_and_D7d_NotP;
+  TH1F* EWK_and_fifthQCD_and_Higgs = &EWK_and_fifthQCD_and_Higgs_NotP;
 
   Double_t yval1 = 0.96;
   Double_t xval = 0.2;
@@ -472,7 +471,7 @@ int plotVBFDMresults_ConstantMass(TString variable="", TString PS="", TString Ma
   Double_t finalVal = yval1-0.1;
    
   
-  TLegend *leg_main = new TLegend(xval,finalVal,xval+0.8,yval1);
+  TLegend *leg_main = new TLegend(xval,finalVal,xval+0.75,yval1);
   leg_main->SetNColumns(3);
   leg_main->SetFillColor(0);
   leg_main->SetTextSize(0.02);
@@ -492,6 +491,7 @@ int plotVBFDMresults_ConstantMass(TString variable="", TString PS="", TString Ma
   leg_main->AddEntry(QCD,"QCD Z(#nu#nu)jj","f");
   leg_main->AddEntry(EWK,"EWK Z(#nu#nu)jj","f");
   leg_main->AddEntry(EWK_and_fifthQCD,"QCD+EWK Z(#nu#nu)jj","f");
+  leg_main->AddEntry(cRatio, "z(#nu#nu)/z(#mu#mu)");
   leg_main->Draw("same");
   
 
@@ -504,7 +504,7 @@ int plotVBFDMresults_ConstantMass(TString variable="", TString PS="", TString Ma
 
     canv->cd();
 
-    TPad *ratioPad = new TPad("ratioPad","", 0.01, 0.02, 0.99, 0.2);
+    TPad *ratioPad = new TPad("ratioPad","", 0.01, 0.02, 0.99, 0.285);
     ratioPad->SetGridy();
     ratioPad->Draw();
     ratioPad->cd();
@@ -524,6 +524,7 @@ int plotVBFDMresults_ConstantMass(TString variable="", TString PS="", TString Ma
     TH1F* D7b_ratio = (TH1F*)EWK_and_fifthQCD_and_D7b->Clone("D7b_ratio");
     TH1F* D7c_ratio = (TH1F*)EWK_and_fifthQCD_and_D7c->Clone("D7c_ratio");
     TH1F* D7d_ratio = (TH1F*)EWK_and_fifthQCD_and_D7d->Clone("D7d_ratio");
+    TH1F* Higgs_ratio = (TH1F*)EWK_and_fifthQCD_and_Higgs->Clone("Higgs_ratio");
 
     D5a_ratio->GetYaxis()->SetTitle("(Z->#nu#nu + DM)/(Z->#nu#nu)");
     D5a_ratio->GetYaxis()->SetTitleSize(30);
@@ -532,30 +533,18 @@ int plotVBFDMresults_ConstantMass(TString variable="", TString PS="", TString Ma
     D5a_ratio->GetXaxis()->SetTitleSize(40);
     D5a_ratio->GetXaxis()->SetTitleFont(43);
     D5a_ratio->GetXaxis()->SetTitleOffset(4.);
-    /*
-    double ratioMax, ratioMin;
-    if ( Norm=="Normalised" ){
-      ratioMax = 10;
-      ratioMin = -1;
-    }
-    else {
-      ratioMax = 100;
-      ratioMin = -1;
-    }
-    D5a->SetMaximum(ratioMax);
-    D5a->SetMinimum(ratioMin);
-    */
     D5a_ratio->Sumw2();
-    D5a_ratio->Divide(EWK);
-    D5b_ratio->Divide(EWK);
-    D5c_ratio->Divide(EWK);
-    D5d_ratio->Divide(EWK);
-    D6a_ratio->Divide(EWK);
-    D6b_ratio->Divide(EWK);
-    D7a_ratio->Divide(EWK);
-    D7b_ratio->Divide(EWK);
-    D7c_ratio->Divide(EWK);
-    D7d_ratio->Divide(EWK);
+    D5a_ratio->Divide(EWK_and_fifthQCD);
+    D5b_ratio->Divide(EWK_and_fifthQCD);
+    D5c_ratio->Divide(EWK_and_fifthQCD);
+    D5d_ratio->Divide(EWK_and_fifthQCD);
+    D6a_ratio->Divide(EWK_and_fifthQCD);
+    D6b_ratio->Divide(EWK_and_fifthQCD);
+    D7a_ratio->Divide(EWK_and_fifthQCD);
+    D7b_ratio->Divide(EWK_and_fifthQCD);
+    D7c_ratio->Divide(EWK_and_fifthQCD);
+    D7d_ratio->Divide(EWK_and_fifthQCD);
+    Higgs_ratio->Divide(EWK_and_fifthQCD);
 
     D5a_ratio->GetYaxis()->SetNdivisions(10);
     D5a_ratio->SetTickLength(0.08);
@@ -569,6 +558,7 @@ int plotVBFDMresults_ConstantMass(TString variable="", TString PS="", TString Ma
     D7b_ratio->SetMarkerStyle(D7b_marker_style);
     D7c_ratio->SetMarkerStyle(D7c_marker_style);
     D7d_ratio->SetMarkerStyle(D7d_marker_style);
+    Higgs_ratio->SetMarkerStyle(Higgs_marker_style);
 
     D5a_ratio->SetMarkerColor(D5a_line_color);
     D5b_ratio->SetMarkerColor(D5b_line_color);
@@ -580,6 +570,7 @@ int plotVBFDMresults_ConstantMass(TString variable="", TString PS="", TString Ma
     D7b_ratio->SetMarkerColor(D7b_line_color);
     D7c_ratio->SetMarkerColor(D7c_line_color);
     D7d_ratio->SetMarkerColor(D7d_line_color);    
+    Higgs_ratio->SetMarkerColor(Higgs_line_color);
 
     D5a_ratio->SetLineColor(D5a_line_color);
     D5b_ratio->SetLineColor(D5b_line_color);
@@ -591,6 +582,7 @@ int plotVBFDMresults_ConstantMass(TString variable="", TString PS="", TString Ma
     D7b_ratio->SetLineColor(D7b_line_color);
     D7c_ratio->SetLineColor(D7c_line_color);
     D7d_ratio->SetLineColor(D7d_line_color);
+    Higgs_ratio->SetLineColor(Higgs_line_color);
 
     D5a_ratio->Draw("ep same");
     D5b_ratio->Draw("ep same");
@@ -602,6 +594,7 @@ int plotVBFDMresults_ConstantMass(TString variable="", TString PS="", TString Ma
     D7b_ratio->Draw("ep same");
     D7c_ratio->Draw("ep same");
     D7d_ratio->Draw("ep same");
+    Higgs_ratio->Draw("ep same");
 
     //}
 
@@ -614,6 +607,7 @@ int plotVBFDMresults_ConstantMass(TString variable="", TString PS="", TString Ma
   QCD->Write("QCD");
   EWK->Write("EWK");
   EWK_and_fifthQCD->Write("EWK_and_fifthQCD");
+  cRatio->Write("cRatio");
   D5a->Write("D5a");
   D5b->Write("D5b");
   D5c->Write("D5c");

@@ -6,6 +6,7 @@
 #include <boost/assign/list_of.hpp>
 #include "Rivet/Analysis.hh"
 #include "Rivet/Analyses/MC_JetAnalysis.hh"
+#include "Rivet/Projections/ZFinder.hh"
 #include "Rivet/Projections/FastJets.hh"
 #include "Rivet/Projections/MissingMomentum.hh"
 #include "Rivet/Projections/FinalState.hh"
@@ -23,6 +24,10 @@ double Count_Monojet = 0;
 double Count_Monojet_HighPt = 0;
 double Count_VBFDM_OR_Monojet = 0; 
 double Count_VBFDM_OR_Monojet_HighPt = 0;
+bool greaterthan150 = false;
+bool greaterthan250 = false;
+double muonEnergy = 5.;
+int muonSize = 6;
 
 namespace Rivet {
 
@@ -37,140 +42,41 @@ namespace Rivet {
     {   }
 
    public:
+
+    std::vector<double> bins_Mjj;
+    std::vector<double> bins_DeltaEta;
    
-    std::vector<double> bins_Mjj_PS_VBFZ_Baseline;
-    std::vector<double> bins_Mjj_PS_VBFZ_HighMass;
-    std::vector<double> bins_Mjj_PS_VBFZ_Search;
-    std::vector<double> bins_Mjj_PS_VBFDM;
-    std::vector<double> bins_Mjj_PS_Monojet;
-    std::vector<double> bins_Mjj_PS_VBFDM_OR_Monojet;
-    std::vector<double> bins_Jet1PT_PS_VBFZ_Baseline;
-    std::vector<double> bins_Jet1PT_PS_VBFZ_HighMass;
-    std::vector<double> bins_Jet1PT_PS_VBFZ_Search;
-    std::vector<double> bins_Jet1PT_PS_VBFDM;
-    std::vector<double> bins_Jet1PT_PS_Monojet;
-    std::vector<double> bins_Jet1PT_PS_VBFDM_OR_Monojet;
-    std::vector<double> bins_Jet2PT_PS_VBFZ_Baseline;
-    std::vector<double> bins_Jet2PT_PS_VBFZ_HighMass;
-    std::vector<double> bins_Jet2PT_PS_VBFZ_Search;
-    std::vector<double> bins_Jet2PT_PS_VBFDM;
-    std::vector<double> bins_Jet2PT_PS_Monojet;
-    std::vector<double> bins_Jet2PT_PS_VBFDM_OR_Monojet;
-    std::vector<double> bins_NumJets_PS_VBFZ_Baseline;
-    std::vector<double> bins_NumJets_PS_VBFZ_HighMass;
-    std::vector<double> bins_NumJets_PS_VBFZ_Search;
-    std::vector<double> bins_NumJets_PS_VBFDM;
-    std::vector<double> bins_NumJets_PS_Monojet;
-    std::vector<double> bins_NumJets_PS_VBFDM_OR_Monojet;
-    std::vector<double> bins_Jet1Eta_PS_VBFZ_Baseline;
-    std::vector<double> bins_Jet1Eta_PS_VBFZ_HighMass;
-    std::vector<double> bins_Jet1Eta_PS_VBFZ_Search;
-    std::vector<double> bins_Jet1Eta_PS_VBFDM;
-    std::vector<double> bins_Jet1Eta_PS_Monojet;
-    std::vector<double> bins_Jet1Eta_PS_VBFDM_OR_Monojet;
-    std::vector<double> bins_Jet2Eta_PS_VBFZ_Baseline;
-    std::vector<double> bins_Jet2Eta_PS_VBFZ_HighMass;
-    std::vector<double> bins_Jet2Eta_PS_VBFZ_Search;
-    std::vector<double> bins_Jet2Eta_PS_VBFDM;
-    std::vector<double> bins_Jet2Eta_PS_Monojet;
-    std::vector<double> bins_Jet2Eta_PS_VBFDM_OR_Monojet;
-    std::vector<double> bins_DeltaEta_PS_VBFZ_Baseline;
-    std::vector<double> bins_DeltaEta_PS_VBFZ_HighMass;
-    std::vector<double> bins_DeltaEta_PS_VBFZ_Search;
-    std::vector<double> bins_DeltaEta_PS_VBFDM;
-    std::vector<double> bins_DeltaEta_PS_Monojet;
-    std::vector<double> bins_DeltaEta_PS_VBFDM_OR_Monojet;
-    std::vector<double> bins_DeltaPhi_PS_VBFZ_Baseline;
-    std::vector<double> bins_DeltaPhi_PS_VBFZ_HighMass;
-    std::vector<double> bins_DeltaPhi_PS_VBFZ_Search;
-    std::vector<double> bins_DeltaPhi_PS_VBFDM;
-    std::vector<double> bins_DeltaPhi_PS_Monojet;
-    std::vector<double> bins_DeltaPhi_PS_VBFDM_OR_Monojet;
-
-
     /// Initialize                                                                                                               
       void init() {
 	//	FinalState(double mineta, double maxeta, double minpt=0.0*GeV);
 	const FinalState fs;
+
+        ZFinder zfinder_mu(fs, Cuts::abseta < 4.5 && Cuts::pT > 0*GeV, PID::MUON, 0*GeV, 116*GeV, 0.1, ZFinder::CLUSTERNODECAY);
+        addProjection(zfinder_mu, "ZFinder_mu");
 			
-	FastJets jets(fs, FastJets::ANTIKT, 0.4);
+	FastJets jets(zfinder_mu.remainingFinalState(), FastJets::ANTIKT, 0.4);
 	jets.useInvisibles();
 	addProjection(jets, "Jets");
 
 	MissingMomentum met(FinalState(-5.0,5.0,0*GeV));
         addProjection(met, "MET");
 
-	//Assigning bin widths
-	//Mjj
-	bins_Mjj_PS_VBFZ_Baseline = boost::assign::list_of<double>(0)(500)(615)(695)(785)(880)(985)(1100)(1200)(1350)(1500)(2000)(2700)(4000);
-	bins_Mjj_PS_VBFZ_HighMass = boost::assign::list_of<double>(1000)(1100)(1200)(1350)(1500)(2000)(2700)(4000);
-	bins_Mjj_PS_VBFZ_Search = boost::assign::list_of<double>(250)(500)(615)(695)(785)(880)(985)(1100)(1200)(1350)(1500)(2000)(2700)(4000);
-	bins_Mjj_PS_VBFDM = boost::assign::list_of<double>(250)(500)(615)(695)(785)(880)(985)(1100)(1200)(1350)(1500)(2000)(2700)(4000);
-	bins_Mjj_PS_Monojet = boost::assign::list_of<double>(250)(500)(615)(695)(785)(880)(985)(1100)(1200)(1350)(1500)(2000)(2700)(4000);
-	bins_Mjj_PS_VBFDM_OR_Monojet = boost::assign::list_of<double>(250)(500)(615)(695)(785)(880)(985)(1100)(1200)(1350)(1500)(2000)(2700)(4000);
-	//PT of Jet 1
-        bins_Jet1PT_PS_VBFZ_Baseline = boost::assign::list_of<double>(55)(75)(95)(115)(140)(165)(190)(220)(250)(350)(480)(685);
-        bins_Jet1PT_PS_VBFZ_HighMass = boost::assign::list_of<double>(55)(75)(95)(115)(140)(165)(190)(220)(250)(350)(480)(685);
-        bins_Jet1PT_PS_VBFZ_Search = boost::assign::list_of<double>(55)(75)(95)(115)(140)(165)(190)(220)(250)(350)(480)(685);
-        bins_Jet1PT_PS_VBFDM = boost::assign::list_of<double>(55)(75)(95)(115)(140)(165)(190)(220)(250)(350)(480)(685);
-	bins_Jet1PT_PS_Monojet = boost::assign::list_of<double>(55)(75)(95)(115)(140)(165)(190)(220)(250)(350)(480)(685);
-        bins_Jet1PT_PS_VBFDM_OR_Monojet = boost::assign::list_of<double>(55)(75)(95)(115)(140)(165)(190)(220)(250)(350)(480)(685);
-	//PT of Jet 2
-        bins_Jet2PT_PS_VBFZ_Baseline = boost::assign::list_of<double>(45)(55)(75)(95)(115)(140)(165)(190)(220)(250)(350)(480)(685);
-        bins_Jet2PT_PS_VBFZ_HighMass = boost::assign::list_of<double>(45)(55)(75)(95)(115)(140)(165)(190)(220)(250)(350)(480)(685);
-        bins_Jet2PT_PS_VBFZ_Search = boost::assign::list_of<double>(45)(55)(75)(95)(115)(140)(165)(190)(220)(250)(350)(480)(685);
-        bins_Jet2PT_PS_VBFDM = boost::assign::list_of<double>(45)(55)(75)(95)(115)(140)(165)(190)(220)(250)(350)(480)(685);
-	bins_Jet2PT_PS_Monojet = boost::assign::list_of<double>(45)(55)(75)(95)(115)(140)(165)(190)(220)(250)(350)(480)(685);
-        bins_Jet2PT_PS_VBFDM_OR_Monojet = boost::assign::list_of<double>(45)(55)(75)(95)(115)(140)(165)(190)(220)(250)(350)(480)(685);
-	//Number of Jets
-	bins_NumJets_PS_VBFZ_Baseline = boost::assign::list_of<double>(0)(1)(2)(3)(4);
-	bins_NumJets_PS_VBFZ_HighMass = boost::assign::list_of<double>(0)(1)(2)(3)(4);
-	bins_NumJets_PS_VBFZ_Search = boost::assign::list_of<double>(0)(1)(2)(3)(4);
-	bins_NumJets_PS_VBFDM = boost::assign::list_of<double>(0)(1)(2)(3)(4);
-	bins_NumJets_PS_Monojet = boost::assign::list_of<double>(0)(1)(2)(3)(4);
-	bins_NumJets_PS_VBFDM_OR_Monojet = boost::assign::list_of<double>(0)(1)(2)(3)(4);
-	//Eta of Jet 1
-	bins_Jet1Eta_PS_VBFZ_Baseline = boost::assign::list_of<double>(-4)(-3)(-2)(-1)(0)(1)(2)(3)(4);
-	bins_Jet1Eta_PS_VBFZ_HighMass = boost::assign::list_of<double>(-4)(-3)(-2)(-1)(0)(1)(2)(3)(4);
-	bins_Jet1Eta_PS_VBFZ_Search = boost::assign::list_of<double>(-4)(-3)(-2)(-1)(0)(1)(2)(3)(4);
-	bins_Jet1Eta_PS_VBFDM = boost::assign::list_of<double>(-4)(-3)(-2)(-1)(0)(1)(2)(3)(4);
-	bins_Jet1Eta_PS_Monojet = boost::assign::list_of<double>(-4)(-3)(-2)(-1)(0)(1)(2)(3)(4);
-	bins_Jet1Eta_PS_VBFDM_OR_Monojet = boost::assign::list_of<double>(-4)(-3)(-2)(-1)(0)(1)(2)(3)(4);
-	//Eta of Jet 2
-	bins_Jet2Eta_PS_VBFZ_Baseline = boost::assign::list_of<double>(-4)(-3)(-2)(-1)(0)(1)(2)(3)(4);
-	bins_Jet2Eta_PS_VBFZ_HighMass = boost::assign::list_of<double>(-4)(-3)(-2)(-1)(0)(1)(2)(3)(4);
-	bins_Jet2Eta_PS_VBFZ_Search = boost::assign::list_of<double>(-4)(-3)(-2)(-1)(0)(1)(2)(3)(4);
-	bins_Jet2Eta_PS_VBFDM = boost::assign::list_of<double>(-4)(-3)(-2)(-1)(0)(1)(2)(3)(4);
-	bins_Jet2Eta_PS_Monojet = boost::assign::list_of<double>(-4)(-3)(-2)(-1)(0)(1)(2)(3)(4);
-	bins_Jet2Eta_PS_VBFDM_OR_Monojet = boost::assign::list_of<double>(-4)(-3)(-2)(-1)(0)(1)(2)(3)(4);
-	//Delta Eta
-	bins_DeltaEta_PS_VBFZ_Baseline = boost::assign::list_of<double>(-4)(-3)(-2)(-1)(0)(1)(2)(3)(4);
-	bins_DeltaEta_PS_VBFZ_HighMass = boost::assign::list_of<double>(-4)(-3)(-2)(-1)(0)(1)(2)(3)(4);
-	bins_DeltaEta_PS_VBFZ_Search = boost::assign::list_of<double>(-4)(-3)(-2)(-1)(0)(1)(2)(3)(4);
-	bins_DeltaEta_PS_VBFDM = boost::assign::list_of<double>(-4)(-3)(-2)(-1)(0)(1)(2)(3)(4);
-	bins_DeltaEta_PS_Monojet = boost::assign::list_of<double>(-4)(-3)(-2)(-1)(0)(1)(2)(3)(4);
-	bins_DeltaEta_PS_VBFDM_OR_Monojet = boost::assign::list_of<double>(-4)(-3)(-2)(-1)(0)(1)(2)(3)(4);
-	//Delta Phi
-	bins_DeltaPhi_PS_VBFZ_Baseline = boost::assign::list_of<double>(0)(0.6)(0.75)(0.8)(0.85)(0.9)(0.95)(1);
-        bins_DeltaPhi_PS_VBFZ_HighMass = boost::assign::list_of<double>(0)(0.6)(0.75)(0.8)(0.85)(0.9)(0.95)(1);
-        bins_DeltaPhi_PS_VBFZ_Search = boost::assign::list_of<double>(0)(0.6)(0.75)(0.8)(0.85)(0.9)(0.95)(1);
-        bins_DeltaPhi_PS_VBFDM = boost::assign::list_of<double>(0)(0.6)(0.75)(0.8)(0.85)(0.9)(0.95)(1);
-	bins_DeltaPhi_PS_Monojet = boost::assign::list_of<double>(0)(0.6)(0.75)(0.8)(0.85)(0.9)(0.95)(1);
-        bins_DeltaPhi_PS_VBFDM_OR_Monojet = boost::assign::list_of<double>(0)(0.6)(0.75)(0.8)(0.85)(0.9)(0.95)(1);
+	bins_Mjj = boost::assign::list_of<double>(250.)(300.)(400.)(500.)(600.)(800.)(1000.)(1500.)(2000.)(4000.);
+	bins_DeltaEta = boost::assign::list_of<double>(0.)(1.)(2.)(3.)(4.)(5.)(6.)(7.)(8.)(9.);
+
 
 	/// Histograms:             
-	//_h_ngapjets_1D_inclusive[i] = bookHisto1D("ngapjets_1D_inclusive"+tags[i], bins_ngapjets_1D_inclusive, "Njets in gap, inclusive region"+labels[i]);
 	
 	//Mjj	
- 	_hist_Mjj_PS_VBFZ_Baseline = bookHisto1D("Mjj_PS_VBFZ_Baseline", 50, 0, 5000, "Mjj_PS_VBFZ_Baseline", "Mjj, GeV", "Probability");
-	_hist_Mjj_PS_VBFZ_HighMass = bookHisto1D("Mjj_PS_VBFZ_HighMass", 50, 1000, 5000,"Mjj_PS_VBFZ_HighMass", "Mjj, GeV", "Probability");
-	_hist_Mjj_PS_VBFZ_Search = bookHisto1D("Mjj_PS_VBFZ_Search", 50, 250, 5000, "Mjj_PS_VBFZ_Search", "Mjj, GeV", "Probability");
-	_hist_Mjj_PS_VBFDM = bookHisto1D("Mjj_PS_VBFDM", 50, 250, 5000, "Mjj_PS_VBFDM", "Mjj, GeV", "Probability");
-        _hist_Mjj_PS_VBFDM_100 = bookHisto1D("Mjj_PS_VBFDM_100", 50, 250, 5000, "Mjj_PS_VBFDM_100", "Mjj, GeV", "Probability");	
-	_hist_Mjj_PS_Monojet = bookHisto1D("Mjj_PS_Monojet", 50, 250, 5000, "Mjj_PS_Monojet", "Mjj, GeV", "Probability");
-        _hist_Mjj_PS_Monojet_HighPt = bookHisto1D("Mjj_PS_Monojet_HighPt", 50, 250, 5000, "Mjj_PS_Monojet_HighPt", "Mjj, GeV", "Probability");
-	_hist_Mjj_PS_VBFDM_OR_Monojet = bookHisto1D("Mjj_PS_VBFDM_OR_Monojet", 50, 250, 5000, "Mjj_PS_VBFDM_OR_Monojet", "Mjj, GeV", "Probability");
-	_hist_Mjj_PS_VBFDM_OR_Monojet_HighPt = bookHisto1D("Mjj_PS_VBFDM_OR_Monojet_HighPt", 50, 250, 5000, "Mjj_PS_VBFDM_OR_Monojet_HighPt", "Mjj, GeV", "Probability");
+ 	_hist_Mjj_PS_VBFZ_Baseline = bookHisto1D("Mjj_PS_VBFZ_Baseline", bins_Mjj, "Mjj_PS_VBFZ_Baseline", "Mjj, GeV", "Probability");
+	_hist_Mjj_PS_VBFZ_HighMass = bookHisto1D("Mjj_PS_VBFZ_HighMass", bins_Mjj,"Mjj_PS_VBFZ_HighMass", "Mjj, GeV", "Probability");
+	_hist_Mjj_PS_VBFZ_Search = bookHisto1D("Mjj_PS_VBFZ_Search", bins_Mjj, "Mjj_PS_VBFZ_Search", "Mjj, GeV", "Probability");
+	_hist_Mjj_PS_VBFDM = bookHisto1D("Mjj_PS_VBFDM", bins_Mjj, "Mjj_PS_VBFDM", "Mjj, GeV", "Probability");
+        _hist_Mjj_PS_VBFDM_100 = bookHisto1D("Mjj_PS_VBFDM_100", bins_Mjj, "Mjj_PS_VBFDM_100", "Mjj, GeV", "Probability");	
+	_hist_Mjj_PS_Monojet = bookHisto1D("Mjj_PS_Monojet", bins_Mjj, "Mjj_PS_Monojet", "Mjj, GeV", "Probability");
+        _hist_Mjj_PS_Monojet_HighPt = bookHisto1D("Mjj_PS_Monojet_HighPt", bins_Mjj, "Mjj_PS_Monojet_HighPt", "Mjj, GeV", "Probability");
+	_hist_Mjj_PS_VBFDM_OR_Monojet = bookHisto1D("Mjj_PS_VBFDM_OR_Monojet", bins_Mjj, "Mjj_PS_VBFDM_OR_Monojet", "Mjj, GeV", "Probability");
+	_hist_Mjj_PS_VBFDM_OR_Monojet_HighPt = bookHisto1D("Mjj_PS_VBFDM_OR_Monojet_HighPt", bins_Mjj, "Mjj_PS_VBFDM_OR_Monojet_HighPt", "Mjj, GeV", "Probability");
 	//PT of Jet 1
         _hist_Jet1PT_PS_VBFZ_Baseline = bookHisto1D("Jet1PT_PS_VBFZ_Baseline", 50, 55, 600, "Jet1PT_PS_VBFZ_Baseline", "Jet1PT, GeV", "Probability");
 	_hist_Jet1PT_PS_VBFZ_HighMass = bookHisto1D("Jet1PT_PS_VBFZ_HighMass", 50, 55, 600, "Jet1PT_PS_VBFZ_HighMass", "Jet1PT, GeV", "Probability");
@@ -222,15 +128,15 @@ namespace Rivet {
         _hist_Jet2Eta_PS_VBFDM_OR_Monojet = bookHisto1D("Jet2Eta_PS_VBFDM_OR_Monojet", 50, -6, 6, "Jet2Eta_PS_VBFDM_OR_Monojet", "Jet2Eta ", "Probability");
 	_hist_Jet2Eta_PS_VBFDM_OR_Monojet_HighPt = bookHisto1D("Jet2Eta_PS_VBFDM_OR_Monojet_HighPt", 50, -6, 6, "Jet2Eta_PS_VBFDM_OR_Monojet_HighPt", "Jet2Eta ", "Probability");
 	//Delta Eta
-        _hist_DeltaEta_PS_VBFZ_Baseline = bookHisto1D("DeltaEta_PS_VBFZ_Baseline", 50, 0, 9, "DeltaEta_PS_VBFZ_Baseline", "DeltaEta", "Probability");
-	_hist_DeltaEta_PS_VBFZ_HighMass = bookHisto1D("DeltaEta_PS_VBFZ_HighMass", 50, 0, 9, "DeltaEta_PS_VBFZ_HighMass", "DeltaEta ", "Probability");
-        _hist_DeltaEta_PS_VBFZ_Search = bookHisto1D("DeltaEta_PS_VBFZ_Search", 50, 0, 9, "DeltaEta_PS_VBFZ_Search", "DeltaEta ", "Probability");
-        _hist_DeltaEta_PS_VBFDM = bookHisto1D("DeltaEta_PS_VBFDM", 50, 0, 9, "DeltaEta_PS_VBFDM", "DeltaEta ", "Probability");
-        _hist_DeltaEta_PS_VBFDM_100 = bookHisto1D("DeltaEta_PS_VBFDM_100", 50, 0, 9, "DeltaEta_PS_VBFDM_100", "DeltaEta ", "Probability");
-	_hist_DeltaEta_PS_Monojet = bookHisto1D("DeltaEta_PS_Monojet", 50, 0, 9, "DeltaEta_PS_Monojet", "DeltaEta ", "Probability");
-	_hist_DeltaEta_PS_Monojet_HighPt = bookHisto1D("DeltaEta_PS_Monojet_HighPt", 50, 0, 9, "DeltaEta_PS_Monojet_HighPt", "DeltaEta ", "Probability");
-        _hist_DeltaEta_PS_VBFDM_OR_Monojet = bookHisto1D("DeltaEta_PS_VBFDM_OR_Monojet", 50, 0, 9, "DeltaEta_PS_VBFDM_OR_Monojet", "DeltaEta ", "Probability");
-	_hist_DeltaEta_PS_VBFDM_OR_Monojet_HighPt = bookHisto1D("DeltaEta_PS_VBFDM_OR_Monojet_HighPt", 50, 0, 9, "DeltaEta_PS_VBFDM_OR_Monojet_HighPt", "DeltaEta ", "Probability");
+        _hist_DeltaEta_PS_VBFZ_Baseline = bookHisto1D("DeltaEta_PS_VBFZ_Baseline", bins_DeltaEta, "DeltaEta_PS_VBFZ_Baseline", "DeltaEta", "Probability");
+	_hist_DeltaEta_PS_VBFZ_HighMass = bookHisto1D("DeltaEta_PS_VBFZ_HighMass", bins_DeltaEta, "DeltaEta_PS_VBFZ_HighMass", "DeltaEta ", "Probability");
+        _hist_DeltaEta_PS_VBFZ_Search = bookHisto1D("DeltaEta_PS_VBFZ_Search", bins_DeltaEta, "DeltaEta_PS_VBFZ_Search", "DeltaEta ", "Probability");
+        _hist_DeltaEta_PS_VBFDM = bookHisto1D("DeltaEta_PS_VBFDM", bins_DeltaEta, "DeltaEta_PS_VBFDM", "DeltaEta ", "Probability");
+        _hist_DeltaEta_PS_VBFDM_100 = bookHisto1D("DeltaEta_PS_VBFDM_100", bins_DeltaEta, "DeltaEta_PS_VBFDM_100", "DeltaEta ", "Probability");
+	_hist_DeltaEta_PS_Monojet = bookHisto1D("DeltaEta_PS_Monojet", bins_DeltaEta, "DeltaEta_PS_Monojet", "DeltaEta ", "Probability");
+	_hist_DeltaEta_PS_Monojet_HighPt = bookHisto1D("DeltaEta_PS_Monojet_HighPt", bins_DeltaEta, "DeltaEta_PS_Monojet_HighPt", "DeltaEta ", "Probability");
+        _hist_DeltaEta_PS_VBFDM_OR_Monojet = bookHisto1D("DeltaEta_PS_VBFDM_OR_Monojet", bins_DeltaEta, "DeltaEta_PS_VBFDM_OR_Monojet", "DeltaEta ", "Probability");
+	_hist_DeltaEta_PS_VBFDM_OR_Monojet_HighPt = bookHisto1D("DeltaEta_PS_VBFDM_OR_Monojet_HighPt", bins_DeltaEta, "DeltaEta_PS_VBFDM_OR_Monojet_HighPt", "DeltaEta ", "Probability");
 	//Delta Phi
         _hist_DeltaPhi_PS_VBFZ_Baseline = bookHisto1D("DeltaPhi_PS_VBFZ_Baseline", 50, 0, 1, "Mjj_PS_VBFZ_Baseline", "DeltaPhi ", "Probability");
         _hist_DeltaPhi_PS_VBFZ_HighMass = bookHisto1D("DeltaPhi_PS_VBFZ_HighMass", 50, 0, 1, "DeltaPhi_PS_VBFZ_HighMass", "DeltaPhi ", "Probability");
@@ -254,7 +160,10 @@ namespace Rivet {
 	//Cross Section
         _hist_Count_for_All_PS_CrossSection = bookHisto1D("Count_for_All_PS_CrossSection", 9, 0, 9, "Count_for_All_PS_CrossSection", "Phase Space", "CrossSectionxAcceptedCounts/TotalCounts");
 
-      }
+	//2D Histograms
+	//	_hist_MjjvsDeltaEta_PS_VBFDM_OR_Monojet = bookHisto2D("MjjvsDeltaEta_PS_VBFDM_OR_Monojet", 50, 0., 9., 50, 250., 5000., "MjjvsDeltaEta_PS_VBFDM_OR_Monojet", "DeltaEta", "Mjj (GeV)", "Probability");
+
+	      }
 
     /// Perform the per-event analysis
     void analyze(const Event& event) {
@@ -263,6 +172,7 @@ namespace Rivet {
       ++Count_Total;
       const FastJets& jetpro = applyProjection<FastJets>(event, "Jets");       
       const MissingMomentum& met = applyProjection<MissingMomentum>(event, "MET");
+      const ZFinder& zfinder_mu = applyProjection<ZFinder>(event, "ZFinder_mu");
 
       vector<FourMomentum> jets;
       foreach (const Jet& jet, jetpro.jetsByPt(45.0*GeV)) {
@@ -271,9 +181,20 @@ namespace Rivet {
 	jets.push_back(jet.momentum());
       }
 
+      vector<FourMomentum> muons;
+      if (zfinder_mu.bosons().size() == 1 ){
+        for ( int i = 0 ; i < 2 ; ++i ){
+          const FourMomentum& zmom = zfinder_mu.constituents()[i].momentum();
+          muons.push_back(zmom);
+        }
+      }
+
+      muonSize = zfinder_mu.bosons().size();
+
+      if (muons.size() == 1 ){ vetoEvent; }
       if (jets.size() < 1) { vetoEvent; }
 
-      double Mjj, Jet1PT, Jet2PT, Jet1Eta, Jet2Eta, DeltaEta, dphi, DeltaPhi, Countforhist, JC, LC;
+      double Mjj, Jet1PT, Jet2PT, Jet1Eta, Jet2Eta, DeltaEta, dphi, DeltaPhi, Countforhist, JC, LC, MET;
       
       if (jets.size()>=3){
 	JC = ( jets[2].rapidity() - ( (jets[0].rapidity() + jets[1].rapidity()) /2 ) ) / (jets[0].rapidity() - jets[1].rapidity());
@@ -287,7 +208,7 @@ namespace Rivet {
 	DeltaEta = Jet1Eta-Jet2Eta;
 	dphi = fabs(jets[0].phi() - jets[1].phi());
 	DeltaPhi = ( dphi<=pi ) ? dphi/pi : (2.*pi-dphi)/pi;
-	LC = ( met.rapidity() - ( (jets[0].rapidity() + jets[1].rapidity()) /2 ) ) / (jets[0].rapidity() - jets[1].rapidity());
+	//	LC = ( met.rapidity() - ( (jets[0].rapidity() + jets[1].rapidity()) /2 ) ) / (jets[0].rapidity() - jets[1].rapidity());
       }
       else{
 	Mjj = 0*GeV;
@@ -305,15 +226,25 @@ namespace Rivet {
       if(Jet2PT!=0*GeV && Jet2PT<=45*GeV) { vetoEvent; }
 
       size_t NumJets = jets.size();
-      double MET = met.vectorEt().mod();
+
+      if ( muons.size() == 2 ){
+        muonEnergy = muons[0].pT()+muons[1].pT();
+        if (muonEnergy>150*GeV){ greaterthan150 = true; }
+        if (muonEnergy>250*GeV){ greaterthan250 = true; }
+      }
+      else{
+        MET = met.vectorEt().mod();
+        if (MET>150*GeV){ greaterthan150 = true; }
+        if (MET>250*GeV){ greaterthan250 = true; }
+      }
 
       bool PS_VBFZ_Baseline = ( Jet1PT>55*GeV && Jet2PT>45*GeV && NumJets>=2 && abseta<4.4  );
       bool PS_VBFZ_HighMass = ( Mjj>1000*GeV && Jet1PT>55*GeV && Jet2PT>45*GeV && NumJets>=2 && abseta<4.4 );
       bool PS_VBFZ_Search = ( Mjj>250*GeV && Jet1PT>55*GeV && Jet2PT>45*GeV && NumJets>=2 && abseta<4.4 );
-      bool PS_VBFDM = ( Mjj>250*GeV && Jet1PT>55*GeV && Jet2PT>45*GeV && NumJets>=2 && abseta<4.4 && MET>150*GeV );
-      bool PS_VBFDM_100 = ( Mjj>250*GeV && Jet1PT>100*GeV && Jet2PT>45*GeV && NumJets>=2 && abseta<4.4 && MET>150*GeV );
-      bool PS_Monojet = ( Jet1PT>100*GeV && NumJets>=1 && abseta<4.4 && MET>150*GeV );
-      bool PS_Monojet_HighPt = ( Jet1PT>250*GeV && NumJets>=1 && MET>250*GeV );
+      bool PS_VBFDM = ( Mjj>250*GeV && Jet1PT>55*GeV && Jet2PT>45*GeV && NumJets>=2 && abseta<4.4 && greaterthan150 );
+      bool PS_VBFDM_100 = ( Mjj>250*GeV && Jet1PT>100*GeV && Jet2PT>45*GeV && NumJets>=2 && abseta<4.4 && greaterthan150 );
+      bool PS_Monojet = ( Jet1PT>100*GeV && NumJets>=1 && abseta<4.4 && greaterthan150 );
+      bool PS_Monojet_HighPt = ( Jet1PT>250*GeV && NumJets>=1 && greaterthan250 );
       bool PS_VBFDM_OR_Monojet = ( PS_VBFDM || PS_Monojet );
       bool PS_VBFDM_OR_Monojet_HighPt = ( PS_VBFDM || PS_Monojet_HighPt );
 
@@ -443,6 +374,7 @@ namespace Rivet {
 	  _hist_Jet2Eta_PS_VBFDM_OR_Monojet->fill( Jet2Eta, weight );
 	  _hist_DeltaEta_PS_VBFDM_OR_Monojet->fill( DeltaEta, weight );
 	  _hist_DeltaPhi_PS_VBFDM_OR_Monojet->fill( DeltaPhi, weight );
+	  //	  _hist_MjjvsDeltaEta_PS_VBFDM_OR_Monojet->fill( DeltaEta, Mjj, weight );
 	}
 	++Count_VBFDM_OR_Monojet;
       }
@@ -481,6 +413,9 @@ namespace Rivet {
       cout<<"\nCount with Monojet_HighPt cuts = "<<Count_Monojet_HighPt;
       cout<<"\nCount with VBFDM_OR_Monojet cuts = "<<Count_VBFDM_OR_Monojet<<endl;
       cout<<"\nCount with VBFDM_OR_Monojet_HighPt cuts = "<<Count_VBFDM_OR_Monojet_HighPt<<endl;
+      cout<<"muon pt = "<<muonEnergy<<endl;
+      cout<<"muon size = "<<muonSize<<endl;
+      //      double factor = crossSection()/sumOfWeights();
 
       //      double factor = crossSection()/sumOfWeights();
       double Count_factor = crossSection()/Count_Total;
@@ -567,6 +502,7 @@ namespace Rivet {
       scale(_hist_DeltaEta_PS_VBFDM_OR_Monojet, Count_factor);
       scale(_hist_DeltaPhi_PS_VBFDM_OR_Monojet, Count_factor);
       scale(_hist_met_PS_VBFDM_OR_Monojet, Count_factor);
+      //      scale(_hist_MjjvsDeltaEta_PS_VBFDM_OR_Monojet, 50*9);
 
       scale(_hist_Mjj_PS_VBFDM_OR_Monojet_HighPt, Count_factor);
       scale(_hist_Jet1PT_PS_VBFDM_OR_Monojet_HighPt, Count_factor);
@@ -749,6 +685,7 @@ namespace Rivet {
     Histo1DPtr _hist_DeltaEta_PS_VBFDM_OR_Monojet;
     Histo1DPtr _hist_DeltaPhi_PS_VBFDM_OR_Monojet;
     Histo1DPtr _hist_met_PS_VBFDM_OR_Monojet;
+    //    Histo2DPtr _hist_MjjvsDeltaEta_PS_VBFDM_OR_Monojet;
 
     Histo1DPtr _hist_Mjj_PS_VBFDM_OR_Monojet_HighPt;
     Histo1DPtr _hist_Jet1PT_PS_VBFDM_OR_Monojet_HighPt;

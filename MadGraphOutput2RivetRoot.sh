@@ -17,17 +17,17 @@ do
 	    yoda2root Rivet.yoda
        
 	fi
-    for Mass in 10 100 1000 
-    do
+	for Mass in 10 100 1000 
+	do
 #gunzip ~/Documents/MG5_aMC_v2_3_2_2/$Dimension/$Norm/ppchichijj__$MassGeV_n100000/Events/run_01/unweighted_events.lhe.gz
 #cp ~/Documents/MG5_aMC_v2_3_2_2/$Dimension/M$Mass/ppchichijj_$Dimension_$MassGeV_n100000/Events/run_01/unweighted_events.lhe ~/Documents/contrib/lhef2hepmc/
 #cd ~/Documents/contrib/lhef2hepmc/ 
 #./lhef2hepmc unweighted_events.lhe ppchichijj_$Dimension_$MassGeV_unweighted.hepmc
-cp ~/Documents/contrib/lhef2hepmc/ppchichijj_${Dimension}_${Mass}GeV_unweighted.hepmc ~/Documents/Rivet_Analyses/MC_VBFDM/$Dimension/Mass${Mass}/$Norm/
-cd ~/Documents/Rivet_Analyses/MC_VBFDM/$Dimension/Mass${Mass}/$Norm/
-rivet -a MC_VBFDM_${Norm} ppchichijj_${Dimension}_${Mass}GeV_unweighted.hepmc
-python removeBits.py Rivet.yoda
-yoda2root Rivet.yoda
+	cp ~/Documents/contrib/lhef2hepmc/ppchichijj_${Dimension}_${Mass}GeV_unweighted.hepmc ~/Documents/Rivet_Analyses/MC_VBFDM/$Dimension/Mass${Mass}/$Norm/
+	cd ~/Documents/Rivet_Analyses/MC_VBFDM/$Dimension/Mass${Mass}/$Norm/
+	rivet -a MC_VBFDM_${Norm} ppchichijj_${Dimension}_${Mass}GeV_unweighted.hepmc
+	python removeBits.py Rivet.yoda
+	yoda2root Rivet.yoda
 	done
     done
 done
@@ -36,7 +36,7 @@ for Dimension in EWK QCD
 do
     for Norm in Normalised Absolute
     do
-	#gunzip ~/Documents/MG5_aMC_v2_3_2_2/Backgrounds/$Dimension/ppchichijj__n100000/Events/run_01/unweighted_events.lhe.gz
+	#gunzip ~/Documents/MG5_aMC_v2_3_2_2/Backgrounds/$Dimension/ppchichijj_n100000/Events/run_01/unweighted_events.lhe.gz
 #cp ~/Documents/MG5_aMC_v2_3_2_2/$Dimension/M$Mass/ppchichijj_$Dimension_$MassGeV_n100000/Events/run_01/unweighted_events.lhe ~/Documents/contrib/lhef2hepmc/
 #cd ~/Documents/contrib/lhef2hepmc/
 #./lhef2hepmc unweighted_events.lhe ppchichijj_$Dimension_$MassGeV_unweighted.hepmc  
@@ -45,5 +45,21 @@ do
 	rivet -a MC_VBFDM_${Norm} ${Dimension}_Background_unweighted.hepmc
 	python removeBits.py Rivet.yoda
 	yoda2root Rivet.yoda
+    done
+done
+
+for Dimension in zmumu zvv
+do
+    for Norm in Normalised Absolute
+    do
+#        gunzip ~/Documents/MG5_aMC_v2_3_2_2/Backgrounds/Scaling/ppzjj_${Dimension}_n10000/Events/run_01/unweighted_events.lhe.gz
+	#cp ~/Documents/MG5_aMC_v2_3_2_2/Backgrounds/Scaling/ppzjj_${Dimension}_n10000/Events/run_01/unweighted_events.lhe ~/Documents/contrib/lhef2hepmc/
+	#cd ~/Documents/contrib/lhef2hepmc/  
+	#./lhef2hepmc unweighted_events.lhe ppzjj_${Dimension}_Background_unweighted.hepmc  
+        cp ~/Documents/contrib/lhef2hepmc/ppzjj_${Dimension}_Background_unweighted.hepmc ~/Documents/Rivet_Analyses/MC_VBFDM/Backgrounds/$Dimension/$Norm/
+        cd ~/Documents/Rivet_Analyses/MC_VBFDM/Backgrounds/$Dimension/$Norm/
+        rivet -a MC_VBFDM_${Norm} ppzjj_${Dimension}_Background_unweighted.hepmc
+        python removeBits.py Rivet.yoda
+        yoda2root Rivet.yoda
     done
 done

@@ -120,10 +120,20 @@ int plotVBFDMresults_ConstantDimension(TString variable="", TString PS="", TStri
   file_EWK->cd("MC_VBFDM_"+Norm+"");
   TH1F* EWK = (TH1F*)gDirectory->Get(""+variable+"_PS_"+PS+"");          
 
-  TFile* file_Inclusive = new TFile("~/Documents/Rivet_Analyses/MC_VBFDM/Backgrounds/Inclusive/"+Norm+"/Rivet.root", "READ");                                                        
-  file_Inclusive->cd("MC_VBFDM_"+Norm+"");
+  TFile* file_Inclusive = new TFile("~/Documents/Rivet_Analyses/MC_VBFDM/Backgrounds/Inclusive/"+Norm+"/Rivet.root", "READ");                                                         file_Inclusive->cd("MC_VBFDM_"+Norm+"");
   TH1F* Inclusive = (TH1F*)gDirectory->Get(""+variable+"_PS_"+PS+"");          
   
+  TFile* file_zvv = new TFile("~/Documents/Rivet_Analyses/MC_VBFDM/Backgrounds/zvv/"+Norm+"/Rivet.root", "READ");
+  file_zvv->cd("MC_VBFDM_"+Norm+"");
+  TH1F* zvv = (TH1F*)gDirectory->Get(""+variable+"_PS_"+PS+"");
+
+  TFile* file_zmumu = new TFile("~/Documents/Rivet_Analyses/MC_VBFDM/Backgrounds/zmumu/"+Norm+"/Rivet.root", "READ");
+  file_zmumu->cd("MC_VBFDM_"+Norm+"");
+  TH1F* zmumu = (TH1F*)gDirectory->Get(""+variable+"_PS_"+PS+"");
+
+  TH1F* cRatio = (TH1F*)zvv->Clone("cRatio");
+  cRatio->Sumw2();
+  cRatio->Divide(zmumu);
 
     TH1F* QCD_Copy = (TH1F*)QCD->Clone("QCD_Copy");
     TH1F* EWK_Copy = (TH1F*)EWK->Clone("EWK_Copy");
@@ -131,15 +141,6 @@ int plotVBFDMresults_ConstantDimension(TString variable="", TString PS="", TStri
     //Creating histogram of Ewk + 0.2QCD to replicate how 3 jet events affect the background
     TH1F EWK_and_fifthQCD_NotP = (*QCD_Copy)+(*EWK_Copy);
     TH1F* EWK_and_fifthQCD = &EWK_and_fifthQCD_NotP;
-
-    TH1F EWK_and_fifthQCD_and_Mass10_NotP = (*EWK_and_fifthQCD)+(*Mass10);
-    TH1F EWK_and_fifthQCD_and_Mass100_NotP = (*EWK_and_fifthQCD)+(*Mass100);
-    TH1F EWK_and_fifthQCD_and_Mass1000_NotP = (*EWK_and_fifthQCD)+(*Mass1000);
-    TH1F* EWK_and_fifthQCD_and_Mass10 = &EWK_and_fifthQCD_and_Mass10_NotP;
-    TH1F* EWK_and_fifthQCD_and_Mass100 = &EWK_and_fifthQCD_and_Mass100_NotP;
-    TH1F* EWK_and_fifthQCD_and_Mass1000 = &EWK_and_fifthQCD_and_Mass1000_NotP;
-
-
 
   //  -- HERE YOU COULD MANIPULATE THEM IF YOU WANTED TO, BUT THERE IS NO NEED RIGHT NOW (AS FAR AS I REMEMBER)
 
@@ -152,12 +153,7 @@ int plotVBFDMresults_ConstantDimension(TString variable="", TString PS="", TStri
 
   //////////////////////////////////////////////////////////////////////////////////////////
   TCanvas *canv;
-  //if (Norm=="Normalised") {
-    canv = new TCanvas("canv","",1500,1800);
-    /*} 
-  else {
-    canv = new TCanvas("canv","",1500,1500);
-    }*/
+  canv = new TCanvas("canv","",1500,1800);
 
   gStyle->SetOptFit(0);
   gStyle->SetOptStat(0);
@@ -173,12 +169,7 @@ int plotVBFDMresults_ConstantDimension(TString variable="", TString PS="", TStri
   // THIS DEFINES THE MAIN PAD IN THE OUTPUT PLOTS, AND A RATIO PAD (AT THE BOTTOM OF THE PDF FILES) IS DEFINED LATER
   
   TPad *mainPad;
-  //if (Norm=="Normalised") {
-    mainPad = new TPad("mainPad","", 0.01, 0.2, 0.99, 0.99);
-    /*}
-  else{
-    mainPad = new TPad("mainPad","", 0.01, 0.02, 0.99, 0.99);    
-    }*/
+  mainPad = new TPad("mainPad","", 0.01, 0.2, 0.99, 0.99);
   mainPad->Draw();
   mainPad->cd();
   
@@ -213,6 +204,7 @@ int plotVBFDMresults_ConstantDimension(TString variable="", TString PS="", TStri
   frame->GetXaxis()->SetLabelFont( 43 );
   frame->GetXaxis()->SetLabelSize( font_size );
   frame->GetXaxis()->SetTitleSize( font_size );
+  frame->GetXaxis()->SetLabelColor( 0 );
 
 
   // HERE YOU CAN SET ALL THE COLOURS AND STYLES AND MARKERS FOR YOUR HISTOGRAMS (VARIABLES DEFINED IN THE HEADER FILE)
@@ -300,7 +292,7 @@ int plotVBFDMresults_ConstantDimension(TString variable="", TString PS="", TStri
       }
       if (variable.Contains("Etmiss")) {
 	max = 1e0;
-	min = 1e-2;
+	min = 1e-4;
       }
     }
 
@@ -365,7 +357,6 @@ int plotVBFDMresults_ConstantDimension(TString variable="", TString PS="", TStri
 
   // ACTUAL DRAWING OF THE HISTOGRAMS
 
-  if (Norm == "Absolute"){
     Double_t scaling;
     if (Dimension == "D5a"){
       scaling = 1;
@@ -407,17 +398,18 @@ int plotVBFDMresults_ConstantDimension(TString variable="", TString PS="", TStri
     Mass100->Scale(scaling);
     Mass1000->Scale(scaling);
 
-  }
 
   EWK_and_fifthQCD->Draw("HIST same");
   QCD->Draw("HIST same");
   EWK->Draw("HIST same");
+  cRatio->Draw("L same");
     if (Dimension.Contains("Higgs")){
 	Mass1->Draw("PH same");
       }
   Mass10->Draw("PH same");
   Mass100->Draw("PH same");
   Mass1000->Draw("PH same");
+
 
   /*
   TGraphAsymmErrors* double_data_err = (TGraphAsymmErrors*)data_err->Clone("double_data_err");
@@ -429,6 +421,13 @@ int plotVBFDMresults_ConstantDimension(TString variable="", TString PS="", TStri
   //  TLatex txt_PS;txt_PS.SetNDC();txt_PS.SetTextAlign(11);txt_PS.SetTextSize(0.03);txt_PS.DrawLatex(0.22,0.20,"pp->2DM+2jets: ""Dimension "+Dimension+" "+PS+" phase space");
 
   // BUILDING THE LEGEND...
+
+  TH1F EWK_and_fifthQCD_and_Mass10_NotP = (*EWK_and_fifthQCD)+(*Mass10);
+  TH1F EWK_and_fifthQCD_and_Mass100_NotP = (*EWK_and_fifthQCD)+(*Mass100);
+  TH1F EWK_and_fifthQCD_and_Mass1000_NotP = (*EWK_and_fifthQCD)+(*Mass1000);
+  TH1F* EWK_and_fifthQCD_and_Mass10 = &EWK_and_fifthQCD_and_Mass10_NotP;
+  TH1F* EWK_and_fifthQCD_and_Mass100 = &EWK_and_fifthQCD_and_Mass100_NotP;
+  TH1F* EWK_and_fifthQCD_and_Mass1000 = &EWK_and_fifthQCD_and_Mass1000_NotP;
 
   Double_t yval1 = 0.96;
   Double_t xval = 0.3;
@@ -451,6 +450,7 @@ int plotVBFDMresults_ConstantDimension(TString variable="", TString PS="", TStri
   leg_main->AddEntry(QCD,"QCD Z(#nu#nu)jj","f");
   leg_main->AddEntry(EWK,"EWK Z(#nu#nu)jj","f");
   leg_main->AddEntry(EWK_and_fifthQCD,"QCD+EWK Z(#nu#nu)jj","f");
+  leg_main->AddEntry(cRatio, "z(#nu#nu)/z(#mu#mu)");
   leg_main->Draw("same");
   
 
@@ -471,7 +471,7 @@ int plotVBFDMresults_ConstantDimension(TString variable="", TString PS="", TStri
 
     canv->cd();
     //    TPad *ratioPad_1 = new TPad("ratioPad_1","", 0.01, topPady-height, 0.99, topPady);
-    TPad *ratioPad = new TPad("ratioPad","", 0.01, 0.02, 0.99, 0.2);
+    TPad *ratioPad = new TPad("ratioPad","", 0.01, 0.02, 0.99, 0.285);
     ratioPad->SetGridy();
     ratioPad->Draw();
     ratioPad->cd();
@@ -575,6 +575,7 @@ int plotVBFDMresults_ConstantDimension(TString variable="", TString PS="", TStri
   QCD->Write("QCD");
   EWK->Write("EWK");
   EWK_and_fifthQCD->Write("EWK_and_fifthQCD");
+  cRatio->Write("cRatio");
     if (Dimension.Contains("Higgs")){
       Mass1->Write("Mass1");	  
     }
