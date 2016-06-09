@@ -44,7 +44,7 @@ int plotVBFDMresults_ConstantDimension(TString variable="", TString PS="", TStri
   gROOT->SetStyle("ATLAS");
   gROOT->ForceStyle();
 
-  gSystem->Exec("mkdir Figures/"""+Dimension+"""/"+Norm+"");
+  gSystem->Exec("mkdir -p Figures/"+Dimension+"/"+Norm+"");
 
   TString xaxis = "NULL";
   TString yaxis = "";
@@ -91,13 +91,16 @@ int plotVBFDMresults_ConstantDimension(TString variable="", TString PS="", TStri
 
 
   //  -- READ IN YOUR VARIOUS FILES HERE (SEE HOW VARIABLE AND PS ARE PASSED IN THE FILENAME) AND PULL OUT THE HISTOGRAMS YOU WANT
-  TH1F* Mass1;
-  if (Dimension=="Higgs"){
-      TFile* file_Mass1 = new TFile("~/Documents/Rivet_Analyses/MC_VBFDM/"""+Dimension+"""/Mass1/"+Norm+"/Rivet.root", "READ");
-      file_Mass1->cd("MC_VBFDM_"+Norm+"");
-      Mass1 = (TH1F*)gDirectory->Get(""+variable+"_PS_"+PS+"");
-    }  
 
+  //  TString mass[4] = {"1", "10", "100", "1000"};
+
+  TFile* file_Mass01 = new TFile("~/Documents/Rivet_Analyses/MC_VBFDM/"""+Dimension+"""/Mass.1/"+Norm+"/Rivet.root", "READ");
+  file_Mass01->cd("MC_VBFDM_"+Norm+"");
+  TH1F* Mass01 = (TH1F*)gDirectory->Get(""+variable+"_PS_"+PS+""); 
+
+  TFile* file_Mass1 = new TFile("~/Documents/Rivet_Analyses/MC_VBFDM/"""+Dimension+"""/Mass1/"+Norm+"/Rivet.root", "READ");
+  file_Mass1->cd("MC_VBFDM_"+Norm+"");
+  TH1F* Mass1 = (TH1F*)gDirectory->Get(""+variable+"_PS_"+PS+"");
 
   TFile* file_Mass10 = new TFile("~/Documents/Rivet_Analyses/MC_VBFDM/"""+Dimension+"""/Mass10/"+Norm+"/Rivet.root", "READ");
   file_Mass10->cd("MC_VBFDM_"+Norm+"");
@@ -125,23 +128,23 @@ int plotVBFDMresults_ConstantDimension(TString variable="", TString PS="", TStri
   
   TFile* file_zvv = new TFile("~/Documents/Rivet_Analyses/MC_VBFDM/Backgrounds/zvv/"+Norm+"/Rivet.root", "READ");
   file_zvv->cd("MC_VBFDM_"+Norm+"");
-  TH1F* zvv = (TH1F*)gDirectory->Get(""+variable+"_PS_"+PS+"");
+  TH1F* EWK_and_fifthQCD = (TH1F*)gDirectory->Get(""+variable+"_PS_"+PS+"");
 
   TFile* file_zmumu = new TFile("~/Documents/Rivet_Analyses/MC_VBFDM/Backgrounds/zmumu/"+Norm+"/Rivet.root", "READ");
   file_zmumu->cd("MC_VBFDM_"+Norm+"");
   TH1F* zmumu = (TH1F*)gDirectory->Get(""+variable+"_PS_"+PS+"");
 
-  TH1F* cRatio = (TH1F*)zvv->Clone(cRatio);
+  TH1F* cRatio = (TH1F*)EWK_and_fifthQCD->Clone("cRatio");
   cRatio->Sumw2();
   cRatio->Divide(zmumu);
-
+  /*
     TH1F* QCD_Copy = (TH1F*)QCD->Clone("QCD_Copy");
     TH1F* EWK_Copy = (TH1F*)EWK->Clone("EWK_Copy");
 
     //Creating histogram of Ewk + 0.2QCD to replicate how 3 jet events affect the background
     TH1F EWK_and_fifthQCD_NotP = (*QCD_Copy)+(*EWK_Copy);
     TH1F* EWK_and_fifthQCD = &EWK_and_fifthQCD_NotP;
-
+  */
   //  -- HERE YOU COULD MANIPULATE THEM IF YOU WANTED TO, BUT THERE IS NO NEED RIGHT NOW (AS FAR AS I REMEMBER)
 
   //  YOU COULD LATER MAKE HISTOGRAMS OF EVERY SAMPLE TO SOME FIXED SAMPLE (LIKE ZNUNU+2J) HERE, AND THEN LATER PLOT THESE IN THE SMALL PANE IN THE LOWER PART OF THE PDF, TO SHOW THE RELATIVE SHAPE DIFFERENCES BETWEEN THIS SM PROCESS AND THE VARIOUS OTHER SAMPLES
@@ -169,7 +172,7 @@ int plotVBFDMresults_ConstantDimension(TString variable="", TString PS="", TStri
   // THIS DEFINES THE MAIN PAD IN THE OUTPUT PLOTS, AND A RATIO PAD (AT THE BOTTOM OF THE PDF FILES) IS DEFINED LATER
   
   TPad *mainPad;
-  mainPad = new TPad("mainPad","", 0.01, 0.2, 0.99, 0.99);
+  mainPad = new TPad("mainPad","", 0.01, 0.01, 0.99, 0.99);
   mainPad->Draw();
   mainPad->cd();
   
@@ -204,15 +207,16 @@ int plotVBFDMresults_ConstantDimension(TString variable="", TString PS="", TStri
   frame->GetXaxis()->SetLabelFont( 43 );
   frame->GetXaxis()->SetLabelSize( font_size );
   frame->GetXaxis()->SetTitleSize( font_size );
-  frame->GetXaxis()->SetLabelColor( 0 );
+  frame->GetXaxis()->SetLabelColor( 1 );
 
 
   // HERE YOU CAN SET ALL THE COLOURS AND STYLES AND MARKERS FOR YOUR HISTOGRAMS (VARIABLES DEFINED IN THE HEADER FILE)
-  if (Dimension.Contains("Higgs")){
-      Mass1->SetLineColor(Mass1_line_color);Mass1->SetLineStyle(Mass1_line_style);Mass1->SetLineWidth(Mass1_line_width);Mass1->SetFillColor(Mass1_fill_color);
-      Mass1->SetFillStyle(Mass1_fill_style);Mass1->SetMarkerColor(Mass1_line_color);Mass1->SetMarkerStyle(Mass1_marker_style);Mass1->SetMarkerSize(Mass1_marker_size);
-  }
+  Mass01->SetLineColor(Mass01_line_color);Mass01->SetLineStyle(Mass01_line_style);Mass01->SetLineWidth(Mass01_line_width);Mass01->SetFillColor(Mass01_fill_color);
+  Mass01->SetFillStyle(Mass01_fill_style);Mass01->SetMarkerColor(Mass01_line_color);Mass01->SetMarkerStyle(Mass01_marker_style);Mass01->SetMarkerSize(Mass01_marker_size);
 
+  Mass1->SetLineColor(Mass1_line_color);Mass1->SetLineStyle(Mass1_line_style);Mass1->SetLineWidth(Mass1_line_width);Mass1->SetFillColor(Mass1_fill_color);
+  Mass1->SetFillStyle(Mass1_fill_style);Mass1->SetMarkerColor(Mass1_line_color);Mass1->SetMarkerStyle(Mass1_marker_style);Mass1->SetMarkerSize(Mass1_marker_size);
+  
   Mass10->SetLineColor(Mass10_line_color);Mass10->SetLineStyle(Mass10_line_style);Mass10->SetLineWidth(Mass10_line_width);Mass10->SetFillColor(Mass10_fill_color);
   Mass10->SetFillStyle(Mass10_fill_style);Mass10->SetMarkerColor(Mass10_line_color);Mass10->SetMarkerStyle(Mass10_marker_style);Mass10->SetMarkerSize(Mass10_marker_size);
   
@@ -357,13 +361,8 @@ int plotVBFDMresults_ConstantDimension(TString variable="", TString PS="", TStri
 
   // ACTUAL DRAWING OF THE HISTOGRAMS
 
-    Double_t scaling;
-    if (Dimension == "D5a"){
-      scaling = 1;
-    }
-    if (Dimension == "D5b"){
-      scaling = 1;
-    }
+    Double_t scaling = 1.;
+
     if (Dimension == "D5c"){
       scaling = pow(((0.1)/(3.3)),4);
     }
@@ -376,24 +375,9 @@ int plotVBFDMresults_ConstantDimension(TString variable="", TString PS="", TStri
     if (Dimension == "D6b"){
       scaling = pow(((1)/(3.3)),5);
     }
-    if (Dimension == "D7a"){
-      scaling = 1;
-    }
-    if (Dimension == "D7b"){
-      scaling = 1;
-    }
-    if (Dimension == "D7c"){
-      scaling = 1;
-    }
-    if (Dimension == "D7d"){
-      scaling = 1;
-    }
-    if (Dimension == "Higgs"){
-      scaling = 1;
-    }
-    if (Dimension.Contains("Higgs")){
-      Mass1->Scale(scaling);
-    }
+
+    Mass01->Scale(scaling);
+    Mass1->Scale(scaling);
     Mass10->Scale(scaling);
     Mass100->Scale(scaling);
     Mass1000->Scale(scaling);
@@ -402,10 +386,9 @@ int plotVBFDMresults_ConstantDimension(TString variable="", TString PS="", TStri
   EWK_and_fifthQCD->Draw("HIST same");
   QCD->Draw("HIST same");
   EWK->Draw("HIST same");
-  cRatio->Draw("L same");
-    if (Dimension.Contains("Higgs")){
-	Mass1->Draw("PH same");
-      }
+  //cRatio->Draw("L same");
+  Mass01->Draw("PH same");
+  Mass1->Draw("PH same");
   Mass10->Draw("PH same");
   Mass100->Draw("PH same");
   Mass1000->Draw("PH same");
@@ -441,16 +424,15 @@ int plotVBFDMresults_ConstantDimension(TString variable="", TString PS="", TStri
   leg_main->SetTextSize(0.02);
   leg_main->SetBorderSize(0);
   leg_main->SetTextFont(42);
-    if (Dimension.Contains("Higgs")){
-	  leg_main->AddEntry(Mass1,"DM Mass 1GeV","PL");
-	}
+  leg_main->AddEntry(Mass01,"DM Mass 0.1GeV","PL");
+  leg_main->AddEntry(Mass1,"DM Mass 1GeV","PL");
   leg_main->AddEntry(Mass10,"DM Mass 10GeV","PL");
   leg_main->AddEntry(Mass100,"DM Mass 100GeV","PL");
   leg_main->AddEntry(Mass1000,"DM Mass 1000GeV","PL");
   leg_main->AddEntry(QCD,"QCD Z(#nu#nu)jj","f");
   leg_main->AddEntry(EWK,"EWK Z(#nu#nu)jj","f");
   leg_main->AddEntry(EWK_and_fifthQCD,"QCD+EWK Z(#nu#nu)jj","f");
-  leg_main->AddEntry(cRatio, "z(#nu#nu)/z(#mu#mu)");
+  //  leg_main->AddEntry(cRatio, "z(#nu#nu)/z(#mu#mu)");
   leg_main->Draw("same");
   
 
@@ -465,7 +447,7 @@ int plotVBFDMresults_ConstantDimension(TString variable="", TString PS="", TStri
     
 
   //  if (Norm=="Normalised"){
-
+  /*
     TLine *ratioline= new TLine(frame->GetBinLowEdge(1),1.0,frame->GetBinLowEdge(frame->GetNbinsX()+1),1.0);
     ratioline->SetLineColor(1);ratioline->SetLineStyle(1);ratioline->SetLineWidth(1);
 
@@ -493,20 +475,6 @@ int plotVBFDMresults_ConstantDimension(TString variable="", TString PS="", TStri
     M10_ratio->GetXaxis()->SetTitleFont(43);
     M10_ratio->GetXaxis()->SetTitleOffset(4.);
 
-    /*
-    double ratioMax, ratioMin;    
-    if ( Norm=="Normalised" ){
-      ratioMax = 10;
-      ratioMin = -1;
-    }
-    else {
-      ratioMax = 100;
-      ratioMin = -1;
-    }
-
-    M10_ratio->SetMaximum(ratioMax);
-    M10_ratio->SetMinimum(ratioMin);
-    */
     M10_ratio->Sumw2();
     M10_ratio->Divide(EWK_and_fifthQCD);
     M100_ratio->Divide(EWK_and_fifthQCD);
@@ -547,7 +515,7 @@ int plotVBFDMresults_ConstantDimension(TString variable="", TString PS="", TStri
     M1000_ratio->Draw("ep same");
 
     //}
-
+    */
 
     
     //if (variable.Contains("j1pt") || variable.Contains("mass") ) {
@@ -576,9 +544,9 @@ int plotVBFDMresults_ConstantDimension(TString variable="", TString PS="", TStri
   EWK->Write("EWK");
   EWK_and_fifthQCD->Write("EWK_and_fifthQCD");
   cRatio->Write("cRatio");
-    if (Dimension.Contains("Higgs")){
-      Mass1->Write("Mass1");	  
-    }
+  zmumu->Write("zmumu");
+  Mass01->Write("Mass0.1");
+  Mass1->Write("Mass1");	  
   Mass10->Write("Mass10");
   Mass100->Write("Mass100");
   Mass1000->Write("Mass1000");

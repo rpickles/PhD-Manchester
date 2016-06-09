@@ -3,11 +3,11 @@
 if [ "$1" == "" -o "$1" == "-h" ]
     then
     echo ""
-    echo "*** Double_t plotVBFDMresults_ConstantMass(TString variable=Mjj, TString phasespace=VBFDM, TString Mass=Mass10, TString Norm=Normalised)"
+    echo "*** Double_t statisticsTest(TString variable=Mjj, TString PS=VBFDM, TString Dimension=D5a, TString StatOption=chi2, TString BinErrorString=Stand )"
     echo ""
     exit
 else 
-    cmd="root -l -b -q -x plotVBFDMresults_ConstantMass.C+'(\"$1\",\"$2\",\"$3\",\"$4\")'"
+    cmd="root -l -b -q -x statisticsTest.C+'(\"$1\",\"$2\",\"$3\",\"$4\",\"$5\")'"
     eval $cmd 
 fi
 

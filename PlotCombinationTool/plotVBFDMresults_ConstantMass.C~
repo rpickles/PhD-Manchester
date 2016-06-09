@@ -43,7 +43,7 @@ int plotVBFDMresults_ConstantMass(TString variable="", TString PS="", TString Ma
   gROOT->SetStyle("ATLAS");
   gROOT->ForceStyle();
 
-  gSystem->Exec("mkdir Figures/"+Mass+"/"+Norm+"");
+  gSystem->Exec("mkdir -p Figures/"+Mass+"/"+Norm+"NOBKG/");
 
   TString xaxis = "NULL";
   TString yaxis = "";
@@ -139,6 +139,10 @@ int plotVBFDMresults_ConstantMass(TString variable="", TString PS="", TString Ma
   file_Higgs->cd("MC_VBFDM_"+Norm+"");
   TH1F* Higgs = (TH1F*)gDirectory->Get(""+variable+"_PS_"+PS+"");
 
+  TFile* file_Higgs750 = new TFile("~/Documents/Rivet_Analyses/MC_VBFDM/Higgs750/"""+Mass+"""/"""+Norm+"""/Rivet.root", "READ");
+  file_Higgs750->cd("MC_VBFDM_"+Norm+"");
+  TH1F* Higgs750 = (TH1F*)gDirectory->Get(""+variable+"_PS_"+PS+"");
+
   TFile* file_QCD = new TFile("~/Documents/Rivet_Analyses/MC_VBFDM/Backgrounds/QCD/"""+Norm+"""/Rivet.root", "READ");
   file_QCD->cd("MC_VBFDM_"+Norm+"");
   TH1F* QCD = (TH1F*)gDirectory->Get(""+variable+"_PS_"+PS+"");
@@ -151,26 +155,29 @@ int plotVBFDMresults_ConstantMass(TString variable="", TString PS="", TString Ma
   TFile* file_Inclusive = new TFile("~/Documents/Rivet_Analyses/MC_VBFDM/Backgrounds/Inclusive/"""+Norm+"""/Rivet.root", "READ");
   file_Inclusive->cd("MC_VBFDM_"+Norm+"");
   TH1F* Inclusive = (TH1F*)gDirectory->Get(""+variable+"_PS_"+PS+"");          
+
+  TFile* file_zvv = new TFile("~/Documents/Rivet_Analyses/MC_VBFDM/Backgrounds/zvv/"+Norm+"/Rivet.root", "READ");
+  file_zvv->cd("MC_VBFDM_"+Norm+"");
+  TH1F* EWK_and_fifthQCD = (TH1F*)gDirectory->Get(""+variable+"_PS_"+PS+"");
   
+  TFile* file_zmumu = new TFile("~/Documents/Rivet_Analyses/MC_VBFDM/Backgrounds/zmumu/"+Norm+"/Rivet.root", "READ");
+  file_zmumu->cd("MC_VBFDM_"+Norm+"");
+  TH1F* zmumu = (TH1F*)gDirectory->Get(""+variable+"_PS_"+PS+"");
 
-  TH1F* QCD_Copy = (TH1F*)QCD->Clone("QCD_Copy");
-  TH1F* EWK_Copy = (TH1F*)EWK->Clone("EWK_Copy");
+  //  TH1F* QCD_Copy = (TH1F*)QCD->Clone("QCD_Copy");
+  //TH1F* EWK_Copy = (TH1F*)EWK->Clone("EWK_Copy");
 
-  TH1F EWK_and_fifthQCD_NotP = (*QCD_Copy)+(*EWK_Copy);
-  TH1F* EWK_and_fifthQCD = &EWK_and_fifthQCD_NotP;
+  //  TH1F EWK_and_fifthQCD_NotP = (*QCD_Copy)+(*EWK_Copy);
+  //TH1F* EWK_and_fifthQCD = &EWK_and_fifthQCD_NotP;
 
-  //  -- HERE YOU COULD MANIPULATE THEM IF YOU WANTED TO, BUT THERE IS NO NEED RIGHT NOW (AS FAR AS I REMEMBER)
-
-  //  YOU COULD LATER MAKE HISTOGRAMS OF EVERY SAMPLE TO SOME FIXED SAMPLE (LIKE ZNUNU+2J) HERE, AND THEN LATER PLOT THESE IN THE SMALL PANE IN THE LOWER PART OF THE PDF, TO SHOW THE RELATIVE SHAPE DIFFERENCES BETWEEN THIS SM PROCESS AND THE VARIOUS OTHER SAMPLES
-
-  //////////////////////////////////////////////////////////////////////////////////////////
+  TH1F* cRatio = (TH1F*)EWK_and_fifthQCD->Clone("cRatio");
+  cRatio->Sumw2();
+  cRatio->Divide(zmumu);
 
 
-  //  -- THIS IS WHERE THE ROOT CANVAS IS BUILT, THE ACTUAL PLOT
-
-  //////////////////////////////////////////////////////////////////////////////////////////
+  //Creating the canvas for the acutal plot
   TCanvas *canv;
-  canv = new TCanvas("canv","",1500,1800);
+  canv = new TCanvas("canv","",1500,1500);
   
   gStyle->SetOptFit(0);
   gStyle->SetOptStat(0);
@@ -186,7 +193,7 @@ int plotVBFDMresults_ConstantMass(TString variable="", TString PS="", TString Ma
   // THIS DEFINES THE MAIN PAD IN THE OUTPUT PLOTS, AND A RATIO PAD (AT THE BOTTOM OF THE PDF FILES) IS DEFINED LATER
   
   TPad *mainPad;
-  mainPad = new TPad("mainPad","", 0.01, 0.2, 0.99, 0.99);
+  mainPad = new TPad("mainPad","", 0.01, 0.01, 0.99, 0.99);
   mainPad->Draw();
   mainPad->cd();
 
@@ -220,7 +227,7 @@ int plotVBFDMresults_ConstantMass(TString variable="", TString PS="", TString Ma
   frame->GetXaxis()->SetLabelFont( 43 );
   frame->GetXaxis()->SetLabelSize( font_size );
   frame->GetXaxis()->SetTitleSize( font_size );
-  frame->GetXaxis()->SetLabelColor( 0 );
+  frame->GetXaxis()->SetLabelColor( 1 );
 
 
   // HERE YOU CAN SET ALL THE COLOURS AND STYLES AND MARKERS FOR YOUR HISTOGRAMS (VARIABLES DEFINED IN THE HEADER FILE)
@@ -280,8 +287,8 @@ int plotVBFDMresults_ConstantMass(TString variable="", TString PS="", TString Ma
       min = 1e-2;
     }                                                                                                                                                                        
     if (variable.Contains("Mjj")) {
-      max = 1e0;
-      min = 1e-4;
+      max = 1e1;
+      min = 1e-3;
     }
     if (variable.Contains("Jet1PT")) {
       max = 1e0;
@@ -315,12 +322,12 @@ int plotVBFDMresults_ConstantMass(TString variable="", TString PS="", TString Ma
 	max = 1e0;
       }
       else{
-	max = 1e0;
+	max = 1e1;
       }
-      min = 1e-3;
+      min = 1e-2;
     }
     if (variable.Contains("Etmiss")) {
-      max = 1e0;
+      max = 1e1;
       min = 1e-4;
     }
   }
@@ -331,7 +338,7 @@ int plotVBFDMresults_ConstantMass(TString variable="", TString PS="", TString Ma
       min = 1e-2;
     }
     if (variable.Contains("Mjj")) {
-      max = 1e5;
+      max = 1e10;
       min = 1e-4;
     }
     if (variable.Contains("Jet1PT")) {
@@ -351,15 +358,15 @@ int plotVBFDMresults_ConstantMass(TString variable="", TString PS="", TString Ma
       min = 1e-4;
     }
     if (variable.Contains("DeltaEta")) {
-      max = 1e4;
+      max = 1e10;
       min = 1e-4;
     }
     if (variable.Contains("DeltaPhi")) {
-      max = 1e4;
+      max = 1e10;
       min = 1e-4;
     }
     if (variable.Contains("Etmiss")) {
-      max = 1e5;
+      max = 1e10;
       min = 1e-4;
     }
   }
@@ -390,15 +397,18 @@ int plotVBFDMresults_ConstantMass(TString variable="", TString PS="", TString Ma
 
   // ACTUAL DRAWING OF THE HISTOGRAMS
   
+  if (Norm == "Absolute"){
   D5c->Scale(pow(((0.1)/(3.3)),4));
   D5d->Scale(pow(((0.1)/(6.6)),4));
   D6a->Scale(pow(((1)/(2.3)),5));
   D6b->Scale(pow(((1)/(3.3)),5));
-  
-  EWK_and_fifthQCD->Draw("HIST same");
+  }
+
+  //  EWK_and_fifthQCD->Draw("HIST same");
   //    Inclusive->Draw("HIST same");
-  QCD->Draw("HIST same");
-  EWK->Draw("HIST same");
+  //QCD->Draw("HIST same");
+  //EWK->Draw("HIST same");
+  //  cRatio->Draw("PH same");
   D5a->Draw("PH same");
   D5b->Draw("PH same");
   D5c->Draw("PH same");
@@ -410,7 +420,7 @@ int plotVBFDMresults_ConstantMass(TString variable="", TString PS="", TString Ma
   D7c->Draw("PH same");
   D7d->Draw("PH same");
   Higgs->Draw("PH same");
-
+  //Higgs750->Draw("PH same");
   /*
   TGraphAsymmErrors* double_data_err = (TGraphAsymmErrors*)data_err->Clone("double_data_err");
   double_data_err->SetMarkerSize(1.0*data_marker_size);// was 0.9
@@ -465,27 +475,44 @@ int plotVBFDMresults_ConstantMass(TString variable="", TString PS="", TString Ma
   leg_main->SetTextSize(0.02);
   leg_main->SetBorderSize(0);
   leg_main->SetTextFont(42);
-  leg_main->AddEntry(D5a,"DM D5a (#Lambda > 100GeV) ","PL");
-  leg_main->AddEntry(D5b,"DM D5b (#Lambda > 100GeV)","PL");
-  leg_main->AddEntry(D5c,"DM D5c (#Lambda > 3.3TeV)","PL");
-  leg_main->AddEntry(D5d,"DM D5d (#Lambda > 6.6TeV)","PL");
-  leg_main->AddEntry(D6a,"DM D6a (#Lambda > 230GeV)","PL");
-  leg_main->AddEntry(D6b,"DM D6b (#Lambda > 330GeV)","PL");
-  leg_main->AddEntry(D7a,"DM D7a (#Lambda > 100GeV)","PL");
-  leg_main->AddEntry(D7b,"DM D7b (#Lambda > 100GeV)","PL");
-  leg_main->AddEntry(D7c,"DM D7c (#Lambda > 100GeV)","PL");
-  leg_main->AddEntry(D7d,"DM D7d (#Lambda > 100GeV)","PL");
+
+  if (Norm == "Absolute"){
+    leg_main->AddEntry(D5a,"DM D5a (#Lambda > 100GeV)","PL");
+    leg_main->AddEntry(D5b,"DM D5b (#Lambda > 100GeV)","PL");
+    leg_main->AddEntry(D5c,"DM D5c (#Lambda > 3.3TeV)","PL");
+    leg_main->AddEntry(D5d,"DM D5d (#Lambda > 6.6TeV)","PL");
+    leg_main->AddEntry(D6a,"DM D6a (#Lambda > 230GeV)","PL");
+    leg_main->AddEntry(D6b,"DM D6b (#Lambda > 330GeV)","PL");
+    leg_main->AddEntry(D7a,"DM D7a (#Lambda > 100GeV)","PL");
+    leg_main->AddEntry(D7b,"DM D7b (#Lambda > 100GeV)","PL");
+    leg_main->AddEntry(D7c,"DM D7c (#Lambda > 100GeV)","PL");
+    leg_main->AddEntry(D7d,"DM D7d (#Lambda > 100GeV)","PL");
+  }
+  else {
+    leg_main->AddEntry(D5a,"DM D5a ","PL");
+    leg_main->AddEntry(D5b,"DM D5b ","PL");
+    leg_main->AddEntry(D5c,"DM D5c ","PL");
+    leg_main->AddEntry(D5d,"DM D5d ","PL");
+    leg_main->AddEntry(D6a,"DM D6a ","PL");
+    leg_main->AddEntry(D6b,"DM D6b ","PL");
+    leg_main->AddEntry(D7a,"DM D7a ","PL");
+    leg_main->AddEntry(D7b,"DM D7b ","PL");
+    leg_main->AddEntry(D7c,"DM D7c ","PL");
+    leg_main->AddEntry(D7d,"DM D7d ","PL");
+  }
   leg_main->AddEntry(Higgs,"Higgs DM Portal","PL");
-  leg_main->AddEntry(QCD,"QCD Z(#nu#nu)jj","f");
-  leg_main->AddEntry(EWK,"EWK Z(#nu#nu)jj","f");
-  leg_main->AddEntry(EWK_and_fifthQCD,"QCD+EWK Z(#nu#nu)jj","f");
+  //leg_main->AddEntry(Higgs,"750GeV Higgs DM Portal","PL");
+  //leg_main->AddEntry(QCD,"QCD Z(#nu#nu)jj","f");
+  //leg_main->AddEntry(EWK,"EWK Z(#nu#nu)jj","f");
+  //leg_main->AddEntry(EWK_and_fifthQCD,"QCD+EWK Z(#nu#nu)jj","f");
+  //  leg_main->AddEntry(cRatio, "z(#nu#nu)/z(#mu#mu)");
   leg_main->Draw("same");
   
 
   // BELOW HERE, THE RATIO PANE AT THE BOTTOM OF THE PDF IS DRAWN
   
   //  if (Norm=="Normalised"){
-
+  /*
     TLine *ratioline= new TLine(frame->GetBinLowEdge(1),1.0,frame->GetBinLowEdge(frame->GetNbinsX()+1),1.0);
     ratioline->SetLineColor(1);ratioline->SetLineStyle(1);ratioline->SetLineWidth(1);
 
@@ -584,16 +611,17 @@ int plotVBFDMresults_ConstantMass(TString variable="", TString PS="", TString Ma
     Higgs_ratio->Draw("ep same");
 
     //}
-
+    */
 
   // SAVE ALL THESE HISTOGRAMS YOU MIGHT HAVE READ FROM VARIOUS FILES, OR DONE VARIOUS MODIFICATIONS TO,  TO A ROOT FILE, SO YOU CAN EASILY GET HOLD OF THEM AGAIN!
   
   TFile * outfile = new TFile("Figures/"+Mass+"/"+Norm+"/"+Mass+"_"+variable+"_PS_"+PS+".root", "RECREATE");
   outfile->cd();
 
-  QCD->Write("QCD");
-  EWK->Write("EWK");
-  EWK_and_fifthQCD->Write("EWK_and_fifthQCD");
+  //QCD->Write("QCD");
+  //EWK->Write("EWK");
+  //EWK_and_fifthQCD->Write("EWK_and_fifthQCD");
+  //cRatio->Write("cRatio");
   D5a->Write("D5a");
   D5b->Write("D5b");
   D5c->Write("D5c");
@@ -611,9 +639,9 @@ int plotVBFDMresults_ConstantMass(TString variable="", TString PS="", TString Ma
 
   // THIS ACTUALLY WRITES OUT THE PLOTS (PDF/PNG/EPS FORMAT)
 
-  gPad->RedrawAxis();canv->Print("Figures/"+Mass+"/"+Norm+"/"+Mass+"_"+variable+"_PS_"+PS+".pdf");
-  gPad->RedrawAxis();canv->Print("Figures/"+Mass+"/"+Norm+"/"+Mass+"_"+variable+"_PS_"+PS+".png");
-  gPad->RedrawAxis();canv->Print("Figures/"+Mass+"/"+Norm+"/"+Mass+"_"+variable+"_PS_"+PS+".eps");
+  gPad->RedrawAxis();canv->Print("Figures/"+Mass+"/"+Norm+"/NOBKG/"+Mass+"_"+variable+"_PS_"+PS+".pdf");
+  gPad->RedrawAxis();canv->Print("Figures/"+Mass+"/"+Norm+"/NOBKG/"+Mass+"_"+variable+"_PS_"+PS+".png");
+  gPad->RedrawAxis();canv->Print("Figures/"+Mass+"/"+Norm+"/NOBKG/"+Mass+"_"+variable+"_PS_"+PS+".eps");
 
   return 0;
 } 

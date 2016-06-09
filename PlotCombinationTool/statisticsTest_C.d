@@ -80,5 +80,6 @@
 ./statisticsTest_C.so: /usr/local/Cellar/root/5.34.34/include/root/TLegend.h
 ./statisticsTest_C.so: /usr/local/Cellar/root/5.34.34/include/root/TPave.h
 ./statisticsTest_C.so: /usr/local/Cellar/root/5.34.34/include/root/TBox.h
+./statisticsTest_C.so: /usr/local/Cellar/root/5.34.34/include/root/TColor.h
 ./statisticsTest_C.so: /usr/local/Cellar/root/5.34.34/include/root/cintdictversion.h /usr/local/Cellar/root/5.34.34/include/root/RVersion.h
 statisticsTest_C__ROOTBUILDVERSION= 5.34/34
