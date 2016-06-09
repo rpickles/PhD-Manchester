@@ -1,0 +1,441 @@
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Beamer Presentation
+% LaTeX Template
+% Version 1.0 (10/11/12)
+%
+% This template has been downloaded from:
+% http://www.LaTeXTemplates.com
+%
+% License:
+% CC BY-NC-SA 3.0 (http://creativecommons.org/licenses/by-nc-sa/3.0/)
+%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+%----------------------------------------------------------------------------------------
+% PACKAGES AND THEMES
+%----------------------------------------------------------------------------------------
+
+\documentclass[10pt,xcolor={dvipsnames}]{beamer}
+%\setbeamersize{text margin left=1em,text margin right=1em}
+\usepackage{mathtools}
+\usepackage{amsmath}
+\usepackage{bm}
+\usepackage{hyperref}
+
+\usepackage{graphicx} % Allows including images
+\graphicspath{{/Users/rebecca/Documents/Rivet_Analyses/MC_VBFDM/PlotCombinationTool/Figures/}{/Users/rebecca/Documents/Presentations/Talks/}}
+\usepackage{booktabs} % Allows the use of \toprule, \midrule and \bottomrule in tables
+
+\usepackage{etoolbox}
+
+\usepackage{subcaption}
+\captionsetup{compatibility=false}
+
+\usepackage{multirow}
+
+\usepackage{appendixnumberbeamer}
+
+%\newlength\origleftmargini
+%\setlength\origleftmargini\leftmargini
+%\setbeamertemplate{itemize/enumerate body begin}{\setlength{\leftmargini}{2pt}}%
+
+%\let\oldexampleblock\exampleblock
+%\let\oldendexampleblock\endexampleblock
+%\def\exampleblock{\begingroup \setbeamertemplate{itemize/enumerate body begin}{\setlength{\leftmargini}{\origleftmargini}} \oldexampleblock}
+%\def\endexampleblock{\oldendexampleblock \endgroup}%
+
+%\let\oldalertblock\alertblock
+%\let\oldendalertblock\endalertblock
+%\def\alertblock{\begingroup \setbeamertemplate{itemize/enumerate body begin}{\setlength{\leftmargini}{\origleftmargini}} \oldalertblock}
+%\def\endalertblock{\oldendalertblock \endgroup}
+
+\mode<presentation> {
+
+% The Beamer class comes with a number of default slide themes
+% which change the colors and layouts of slides. Below this is a list
+% of all the themes, uncomment each in turn to see what they look like.
+
+%\usetheme{default}
+%\usetheme{AnnArbor}
+%\usetheme{Antibes}
+%\usetheme{Bergen}
+%\usetheme{Berkeley}
+%\usetheme{Berlin}
+\usetheme{Boadilla}
+%\usetheme{CambridgeUS}
+%\usetheme{Copenhagen}
+%\usetheme{Darmstadt}
+%\usetheme{Dresden}
+%\usetheme{Frankfurt}
+%\usetheme{Goettingen}
+%\usetheme{Hannover}
+%\usetheme{Ilmenau}
+%\usetheme{JuanLesPins}
+%\usetheme{Luebeck}
+%\usetheme{Madrid}
+%\usetheme{Malmoe}
+%\usetheme{Marburg}
+%\usetheme{Montpellier}
+%\usetheme{PaloAlto}
+%\usetheme{Pittsburgh}
+%\usetheme{Rochester}
+%\usetheme{Seahorse}
+%\usetheme{Singapore}
+%\usetheme{Szeged}
+%\usetheme{Warsaw}
+
+% As well as themes, the Beamer class has a number of color themes
+% for any slide theme. Uncomment each of these in turn to see how it
+% changes the colors of your current slide theme.
+
+%\usecolortheme{albatross}
+%\usecolortheme{beaver}
+%\usecolortheme{beetle}
+%\usecolortheme{crane}
+%\usecolortheme{dolphin}
+%\usecolortheme{dove}
+%\usecolortheme{fly}
+%\usecolortheme{lily}
+%\usecolortheme{RoyalBlue}
+%\usecolortheme{rose}
+%\usecolortheme{seagull}
+%\usecolortheme{seahorse}
+%\usecolortheme{whale}
+%\usecolortheme{wolverine}
+
+%%Changing the theme colours
+%\setbeamercolor*{structure}{bg=Plum!20,fg=Plum}
+%\setbeamercolor*{palette primary}{use=structure,fg=white,bg=structure.fg}
+%\setbeamercolor*{palette secondary}{use=structure,fg=white,bg=structure.fg!75}
+%\setbeamercolor*{palette tertiary}{use=structure,fg=white,bg=structure.fg!50!black}
+%\setbeamercolor*{palette quaternary}{fg=white,bg=black}
+%\setbeamercolor{section in toc}{fg=black,bg=white}
+%%\setbeamercolor{alerted text}{use=structure,fg=structure.fg!50!black!80!black}
+%\setbeamercolor{titlelike}{parent=palette primary,fg=structure.fg!50!black}
+%\setbeamercolor{frametitle}{bg=gray!30!white,fg=Plum}
+%\setbeamercolor*{titlelike}{parent=palette primary}
+
+%Changing the theme colours
+\setbeamercolor*{structure}{bg=RoyalPurple,fg=RoyalPurple}
+\setbeamercolor*{palette primary}{use=structure,fg=white,bg=structure.fg}
+\setbeamercolor*{palette secondary}{use=structure,fg=white,bg=structure.fg}
+\setbeamercolor*{palette tertiary}{use=structure,fg=white,bg=structure.fg}
+\setbeamercolor*{palette quaternary}{fg=white,bg=black}
+\setbeamercolor{section in toc}{fg=black,bg=white}
+%\setbeamercolor{alerted text}{use=structure,fg=structure.fg!50!black!80!black}
+\setbeamercolor{titlelike}{parent=palette primary,fg=structure.fg!50!black}
+%\setbeamercolor{frametitle}{use=structure,fg=white,bg=structure.fg}
+\setbeamercolor*{titlelike}{parent=palette primary}
+
+%\setbeamercolor{block}{bg=yellow!10,fg=black}
+%\setbeamercolor{block title}{bg=yellow!50,fg=black}
+%\AtBeginEnvironment{block}{\setbeamercolor{itemize item}{fg=yellow}}
+
+\newenvironment<>{examplefirst}[1]{%
+  \setbeamercolor{block title}{bg=yellow!50,fg=black}%
+  \begin{block}#2{#1}}{\end{block}}
+\AtBeginEnvironment{examplefirst}{\setbeamercolor{itemize item}{fg=yellow}}
+
+%\setbeamertemplate{footline} % To remove the footer line in all slides uncomment this line
+%\setbeamertemplate{footline}[page number] % To replace the footer line in all slides with a simple slide count uncomment this line
+
+%\setbeamertemplate{navigation symbols}{} % To remove the navigation symbols from the bottom of all slides uncomment this line
+
+
+\setbeamertemplate{blocks}[rounded][shadow=false]
+\setbeamertemplate{itemize items}[circle]
+\setbeamertemplate{itemize subitems}[circle]
+
+\renewcommand{\thefootnote}{\alph{footnote}}
+
+}
+
+%----------------------------------------------------------------------------------------
+% TITLE PAGE
+%----------------------------------------------------------------------------------------
+
+
+
+\title[Optimal observables]{Overview of optimal observables for EFT DM sensitivity} % The short title appears at the bottom of every slide, the full title is only on the title page
+
+\author{\underline{Rebecca Pickles}, Darren Price} % Your name
+%\institute[UoM] % Your institution as it will appear on the bottom of every slide, may be shorthand to save space
+%{
+%University of Manchester\\ % Your institution for the title page
+%\medskip
+%\textit{julia.iturbe@cern.ch} % Your email address
+%}
+% logo of my university
+\titlegraphic{\includegraphics[width=3cm]{UniOfManchesterLogo}}
+\date{\today} % Date, can be changed to a custom date
+
+\begin{document}
+
+\begin{frame}
+\titlepage % Print the title page as the first slide
+\end{frame}
+
+\iffalse
+\begin{frame}
+\frametitle{Overview} % Table of contents slide, comment this block out to remove it
+\tableofcontents % Throughout your presentation, if you choose to use \section{} and \subsection{} commands, these will automatically be printed on this slide as an overview of your presentation
+\end{frame}
+\fi
+%----------------------------------------------------------------------------------------
+% PRESENTATION SLIDES
+%----------------------------------------------------------------------------------------
+
+%------------------------------------------------
+\section{Introduction} % Sections can be created in order to organize your presentation into discrete blocks, all sections and subsections are automatically printed in the table of contents as an overview of the talk
+
+%------------------------------------------------
+\iffalse
+\fi
+
+\begin{frame}
+\frametitle{Status}
+\begin{itemize}
+\item Added phase space VBFDM100: VBFDM with Jet 1 pT $>$ 100GeV
+\item Scaled the different dimensions with the effective field theory constraints:
+\begin{itemize}
+\item D5c : $\Lambda$ = 3.3 TeV
+\item D5d : $\Lambda$ = 6.6 TeV
+\item D6a : $\Lambda$ = 230 GeV
+\item D6b : $\Lambda$ = 330 GeV
+\item This has meant that some dimensions would not be seen by any parameters
+\end{itemize}
+\item Added ratio plots of $ \frac{ Z \rightarrow \nu \nu + DM}{ Z \rightarrow \nu \nu } $
+\item Started to look at which set of distributions will give us the broadest sensitivity to dark matter models
+\item No jet veto is applied for QCD suppression right now, so the background QCD+EWK Z is pessimistic
+\end{itemize}
+\end{frame}
+
+\begin{frame}
+\frametitle{Sensitivity to dark matter model over background?}
+\center{$\frac{( Z \rightarrow \nu\nu ) + DM}{Z \rightarrow \nu\nu} : Y > 10 > M > 5 > N $}
+\begin{exampleblock}{VBFDM Phase space:}
+\begin{tabular}{c | c c c c c c c c c c c}
+Parameter & D5a & D5b & D5c & D5d & D6a & D6b & D7a & D7b & D7c & D7d & Higgs \\ \hline
+Etmiss & N & M & N & N & Y & Y & Y & Y & Y & Y & N \\
+Mjj & Y & Y & N & N & N & N & M & M & M & M & N \\
+Jet1pT & M & M & N & N & N & N & M & M & M & M & N \\
+Jet2pT & N & N & N & N & N & N & M & M & M & M & N \\
+Jet1Eta & Y & Y & N & N & N & N & N & N & N & N & N \\
+Jet2Eta & M & M & N & N & N & N & N & N & N & N & N \\
+DeltaEta & Y & Y & N & N & N & N & N & N & N & N & N \\
+DeltaPhi & M & M & N & N & N & N & M & M & N & N & N \\
+\end{tabular}
+\end{exampleblock}
+\begin{itemize}
+\item The parameters that have good sensitivity to the most dimensions are Etmiss and Mjj for the VBFDM phase space.
+\end{itemize}
+\end{frame}
+
+\begin{frame}
+\frametitle{\small{Most broadly sensitive parameter plots: VBFDM Phase space}}
+These are for a DM mass of 100GeV
+\vspace{1cm}
+\begin{columns}
+\begin{column}{.4\textwidth}
+\includegraphics[width=5cm, height=5cm]{/Mass100/Normalised/Mass100_Etmiss_PS_VBFDM.pdf}
+\end{column}
+\begin{column}{.4\textwidth}
+\includegraphics[width=5cm, height=5cm]{/Mass100/Normalised/Mass100_Mjj_PS_VBFDM.pdf}
+\end{column}
+\end{columns}
+\end{frame}
+
+\begin{frame}
+\frametitle{Sensitivity to dark matter model over background?}
+\center{$\frac{( Z \rightarrow \nu\nu ) + DM}{Z \rightarrow \nu\nu} : Y > 10 > M > 5 > N $}
+\begin{exampleblock}{VBFDM100 Phase space:}
+\begin{tabular}{c | c c c c c c c c c c c}
+Parameter & D5a & D5b & D5c & D5d & D6a & D6b & D7a & D7b & D7c & D7d & Higgs \\ \hline
+Etmiss & N & M & N & N & Y & Y & Y & Y & Y & Y & N \\
+Mjj & Y & Y & N & N & N & N & M & M & M & M & N \\
+Jet1pT & M & M & N & N & N & N & M & M & M & M & N \\
+Jet2pT & N & N & N & N & N & N & M & M & M & M & N \\
+Jet1Eta & Y & Y & N & N & N & N & N & N & N & N & N \\
+Jet2Eta & M & M & N & N & N & N & N & N & N & N & N \\
+DeltaEta & Y & Y & N & N & N & N & N & N & N & N & N \\
+DeltaPhi & M & M & N & N & N & N & M & M & N & N & N \\
+\end{tabular}
+\end{exampleblock}
+\begin{itemize}
+\item The parameters that have good sensitivity to the most dimensions are Etmiss and Mjj for the VBFDM100 phase space.
+\end{itemize}
+\end{frame}
+
+\begin{frame}
+\frametitle{\small{Most broadly sensitive parameter plots: VBFDM100 Phase space}}
+These are for a DM mass of 100GeV
+\vspace{1cm}
+\begin{columns}
+\begin{column}{.4\textwidth}
+\includegraphics[width=5cm, height=5cm]{/Mass100/Normalised/Mass100_Etmiss_PS_VBFDM_100.pdf}
+\end{column}
+\begin{column}{.4\textwidth}
+\includegraphics[width=5cm, height=5cm]{/Mass100/Normalised/Mass100_Mjj_PS_VBFDM_100.pdf}
+\end{column}
+\end{columns}
+\end{frame}
+
+\begin{frame}
+\frametitle{Sensitivity to dark matter model over background?}
+\center{$\frac{( Z \rightarrow \nu\nu ) + DM}{Z \rightarrow \nu\nu} : Y > 10 > M > 5 > N $}
+\begin{block}{VBFDM OR Monojet Phase space:}
+\begin{tabular}{c | c c c c c c c c c c c}
+Parameter & D5a & D5b & D5c & D5d & D6a & D6b & D7a & D7b & D7c & D7d & Higgs \\ \hline
+Etmiss & M & M & M & M & Y & Y & Y & Y & Y & Y & N \\
+Mjj & Y & Y & N & N & N & N & N & N & M & M & N \\
+Jet1pT & M & M & N & N & N & N & M & M & N & N & N \\
+Jet2pT & N & N & N & N & N & N & M & M & M & M & N \\
+Jet1Eta & Y & Y & N & N & N & N & N & N & N & N & N \\
+Jet2Eta & M & M & N & N & N & N & N & N & N & N & N \\
+DeltaEta & Y & Y & N & N & N & N & N & N & N & N & N \\
+DeltaPhi & N & N & N & N & N & N & N & N & N & N & N \\
+\end{tabular}
+\end{block}
+\begin{itemize}
+\item The parameter that has the best sensitivity to the most dimensions is Etmiss, for the VBFDM OR Monojet phase space.
+\end{itemize}
+\end{frame}
+
+\begin{frame}
+\frametitle{\small{Most broadly sensitive parameter plots: VBFDM or Monojet Phase space}}
+This is for a DM mass of 100GeV
+\vspace{1cm}
+\begin{columns}
+\begin{column}{.5\textwidth}
+\includegraphics[width=7cm, height=7cm]{/Mass100/Normalised/Mass100_Etmiss_PS_VBFDM_OR_Monojet.pdf}
+\end{column}
+\begin{column}{.3\textwidth}
+\begin{itemize}
+\item None of the dimensions scaled by the EFT constraints can bee seen here
+\end{itemize}
+\end{column}
+\end{columns}
+\end{frame}
+
+\begin{frame}
+\frametitle{Sensitivity to dark matter model over background?}
+\center{$\frac{( Z \rightarrow \nu\nu ) + DM}{Z \rightarrow \nu\nu} : Y > 10 > M > 5 > N $}
+\begin{block}{VBFDM OR Monojet High pT Phase space:}
+\begin{tabular}{c | c c c c c c c c c c c}
+Parameter & D5a & D5b & D5c & D5d & D6a & D6b & D7a & D7b & D7c & D7d & Higgs \\ \hline
+Etmiss & M & M & N & N & Y & Y & Y & Y & Y & Y & N \\
+Mjj & Y & Y & N & N & N & N & N & N & M & M & N \\
+Jet1pT & M & M & N & N & N & N & M & M & N & N & N \\
+Jet2pT & N & N & N & N & N & N & M & M & M & M & N \\
+Jet1Eta & Y & Y & N & N & N & N & N & N & N & N & N \\
+Jet2Eta & M & M & N & N & N & N & N & N & N & N & N \\
+DeltaEta & Y & Y & N & N & N & N & N & N & N & N & N \\
+DeltaPhi & M & M & N & N & N & N & N & N & N & N & N \\
+\end{tabular}
+\end{block}
+\begin{itemize}
+\item The parameter that has the best sensitivity to the most dimensions is Etmiss for the VBFDM OR Monojet High pT phase space.
+\end{itemize}
+\end{frame}
+
+\begin{frame}
+\frametitle{\small{Most broadly sensitive parameter plots: VBFDM OR Monojet High pT Phase space}}
+\vspace{1cm}
+\includegraphics[width=7cm, height=7cm]{/Mass100/Normalised/Mass100_Etmiss_PS_VBFDM_OR_Monojet_HighPt.pdf}
+\end{frame}
+
+\begin{frame}
+\frametitle{Best parameter?}
+\begin{itemize}
+\item Due to the scaling with the EFT constraints, some dimensions would not be seen by any parameters. ( D5c, D5d, D6a, D6b )
+\item Etmiss seems to be the parameter that is sensitive to the most dimensions.
+\item This doesn't change for the different masses that have been looked at:
+\end{itemize}
+\begin{columns}
+\begin{column}{.3\textwidth}
+\center{Mass = 10 GeV}
+\includegraphics[width=4cm, height=4cm]{/Mass10/Normalised/Mass10_Etmiss_PS_VBFDM.pdf}
+\end{column}
+\begin{column}{.3\textwidth}
+\center{Mass = 100 GeV}
+\includegraphics[width=4cm, height=4cm]{/Mass100/Normalised/Mass100_Etmiss_PS_VBFDM.pdf}
+\end{column}
+\begin{column}{.3\textwidth}
+\center{Mass = 1000 GeV}
+\includegraphics[width=4cm, height=4cm]{/Mass1000/Normalised/Mass1000_Etmiss_PS_VBFDM.pdf}
+\end{column}
+\end{columns}
+\end{frame}
+
+\begin{frame}
+\frametitle{Backup slides}
+\end{frame}
+
+\begin{frame}
+\frametitle{\small{Phase space VBFDM : Other Parameters}}
+\begin{columns}
+\begin{column}{.3\textwidth}
+\includegraphics[width=4cm, height=4cm]{/Mass100/Normalised/Mass100_DeltaPhi_PS_VBFDM.pdf}
+\newline
+\includegraphics[width=4cm, height=4cm]{/Mass100/Normalised/Mass100_DeltaEta_PS_VBFDM.pdf}
+\end{column}
+\begin{column}{.3\textwidth}
+\includegraphics[width=4cm, height=4cm]{/Mass100/Normalised/Mass100_Jet1Pt_PS_VBFDM.pdf}
+\newline
+\includegraphics[width=4cm, height=4cm]{/Mass100/Normalised/Mass100_Jet2Pt_PS_VBFDM.pdf}
+\end{column}
+\begin{column}{.3\textwidth}
+\includegraphics[width=4cm, height=4cm]{/Mass100/Normalised/Mass100_Jet1Eta_PS_VBFDM.pdf}
+\newline
+\includegraphics[width=4cm, height=4cm]{/Mass100/Normalised/Mass100_Jet2Eta_PS_VBFDM.pdf}
+\end{column}
+\end{columns}
+\end{frame}
+
+\begin{frame}
+\frametitle{\small{Phase space VBFDM or Monojet: Other Parameters}}
+\begin{columns}
+\begin{column}{.3\textwidth}
+\includegraphics[width=4cm, height=4cm]{/Mass100/Normalised/Mass100_DeltaPhi_PS_VBFDM_OR_Monojet.pdf}
+\newline
+\includegraphics[width=4cm, height=4cm]{/Mass100/Normalised/Mass100_DeltaEta_PS_VBFDM_OR_Monojet.pdf}
+\end{column}
+\begin{column}{.3\textwidth}
+\includegraphics[width=4cm, height=4cm]{/Mass100/Normalised/Mass100_Jet1Pt_PS_VBFDM_OR_Monojet.pdf}
+\newline
+\includegraphics[width=4cm, height=4cm]{/Mass100/Normalised/Mass100_Jet2Pt_PS_VBFDM_OR_Monojet.pdf}
+\end{column}
+\begin{column}{.3\textwidth}
+\includegraphics[width=4cm, height=4cm]{/Mass100/Normalised/Mass100_Jet1Eta_PS_VBFDM_OR_Monojet.pdf}
+\newline
+\includegraphics[width=4cm, height=4cm]{/Mass100/Normalised/Mass100_Jet2Eta_PS_VBFDM_OR_Monojet.pdf}
+\end{column}
+\end{columns}
+\end{frame}
+
+\begin{frame}
+\frametitle{\small{Phase space VBFDM or Monojet High pT: Other Parameters}}
+\begin{columns}
+\begin{column}{.3\textwidth}
+\includegraphics[width=4cm, height=4cm]{/Mass100/Normalised/Mass100_DeltaPhi_PS_VBFDM_OR_Monojet_HighPt.pdf}
+\newline
+\includegraphics[width=4cm, height=4cm]{/Mass100/Normalised/Mass100_DeltaEta_PS_VBFDM_OR_Monojet_HighPt.pdf}
+\end{column}
+\begin{column}{.3\textwidth}
+\includegraphics[width=4cm, height=4cm]{/Mass100/Normalised/Mass100_Jet1Pt_PS_VBFDM_OR_Monojet_HighPt.pdf}
+\newline
+\includegraphics[width=4cm, height=4cm]{/Mass100/Normalised/Mass100_Jet2Pt_PS_VBFDM_OR_Monojet_HighPt.pdf}
+\end{column}
+\begin{column}{.3\textwidth}
+\includegraphics[width=4cm, height=4cm]{/Mass100/Normalised/Mass100_Jet1Eta_PS_VBFDM_OR_Monojet_HighPt.pdf}
+\newline
+\includegraphics[width=4cm, height=4cm]{/Mass100/Normalised/Mass100_Jet2Eta_PS_VBFDM_OR_Monojet_HighPt.pdf}
+\end{column}
+\end{columns}
+\end{frame}
+
+
+
+
+
+\end{document} 

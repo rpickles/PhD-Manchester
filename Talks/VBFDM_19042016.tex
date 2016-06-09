@@ -1,0 +1,699 @@
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Beamer Presentation
+% LaTeX Template
+% Version 1.0 (10/11/12)
+%
+% This template has been downloaded from:
+% http://www.LaTeXTemplates.com
+%
+% License:
+% CC BY-NC-SA 3.0 (http://creativecommons.org/licenses/by-nc-sa/3.0/)
+%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+%----------------------------------------------------------------------------------------
+% PACKAGES AND THEMES
+%----------------------------------------------------------------------------------------
+
+\documentclass[10pt,xcolor={dvipsnames}]{beamer}
+%\setbeamersize{text margin left=1em,text margin right=1em}
+\usepackage{mathtools}
+\usepackage{amsmath}
+\usepackage{bm}
+\usepackage{hyperref}
+
+\usepackage{graphicx} % Allows including images
+\graphicspath{{/Users/rebecca/Documents/Rivet_Analyses/MC_VBFDM/PlotCombinationTool/Figures/}{/Users/rebecca/Documents/Presentations/Talks/}{/Users/rebecca/Documents/Rivet_Analyses/MC_VBFDM/PlotCombinationTool/Figures/StatPlots/}{/Users/rebecca/Documents/Rivet_Analyses/MC_VBFDM/PlotCombinationTool/Figures/2DHists/}}
+\usepackage{booktabs} % Allows the use of \toprule, \midrule and \bottomrule in tables
+
+\usepackage{etoolbox}
+\usepackage{cancel}
+
+\usepackage{subcaption}
+\captionsetup{compatibility=false}
+
+\usepackage{multirow}
+
+\usepackage{appendixnumberbeamer}
+
+%\newlength\origleftmargini
+%\setlength\origleftmargini\leftmargini
+%\setbeamertemplate{itemize/enumerate body begin}{\setlength{\leftmargini}{2pt}}%
+
+%\let\oldexampleblock\exampleblock
+%\let\oldendexampleblock\endexampleblock
+%\def\exampleblock{\begingroup \setbeamertemplate{itemize/enumerate body begin}{\setlength{\leftmargini}{\origleftmargini}} \oldexampleblock}
+%\def\endexampleblock{\oldendexampleblock \endgroup}%
+
+%\let\oldalertblock\alertblock
+%\let\oldendalertblock\endalertblock
+%\def\alertblock{\begingroup \setbeamertemplate{itemize/enumerate body begin}{\setlength{\leftmargini}{\origleftmargini}} \oldalertblock}
+%\def\endalertblock{\oldendalertblock \endgroup}
+
+\mode<presentation> {
+
+% The Beamer class comes with a number of default slide themes
+% which change the colors and layouts of slides. Below this is a list
+% of all the themes, uncomment each in turn to see what they look like.
+
+%\usetheme{default}
+%\usetheme{AnnArbor}
+%\usetheme{Antibes}
+%\usetheme{Bergen}
+%\usetheme{Berkeley}
+%\usetheme{Berlin}
+\usetheme{Boadilla}
+%\usetheme{CambridgeUS}
+%\usetheme{Copenhagen}
+%\usetheme{Darmstadt}
+%\usetheme{Dresden}
+%\usetheme{Frankfurt}
+%\usetheme{Goettingen}
+%\usetheme{Hannover}
+%\usetheme{Ilmenau}
+%\usetheme{JuanLesPins}
+%\usetheme{Luebeck}
+%\usetheme{Madrid}
+%\usetheme{Malmoe}
+%\usetheme{Marburg}
+%\usetheme{Montpellier}
+%\usetheme{PaloAlto}
+%\usetheme{Pittsburgh}
+%\usetheme{Rochester}
+%\usetheme{Seahorse}
+%\usetheme{Singapore}
+%\usetheme{Szeged}
+%\usetheme{Warsaw}
+
+% As well as themes, the Beamer class has a number of color themes
+% for any slide theme. Uncomment each of these in turn to see how it
+% changes the colors of your current slide theme.
+
+%\usecolortheme{albatross}
+%\usecolortheme{beaver}
+%\usecolortheme{beetle}
+%\usecolortheme{crane}
+%\usecolortheme{dolphin}
+%\usecolortheme{dove}
+%\usecolortheme{fly}
+%\usecolortheme{lily}
+%\usecolortheme{RoyalBlue}
+%\usecolortheme{rose}
+%\usecolortheme{seagull}
+%\usecolortheme{seahorse}
+%\usecolortheme{whale}
+%\usecolortheme{wolverine}
+
+%%Changing the theme colours
+%\setbeamercolor*{structure}{bg=Plum!20,fg=Plum}
+%\setbeamercolor*{palette primary}{use=structure,fg=white,bg=structure.fg}
+%\setbeamercolor*{palette secondary}{use=structure,fg=white,bg=structure.fg!75}
+%\setbeamercolor*{palette tertiary}{use=structure,fg=white,bg=structure.fg!50!black}
+%\setbeamercolor*{palette quaternary}{fg=white,bg=black}
+%\setbeamercolor{section in toc}{fg=black,bg=white}
+%%\setbeamercolor{alerted text}{use=structure,fg=structure.fg!50!black!80!black}
+%\setbeamercolor{titlelike}{parent=palette primary,fg=structure.fg!50!black}
+%\setbeamercolor{frametitle}{bg=gray!30!white,fg=Plum}
+%\setbeamercolor*{titlelike}{parent=palette primary}
+
+%Changing the theme colours
+\setbeamercolor*{structure}{bg=RoyalPurple,fg=RoyalPurple}
+\setbeamercolor*{palette primary}{use=structure,fg=white,bg=structure.fg}
+\setbeamercolor*{palette secondary}{use=structure,fg=white,bg=structure.fg}
+\setbeamercolor*{palette tertiary}{use=structure,fg=white,bg=structure.fg}
+\setbeamercolor*{palette quaternary}{fg=white,bg=black}
+\setbeamercolor{section in toc}{fg=black,bg=white}
+%\setbeamercolor{alerted text}{use=structure,fg=structure.fg!50!black!80!black}
+\setbeamercolor{titlelike}{parent=palette primary,fg=structure.fg!50!black}
+%\setbeamercolor{frametitle}{use=structure,fg=white,bg=structure.fg}
+\setbeamercolor*{titlelike}{parent=palette primary}
+
+%\setbeamercolor{block}{bg=yellow!10,fg=black}
+%\setbeamercolor{block title}{bg=yellow!50,fg=black}
+%\AtBeginEnvironment{block}{\setbeamercolor{itemize item}{fg=yellow}}
+
+\newenvironment<>{examplefirst}[1]{%
+  \setbeamercolor{block title}{bg=yellow!50,fg=black}%
+  \begin{block}#2{#1}}{\end{block}}
+\AtBeginEnvironment{examplefirst}{\setbeamercolor{itemize item}{fg=yellow}}
+
+%\setbeamertemplate{footline} % To remove the footer line in all slides uncomment this line
+%\setbeamertemplate{footline}[page number] % To replace the footer line in all slides with a simple slide count uncomment this line
+
+%\setbeamertemplate{navigation symbols}{} % To remove the navigation symbols from the bottom of all slides uncomment this line
+
+
+\setbeamertemplate{blocks}[rounded][shadow=false]
+\setbeamertemplate{itemize items}[circle]
+\setbeamertemplate{itemize subitems}[circle]
+
+\renewcommand{\thefootnote}{\alph{footnote}}
+
+}
+
+%----------------------------------------------------------------------------------------
+% TITLE PAGE
+%----------------------------------------------------------------------------------------
+
+
+
+\title[VBFDM Statistical Test]{Statistical test for VBF DM observables} % The short title appears at the bottom of every slide, the full title is only on the title page
+
+\author{\underline{Rebecca Pickles}, Darren Price} % Your name
+%\institute[UoM] % Your institution as it will appear on the bottom of every slide, may be shorthand to save space
+%{
+%University of Manchester\\ % Your institution for the title page
+%\medskip
+%\textit{julia.iturbe@cern.ch} % Your email address
+%}
+% logo of my university
+\titlegraphic{\includegraphics[width=3cm]{UniOfManchesterLogo}}
+\date{\today} % Date, can be changed to a custom date
+
+\begin{document}
+
+\begin{frame}
+\titlepage % Print the title page as the first slide
+\end{frame}
+
+\iffalse
+\begin{frame}
+\frametitle{Overview} % Table of contents slide, comment this block out to remove it
+\tableofcontents % Throughout your presentation, if you choose to use \section{} and \subsection{} commands, these will automatically be printed on this slide as an overview of your presentation
+\end{frame}
+\fi
+%----------------------------------------------------------------------------------------
+% PRESENTATION SLIDES
+%----------------------------------------------------------------------------------------
+
+%------------------------------------------------
+\section{Introduction} % Sections can be created in order to organize your presentation into discrete blocks, all sections and subsections are automatically printed in the table of contents as an overview of the talk
+
+%------------------------------------------------
+\iffalse
+\fi
+
+\begin{frame}
+\frametitle{Status}
+\begin{itemize}
+\item Compared the DM VBF models with standard model background (Both produced in MadGraph).
+\begin{itemize}
+\item Ratio plots of $\frac{\sigma((Z\rightarrow\nu\nu)jj)+\sigma((Z\rightarrow DM DM)jj)}{\sigma((Z\rightarrow\mu^{+}\mu^{-})jj)}_{(EWK+QCD)}$
+\item $\chi^{2}$ statistical test (With room to adapt for different - more robust - test:  inclusion of correlation information arXiv:1508.02507). Showing p-value for a range of DM masses and EFT scales.
+\end{itemize}
+\item Compared DM models with the corrected ratios for all observables, masses and DM models being investigated.
+\item Produced 2D plots of Mjj vs $\delta\eta$.
+\item Looked into the possibility of a 750GeV Higgs being produced through the DM portal. 
+\end{itemize}
+\end{frame}
+
+\begin{frame}
+\frametitle{Effective Operators of DM models}
+\begin{table}[h!]
+\begin{center}
+\scriptsize
+ \begin{tabular}{ | c | c | c | c |} 
+ \hline
+ Name & Operator & Dimension & Minimum EFT Scale (GeV) \\ \hline
+ D5a & $\mathcal{L} = \frac{1}{\Lambda}\bar{\chi}\chi\bigg[\frac{Z_{\mu}Z^{\mu}}{2}+W_{\mu}^{+}W^{-\mu}\bigg]$ & 5 & 100 \\
+ D5b & $\mathcal{L} = \frac{1}{\Lambda}\bar{\chi}\gamma^{5}\chi\bigg[\frac{Z_{\mu}Z^{\mu}}{2}+W_{\mu}^{+}W^{-\mu}\bigg]$ & 5 & 100 \\
+ D5c & $\mathcal{L} = \frac{g}{2\cos{\theta_{W}}\Lambda}\bar{\chi}\sigma^{\mu\nu}\chi\bigg[\delta_{\mu}Z_{\nu}-\delta_{\nu}Z_{\mu}\bigg]$ & 5 & 3300 \\
+ D5d & $\mathcal{L} = \frac{g}{2\cos{\theta_{W}}\Lambda}\bar{\chi}\sigma^{\mu\nu}\chi\epsilon^{\mu\nu\sigma\rho}\bigg[\delta_{\rho}Z_{\sigma}-\delta_{\sigma}Z_{\rho}\bigg]$ & 5 & 6600 \\
+ D6a & $\mathcal{L} = \frac{g}{2\cos{\theta_{W}}\Lambda^{2}}\bar{\chi}\gamma^{\mu}\delta^{\nu}\chi\bigg[\delta_{\mu}Z_{\nu}-\delta_{\nu}Z_{\mu}\bigg]$ & 6 & 230 \\
+ D6b & $\mathcal{L} = \frac{g}{2\cos{\theta_{W}}\Lambda^{2}}\bar{\chi}\gamma_{\mu}\delta_{\nu}\chi\epsilon^{\mu\nu\sigma\rho}\bigg[\delta_{\rho}Z_{\sigma}-\delta_{\sigma}Z_{\rho}\bigg]$ & 6 & 330 \\
+ D7a & $\mathcal{L} = \frac{1}{\Lambda^{3}}\bar{\chi}\chi W^{i,\mu\nu}W_{\mu\nu}^{i}$ & 7 & 100 \\
+ D7b & $\mathcal{L} = \frac{1}{\Lambda^{3}}\bar{\chi}\gamma^{5}\chi W^{i,\mu\nu}W_{\mu\nu}^{i}$ & 7 & 100 \\
+ D7c & $\mathcal{L} = \frac{1}{\Lambda^{3}}\bar{\chi}\chi\epsilon^{\mu\nu\sigma\rho} W^{i,\mu\nu}W_{\rho\sigma}^{i}$ & 7 & 100 \\
+ D7d & $\mathcal{L} = \frac{1}{\Lambda^{3}}\bar{\chi}\gamma^{5}\chi\epsilon^{\mu\nu\sigma\rho} W^{i,\mu\nu}W_{\rho\sigma}^{i}$ & 7 & 100 \\ \hline
+\end{tabular}
+\end{center}
+\end{table}
+\begin{itemize}
+\item The EFT constraints come from Z invisible width limits.
+\item DM Mass and Lagrangian term influences the rates and kinematics.
+\item Can study Higgs 'dark portal' where the interactions are the same as the BSM EFT
+\item The different dimensions have the EFT scale constraints result in some dimensions with vastly reduced rates.
+\end{itemize}
+\end{frame}
+
+\begin{frame}
+\frametitle{(Z$\rightarrow\nu\nu$)jj/(Z$\rightarrow$l$^{+}$l$^{-}$)jj}
+\begin{itemize}
+\item Ran (Z$\rightarrow\nu\nu$)jj and (Z$\rightarrow$$\mu^{+}\mu^{-}$)jj through Madgraph and Rivet procedure.
+\item Used this to find the normalised cross-section ratio: \newline \newline $\frac{\sigma((Z\rightarrow\nu\nu)jj)+\sigma((Z\rightarrow DM DM)jj)}{\sigma((Z\rightarrow\mu^{+}\mu^{-})jj)}$ \newline
+\item Also found $\frac{\sigma((Z\rightarrow\nu\nu)jj)}{\sigma((Z\rightarrow\mu^{+}\mu^{-})jj)}$.
+\item This doesn't match up with the corrected ratio from Emily and Zara. (suspect that there are generator level cuts biasing the Z$\rightarrow\nu\nu$ sample; checking).
+\item Currently comparing DM models to ratio produced with MadGraph:
+\begin{itemize}
+\item To see comparison against SM.
+\item To see comparison as a function of all observables being studied.
+\end{itemize}
+\end{itemize}
+\end{frame}
+
+\begin{frame}
+\frametitle{Relevant cuts}
+\begin{exampleblock}{MadGraph Cuts}
+\begin{table}[h!]
+\begin{center}
+\scriptsize
+\begin{tabular}{ | c | c | c | c | c | c | c | c |} 
+\hline
+Jet p$_{T}$ & Lepton p$_{T}$ & Jet Abs$\eta$ & lepton Abs$\eta$ & Jets $\Delta$R & Leptons $\Delta$R & Jet and Lepton $\Delta$R \\
+\hline 
+\textgreater20GeV & \textgreater10GeV & \textless5.0 & \textless2.5 & \textgreater0.4 & \textgreater0.4 & \textgreater0.4 \\
+\hline
+\end{tabular}
+\end{center}
+\end{table}
+\end{exampleblock}
+\begin{block}{Phase space cuts for rivet analysis}
+\begin{table}[h!]
+\begin{center}
+\scriptsize
+\begin{tabular}{ | c | c | c | c | c | c | c |} 
+\hline
+Phase Space & Jet 1 p$_{T}$ & Jet 2 p$_{T}$ & Abs$\eta$ & Mjj & No. Jets & $\cancel{\it{E}}_{T}$ \\
+\hline
+VBFZ Baseline & \textgreater55 & \textgreater45 & \textless4.4 & n/a & \textgreater2 & n/a \\ 
+VBFZ High-mass & \textgreater55 & \textgreater45 & \textless4.4 & \textgreater1000 & \textgreater2 & n/a\\ 
+VBFZ Search & \textgreater55 & \textgreater45 & \textless4.4 & \textgreater250 & \textgreater2 & n/a \\ 
+VBF Dark Matter & \textgreater55 & \textgreater45 & \textless4.4 & \textgreater250 & \textgreater2 & \textgreater150 \\ 
+VBF DM High Jet p$_{T}$ & \textgreater100 & \textgreater45 & \textless4.4 & \textgreater250 & \textgreater2 & \textgreater150 \\
+Monojet & \textgreater100 & n/a & \textless4.4 & n/a & \textgreater1 & \textgreater150 \\
+Monojet High Jet p$_{T}$ & \textgreater100 & n/a & \textless4.4 & n/a & \textgreater1 & \textgreater250 \\
+VBF DM or Monojet & \multicolumn{6}{| c |}{ VBF DM or Monojet phase space cuts} \\
+VBF DM or Monojet High Jet p$_{T}$ & \multicolumn{6}{| c |}{ VBF DM or Monojet High Jet p$_{T}$ phase space cuts} \\
+\hline
+\end{tabular}
+\caption{All energies shown are in GeV.}
+\end{center}
+\end{table}
+\end{block}
+\end{frame}
+
+\begin{frame}
+\frametitle{Normalised rate plot : D7a : Mjj : $\Lambda_{Min}$ = 100GeV}
+\begin{columns}
+\begin{column}{.5\textwidth}
+\includegraphics[width=6cm]{Mass100/Normalised/Mass100_Mjj_PS_VBFDM.pdf}
+\end{column}
+\begin{column}{.5\textwidth}
+\begin{itemize}
+\item Block colour shows EWK and QCD SM(Z$\rightarrow\nu\nu$)jj.
+\item Effective operators with high EFT scale constraint have a very low rate.
+\item The operators with the lowest EFT scale constraint have a higher rate than the background at high dijet mass.
+\end{itemize}
+\end{column}
+\end{columns}
+\end{frame}
+
+\begin{frame}
+\frametitle{Observable phase space and ratio plots : D7a : Mjj : $\Lambda_{Min}$ = 100GeV}
+\center
+\includegraphics[width=10cm]{/D7a/Normalised/Stats_D7a_Mjj_PS_VBFDM.pdf}
+\begin{itemize}
+\item Observable phase space plot gives p-value from a $\chi^{2}$-test comparing the DM model to the SM background ratio of $\frac{\sigma((Z\rightarrow\nu\nu)jj)}{\sigma((Z\rightarrow\mu^{+}\mu^{-})jj)}$, for a range of DM masses and EFT scales.
+\item Ratio plot shows $\frac{\sigma((Z\rightarrow\nu\nu)jj)+\sigma((Z\rightarrow DM DM)jj)}{\sigma((Z\rightarrow\mu^{+}\mu^{-})jj)}_{(EWK+QCD)}$
+\end{itemize}
+\end{frame}
+
+
+\begin{frame}
+\frametitle{Comparison: D7a : Mjj : $\Lambda_{Min}$ = 100GeV}
+\begin{columns}
+\begin{column}{.3\textwidth}
+\includegraphics[width=3.5cm]{Mass100/Normalised/Mass100_Mjj_PS_VBFDM.pdf}
+\end{column}
+\begin{column}{.7\textwidth}
+\includegraphics[width=8cm]{/D7a/Normalised/Stats_D7a_Mjj_PS_VBFDM.pdf}
+\end{column}
+\end{columns}
+\begin{itemize}
+\item The effective operators that have the base minimum EFT scale of 100GeV appear to have a rate comparable with, and in some cases higher than, the standard model background.
+\item Very small p-values from the $\chi^{2}$-test.
+\item The bins seem to fill the same regardless of the EFT scale - Might be a bug in my code and I'm looking into fixing it at the moment.
+\end{itemize}
+\end{frame}
+
+\begin{frame}
+\frametitle{Comparison: D7a : $\Delta\eta$ : $\Lambda_{Min}$ = 100GeV}
+\begin{columns}
+\begin{column}{.3\textwidth}
+\includegraphics[width=3.5cm]{Mass100/Normalised/Mass100_DeltaEta_PS_VBFDM.pdf}
+\end{column}
+\begin{column}{.7\textwidth}
+\includegraphics[width=8cm]{/D7a/Normalised/Stats_D7a_DeltaEta_PS_VBFDM.pdf}
+\end{column}
+\end{columns}
+\begin{itemize}
+\item Most of the low minimum EFT scale models have a very similar rate and shape to the standard model background. The operators D5a and D5b have a shape skewed to larger values of $\Delta\eta$.
+\item Much larger p-values from the $\chi^{2}$-test.
+\end{itemize}
+\end{frame}
+
+\begin{frame}
+\frametitle{Comparison: D7a : $\Delta\phi$ : $\Lambda_{Min}$ = 3.3TeV}
+\begin{columns}
+\begin{column}{.3\textwidth}
+\includegraphics[width=3.5cm]{Mass100/Normalised/Mass100_DeltaPhi_PS_VBFDM.pdf}
+\end{column}
+\begin{column}{.7\textwidth}
+\includegraphics[width=8cm]{/D7a/Normalised/Stats_D7a_DeltaPhi_PS_VBFDM.pdf}
+\end{column}
+\end{columns}
+\begin{itemize}
+\item Again has higher p-values from the $\chi^{2}$-test.
+\item Could offer a different exclusion region than $\Delta\phi$.
+\end{itemize}
+\end{frame}
+
+\begin{frame}
+\frametitle{Comparison: D7a : $\cancel{\it{E}}_{T}$ : $\Lambda_{Min}$ = 6.6TeV}
+\begin{columns}
+\begin{column}{.3\textwidth}
+\includegraphics[width=3.5cm]{Mass100/Normalised/Mass100_Etmiss_PS_VBFDM.pdf}
+\end{column}
+\begin{column}{.7\textwidth}
+\includegraphics[width=8cm]{/D7a/Normalised/Stats_D7a_Etmiss_PS_VBFDM.pdf}
+\end{column}
+\end{columns}
+\begin{itemize}
+\item Also has a high p-value from the $\chi^{2}$-test.
+\end{itemize}
+\end{frame}
+
+\begin{frame}
+\frametitle{Comparison: D7a : Jet 1 $p_{T}$ : $\Lambda_{Min}$ = 230GeV}
+\begin{columns}
+\begin{column}{.3\textwidth}
+\includegraphics[width=3.5cm]{Mass100/Normalised/Mass100_Jet1PT_PS_VBFDM.pdf}
+\end{column}
+\begin{column}{.7\textwidth}
+\includegraphics[width=8cm]{/D7a/Normalised/Stats_D7a_Jet1PT_PS_VBFDM.pdf}
+\end{column}
+\end{columns}
+\end{frame}
+
+\begin{frame}
+\frametitle{Comparison: D7a : Jet 1 $\eta$ : $\Lambda_{Min}$ = 330GeV}
+\begin{columns}
+\begin{column}{.3\textwidth}
+\includegraphics[width=3.5cm]{Mass100/Normalised/Mass100_Jet1Eta_PS_VBFDM.pdf}
+\end{column}
+\begin{column}{.7\textwidth}
+\includegraphics[width=8cm]{/D7a/Normalised/Stats_D7a_Jet1Eta_PS_VBFDM.pdf}
+\end{column}
+\end{columns}
+\begin{itemize}
+\item Also has a high p-value from the $\chi^{2}$-test.
+\end{itemize}
+\end{frame}
+
+\begin{frame}
+\frametitle{Plans for 2D Observable phase space plots}
+If two observables will give more sensitivity/exclude more observational phase space regions 2D plots could show what each observable excludes as well as what extra could be excluded when combining the sensitivities of both.
+\begin{itemize}
+\item Start with the dijet mass and jet $\Delta\Phi$ as they appear to give high p-values for different DM masses.
+\item Look at which observables cover which EFT scales when the bug is fixed.
+\end{itemize}
+\end{frame}
+
+
+%---------------------------------2D Comparison Plot---------------------------------------
+
+
+
+\begin{frame}
+\frametitle{2D Comparison: $\Delta\eta$ vs Mjj : D5a}
+Red = EWK+QCD SM(Z$\rightarrow\nu\nu$)jj; Blue = DM model 
+\begin{columns}
+\begin{column}{.3\textwidth}
+\center{DM Mass = 10GeV}
+\includegraphics[width=4cm, height=3.5cm]{D5a/Mass10/Normalised/D5a_Mass10_DeltaEtavsMjj_PS_VBFDM.pdf}
+\end{column}
+\begin{column}{.3\textwidth}
+\center{DM Mass = 100GeV}
+\includegraphics[width=4cm, height=3.5cm]{D5a/Mass100/Normalised/D5a_Mass100_DeltaEtavsMjj_PS_VBFDM.pdf}
+\end{column}
+\begin{column}{.3\textwidth}
+\center{DM Mass = 1000GeV}
+\includegraphics[width=4cm, height=3.5cm]{D5a/Mass1000/Normalised/D5a_Mass1000_DeltaEtavsMjj_PS_VBFDM.pdf}
+\end{column}
+\end{columns}
+\begin{itemize}
+\item Large difference between DM model and SM(Z$\rightarrow\nu\nu$)jj.
+\end{itemize}
+\end{frame}
+
+\begin{frame}
+\frametitle{2D Comparison: $\Delta\eta$ vs Mjj : D5b}
+Red = EWK+QCD SM(Z$\rightarrow\nu\nu$)jj; Blue = DM model 
+\begin{columns}
+\begin{column}{.3\textwidth}
+\center{DM Mass = 10GeV}
+\includegraphics[width=4cm, height=3.5cm]{D5b/Mass10/Normalised/D5b_Mass10_DeltaEtavsMjj_PS_VBFDM.pdf}
+\end{column}
+\begin{column}{.3\textwidth}
+\center{DM Mass = 100GeV}
+\includegraphics[width=4cm, height=3.5cm]{D5b/Mass100/Normalised/D5b_Mass100_DeltaEtavsMjj_PS_VBFDM.pdf}
+\end{column}
+\begin{column}{.3\textwidth}
+\center{DM Mass = 1000GeV}
+\includegraphics[width=4cm, height=3.5cm]{D5b/Mass1000/Normalised/D5b_Mass1000_DeltaEtavsMjj_PS_VBFDM.pdf}
+\end{column}
+\end{columns}
+\begin{itemize}
+\item Again : Large difference between DM model and SM(Z$\rightarrow\nu\nu$)jj.
+\end{itemize}
+\end{frame}
+
+\begin{frame}
+\frametitle{2D Comparison: $\Delta\eta$ vs Mjj : D5c}
+Red = EWK+QCD SM(Z$\rightarrow\nu\nu$)jj; Blue = DM model 
+\begin{columns}
+\begin{column}{.3\textwidth}
+\center{DM Mass = 10GeV}
+\includegraphics[width=4cm, height=3.5cm]{D5c/Mass10/Normalised/D5c_Mass10_DeltaEtavsMjj_PS_VBFDM.pdf}
+\end{column}
+\begin{column}{.3\textwidth}
+\center{DM Mass = 100GeV}
+\includegraphics[width=4cm, height=3.5cm]{D5c/Mass100/Normalised/D5c_Mass100_DeltaEtavsMjj_PS_VBFDM.pdf}
+\end{column}
+\begin{column}{.3\textwidth}
+\center{DM Mass = 1000GeV}
+\includegraphics[width=4cm, height=3.5cm]{D5c/Mass1000/Normalised/D5c_Mass1000_DeltaEtavsMjj_PS_VBFDM.pdf}
+\end{column}
+\end{columns}
+\begin{itemize}
+\item Due to the large EFT constraint of $\Lambda$ = 3.3 TeV, this dimension model can not be seen.
+\end{itemize}
+\end{frame}
+
+\begin{frame}
+\frametitle{2D Comparison: $\Delta\eta$ vs Mjj : D5d}
+Red = EWK+QCD SM(Z$\rightarrow\nu\nu$)jj; Blue = DM model 
+\begin{columns}
+\begin{column}{.3\textwidth}
+\center{DM Mass = 10GeV}
+\includegraphics[width=4cm, height=3.5cm]{D5d/Mass10/Normalised/D5d_Mass10_DeltaEtavsMjj_PS_VBFDM.pdf}
+\end{column}
+\begin{column}{.3\textwidth}
+\center{DM Mass = 100GeV}
+\includegraphics[width=4cm, height=3.5cm]{D5d/Mass100/Normalised/D5d_Mass100_DeltaEtavsMjj_PS_VBFDM.pdf}
+\end{column}
+\begin{column}{.3\textwidth}
+\center{DM Mass = 1000GeV}
+\includegraphics[width=4cm, height=3.5cm]{D5d/Mass1000/Normalised/D5d_Mass1000_DeltaEtavsMjj_PS_VBFDM.pdf}
+\end{column}
+\end{columns}
+\begin{itemize}
+\item Due to the large EFT constraint of $\Lambda$ = 6.6 TeV, this dimension model can not be seen.
+\end{itemize}
+\end{frame}
+
+\begin{frame}
+\frametitle{2D Comparison: $\Delta\eta$ vs Mjj : D6a}
+Red = EWK+QCD SM(Z$\rightarrow\nu\nu$)jj; Blue = DM model 
+\begin{columns}
+\begin{column}{.3\textwidth}
+\center{DM Mass = 10GeV}
+\includegraphics[width=4cm, height=3.5cm]{D6a/Mass10/Normalised/D6a_Mass10_DeltaEtavsMjj_PS_VBFDM.pdf}
+\end{column}
+\begin{column}{.3\textwidth}
+\center{DM Mass = 100GeV}
+\includegraphics[width=4cm, height=3.5cm]{D6a/Mass100/Normalised/D6a_Mass100_DeltaEtavsMjj_PS_VBFDM.pdf}
+\end{column}
+\begin{column}{.3\textwidth}
+\center{DM Mass = 1000GeV}
+\includegraphics[width=4cm, height=3.5cm]{D6a/Mass1000/Normalised/D6a_Mass1000_DeltaEtavsMjj_PS_VBFDM.pdf}
+\end{column}
+\end{columns}
+\begin{itemize}
+\item Due to the large EFT constraint of $\Lambda$ = 330GeV, this dimension model can not be seen.
+\end{itemize}
+\end{frame}
+
+
+\begin{frame}
+\frametitle{2D Comparison: $\Delta\eta$ vs Mjj : D6b}
+Red = EWK+QCD SM(Z$\rightarrow\nu\nu$)jj; Blue = DM model 
+\begin{columns}
+\begin{column}{.3\textwidth}
+\center{DM Mass = 10GeV}
+\includegraphics[width=4cm, height=3.5cm]{D6b/Mass10/Normalised/D6b_Mass10_DeltaEtavsMjj_PS_VBFDM.pdf}
+\end{column}
+\begin{column}{.3\textwidth}
+\center{DM Mass = 100GeV}
+\includegraphics[width=4cm, height=3.5cm]{D6b/Mass100/Normalised/D6b_Mass100_DeltaEtavsMjj_PS_VBFDM.pdf}
+\end{column}
+\begin{column}{.3\textwidth}
+\center{DM Mass = 1000GeV}
+\includegraphics[width=4cm, height=3.5cm]{D6b/Mass1000/Normalised/D6b_Mass1000_DeltaEtavsMjj_PS_VBFDM.pdf}
+\end{column}
+\end{columns}
+\begin{itemize}
+\item Due to the large EFT constraint of $\Lambda$ = 230GeV, this dimension model can not be seen.
+\end{itemize}
+\end{frame}
+
+\begin{frame}
+\frametitle{2D Comparison: $\Delta\eta$ vs Mjj : D7a}
+Red = EWK+QCD SM(Z$\rightarrow\nu\nu$)jj; Blue = DM model 
+\begin{columns}
+\begin{column}{.3\textwidth}
+\center{DM Mass = 10GeV}
+\includegraphics[width=4cm, height=3.5cm]{D7a/Mass10/Normalised/D7a_Mass10_DeltaEtavsMjj_PS_VBFDM.pdf}
+\end{column}
+\begin{column}{.3\textwidth}
+\center{DM Mass = 100GeV}
+\includegraphics[width=4cm, height=3.5cm]{D7a/Mass100/Normalised/D7a_Mass100_DeltaEtavsMjj_PS_VBFDM.pdf}
+\end{column}
+\begin{column}{.3\textwidth}
+\center{DM Mass = 1000GeV}
+\includegraphics[width=4cm, height=3.5cm]{D7a/Mass1000/Normalised/D7a_Mass1000_DeltaEtavsMjj_PS_VBFDM.pdf}
+\end{column}
+\end{columns}
+\end{frame}
+
+\begin{frame}
+\frametitle{2D Comparison: $\Delta\eta$ vs Mjj : D7b}
+Red = EWK+QCD SM(Z$\rightarrow\nu\nu$)jj; Blue = DM model 
+\begin{columns}
+\begin{column}{.3\textwidth}
+\center{DM Mass = 10GeV}
+\includegraphics[width=4cm, height=3.5cm]{D7b/Mass10/Normalised/D7b_Mass10_DeltaEtavsMjj_PS_VBFDM.pdf}
+\end{column}
+\begin{column}{.3\textwidth}
+\center{DM Mass = 100GeV}
+\includegraphics[width=4cm, height=3.5cm]{D7b/Mass100/Normalised/D7b_Mass100_DeltaEtavsMjj_PS_VBFDM.pdf}
+\end{column}
+\begin{column}{.3\textwidth}
+\center{DM Mass = 1000GeV}
+\includegraphics[width=4cm, height=3.5cm]{D7b/Mass1000/Normalised/D7b_Mass1000_DeltaEtavsMjj_PS_VBFDM.pdf}
+\end{column}
+\end{columns}
+\end{frame}
+
+\begin{frame}
+\frametitle{2D Comparison: $\Delta\eta$ vs Mjj : D7c}
+Red = EWK+QCD SM(Z$\rightarrow\nu\nu$)jj; Blue = DM model 
+\begin{columns}
+\begin{column}{.3\textwidth}
+\center{DM Mass = 10GeV}
+\includegraphics[width=4cm, height=3.5cm]{D7c/Mass10/Normalised/D7c_Mass10_DeltaEtavsMjj_PS_VBFDM.pdf}
+\end{column}
+\begin{column}{.3\textwidth}
+\center{DM Mass = 100GeV}
+\includegraphics[width=4cm, height=3.5cm]{D7c/Mass100/Normalised/D7c_Mass100_DeltaEtavsMjj_PS_VBFDM.pdf}
+\end{column}
+\begin{column}{.3\textwidth}
+\center{DM Mass = 1000GeV}
+\includegraphics[width=4cm, height=3.5cm]{D7c/Mass1000/Normalised/D7c_Mass1000_DeltaEtavsMjj_PS_VBFDM.pdf}
+\end{column}
+\end{columns}
+\end{frame}
+
+\begin{frame}
+\frametitle{2D Comparison: $\Delta\eta$ vs Mjj : D7d}
+Red = EWK+QCD SM(Z$\rightarrow\nu\nu$)jj; Blue = DM model 
+\begin{columns}
+\begin{column}{.3\textwidth}
+\center{DM Mass = 10GeV}
+\includegraphics[width=4cm, height=3.5cm]{D7d/Mass10/Normalised/D7d_Mass10_DeltaEtavsMjj_PS_VBFDM.pdf}
+\end{column}
+\begin{column}{.3\textwidth}
+\center{DM Mass = 100GeV}
+\includegraphics[width=4cm, height=3.5cm]{D7d/Mass100/Normalised/D7d_Mass100_DeltaEtavsMjj_PS_VBFDM.pdf}
+\end{column}
+\begin{column}{.3\textwidth}
+\center{DM Mass = 1000GeV}
+\includegraphics[width=4cm, height=3.5cm]{D7d/Mass1000/Normalised/D7d_Mass1000_DeltaEtavsMjj_PS_VBFDM.pdf}
+\end{column}
+\end{columns}
+\end{frame}
+
+
+\begin{frame}
+\frametitle{2D Comparison: $\Delta\eta$ vs Mjj : Higgs}
+Red = EWK+QCD SM(Z$\rightarrow\nu\nu$)jj; Blue = DM model 
+\begin{columns}
+\begin{column}{.3\textwidth}
+\center{DM Mass = 10GeV}
+\includegraphics[width=4cm, height=3.5cm]{Higgs/Mass10/Normalised/Higgs_Mass10_DeltaEtavsMjj_PS_VBFDM.pdf}
+\end{column}
+\begin{column}{.3\textwidth}
+\center{DM Mass = 100GeV}
+\includegraphics[width=4cm, height=3.5cm]{Higgs/Mass100/Normalised/Higgs_Mass100_DeltaEtavsMjj_PS_VBFDM.pdf}
+\end{column}
+\begin{column}{.3\textwidth}
+\center{DM Mass = 1000GeV}
+\includegraphics[width=4cm, height=3.5cm]{Higgs/Mass1000/Normalised/Higgs_Mass1000_DeltaEtavsMjj_PS_VBFDM.pdf}
+\end{column}
+\end{columns}
+\end{frame}
+
+%------------------------------750Higgs-------------------------------------------
+
+
+\begin{frame}
+\frametitle{750GeV Higgs with Higgs Dark Matter Portal model}
+Used 125GeV Higgs DM portal model and changed Higgs mass and ran through procedure. Not perfect method as Higgs DM portal model is set up for the lower mass; just a first look for possibilities. 
+\begin{columns}
+\begin{column}{.3\textwidth}
+\includegraphics[width=3.5cm]{/Higgs750/Normalised/Higgs750_Mjj_PS_VBFDM.pdf}
+\end{column}
+\begin{column}{.7\textwidth}
+\includegraphics[width=8cm]{/Higgs750/Normalised/Stats_Higgs750_Mjj_PS_VBFDM.pdf}
+\end{column}
+\end{columns}
+\end{frame}
+
+
+%-----------------------------Next Steps------------------------------------------
+
+\begin{frame}
+\frametitle{Summary}
+\begin{itemize}
+\item Set up main body of framework for statistical test of the DM models against all observables investigated.
+\item Initial look suggests dijet mass and jet $\Delta\phi$ would work well for a pair of observables to investigate.
+\item Next Steps ($\sim$ 3/4 weeks):
+\begin{itemize}
+\item Fix problem causing SM ratio to be incorrect (Change cuts in MadGraph) 
+\item Fix bug in statistical test code that means the EFT Scale doesn't affect the p-value.
+\item Run more Masses/scales through the code to compare in the statistics test.
+\item Add in a more robust statistical test.
+\item Produce 2D observable phase space plots.
+\end{itemize}
+\item Longer term:
+\begin{itemize}
+\item Add Pythia to procedure.
+\item Run through procedure with Monojet and 'standard DM' models. 
+\end{itemize}
+\end{itemize}
+\end{frame}
+
+
+
+
+\end{document} 
