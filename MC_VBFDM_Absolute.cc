@@ -5,7 +5,6 @@
 /// Initialise and register projections here
 #include <boost/assign/list_of.hpp>
 #include "Rivet/Analysis.hh"
-#include "Rivet/Analyses/MC_JetAnalysis.hh"
 #include "Rivet/Projections/ZFinder.hh"
 #include "Rivet/Projections/FastJets.hh"
 #include "Rivet/Projections/MissingMomentum.hh"
@@ -24,10 +23,10 @@ double Count_Monojet = 0;
 double Count_Monojet_HighPt = 0;
 double Count_VBFDM_OR_Monojet = 0; 
 double Count_VBFDM_OR_Monojet_HighPt = 0;
-bool greaterthan150 = false;
-bool greaterthan250 = false;
-double muonEnergy = 5.;
+bool greaterthan200 = false;
+double diLeptonPt = 5.;
 int muonSize = 6;
+double weight = 0.;
 
 namespace Rivet {
 
@@ -43,158 +42,179 @@ namespace Rivet {
 
    public:
 
-    std::vector<double> bins_Mjj;
-    std::vector<double> bins_DeltaEta;
-   
     /// Initialize                                                                                                               
       void init() {
-	//	FinalState(double mineta, double maxeta, double minpt=0.0*GeV);
+
 	const FinalState fs;
 
-        ZFinder zfinder_mu(fs, Cuts::abseta < 4.5 && Cuts::pT > 0*GeV, PID::MUON, 0*GeV, 116*GeV, 0.1, ZFinder::CLUSTERNODECAY);
+	Cut cuts = (Cuts::pT > 7*GeV) & (Cuts::abseta < 2.5);
+        ZFinder zfinder_mu(fs, cuts, PID::MUON, 66*GeV, 116*GeV, 0.1);
         addProjection(zfinder_mu, "ZFinder_mu");
-			
-	FastJets jets(zfinder_mu.remainingFinalState(), FastJets::ANTIKT, 0.4);
-	jets.useInvisibles();
+
+	VetoedFinalState had_fs;
+	had_fs.addVetoOnThisFinalState(zfinder_mu);			
+	FastJets jets(had_fs, FastJets::ANTIKT, 0.4);
+	jets.useInvisibles(true);
 	addProjection(jets, "Jets");
 
-	MissingMomentum met(FinalState(-5.0,5.0,0*GeV));
+	MissingMomentum met(fs);
         addProjection(met, "MET");
 
-	bins_Mjj = boost::assign::list_of<double>(250.)(300.)(400.)(500.)(600.)(800.)(1000.)(1500.)(2000.)(4000.);
-	bins_DeltaEta = boost::assign::list_of<double>(0.)(1.)(2.)(3.)(4.)(5.)(6.)(7.)(8.)(9.);
+	// Bins:
+	vector<double> bins_Mjj      = { 200., 400., 600., 1000., 2000., 3000., 4000. };
+	vector<double> bins_DeltaEta = { 0., 1., 2., 3., 4., 5., 6., 7., 8., 9. };
+	vector<double> bins_Jet1PT   = { 50., 100., 150., 200., 250., 300., 400., 500., 600. };
+	vector<double> bins_Eta      = { -6., -4., -2., -1., 0., 1., 2., 4., 6. };
+	vector<double> bins_DeltaPhi = { 0., pi/6, pi/3, pi/2, 2*pi/3, 5*pi/6, pi };
+	vector<double> bins_MET      = { 200., 250., 300., 350., 500., 700., 1000., 1400. };
+	vector<double> bins_NumJets  = { 0., 1., 2., 3., 4. };
+	vector<double> bins_Count    = { 0., 1., 2., 3., 4., 5., 6., 7., 8., 9. };
 
-
-	/// Histograms:             
-	
+	/// Histograms:             	
 	//Mjj	
- 	_hist_Mjj_PS_VBFZ_Baseline = bookHisto1D("Mjj_PS_VBFZ_Baseline", bins_Mjj, "Mjj_PS_VBFZ_Baseline", "Mjj, GeV", "Probability");
-	_hist_Mjj_PS_VBFZ_HighMass = bookHisto1D("Mjj_PS_VBFZ_HighMass", bins_Mjj,"Mjj_PS_VBFZ_HighMass", "Mjj, GeV", "Probability");
-	_hist_Mjj_PS_VBFZ_Search = bookHisto1D("Mjj_PS_VBFZ_Search", bins_Mjj, "Mjj_PS_VBFZ_Search", "Mjj, GeV", "Probability");
-	_hist_Mjj_PS_VBFDM = bookHisto1D("Mjj_PS_VBFDM", bins_Mjj, "Mjj_PS_VBFDM", "Mjj, GeV", "Probability");
-        _hist_Mjj_PS_VBFDM_100 = bookHisto1D("Mjj_PS_VBFDM_100", bins_Mjj, "Mjj_PS_VBFDM_100", "Mjj, GeV", "Probability");	
-	_hist_Mjj_PS_Monojet = bookHisto1D("Mjj_PS_Monojet", bins_Mjj, "Mjj_PS_Monojet", "Mjj, GeV", "Probability");
-        _hist_Mjj_PS_Monojet_HighPt = bookHisto1D("Mjj_PS_Monojet_HighPt", bins_Mjj, "Mjj_PS_Monojet_HighPt", "Mjj, GeV", "Probability");
-	_hist_Mjj_PS_VBFDM_OR_Monojet = bookHisto1D("Mjj_PS_VBFDM_OR_Monojet", bins_Mjj, "Mjj_PS_VBFDM_OR_Monojet", "Mjj, GeV", "Probability");
-	_hist_Mjj_PS_VBFDM_OR_Monojet_HighPt = bookHisto1D("Mjj_PS_VBFDM_OR_Monojet_HighPt", bins_Mjj, "Mjj_PS_VBFDM_OR_Monojet_HighPt", "Mjj, GeV", "Probability");
+	_h["Mjj_PS_VBFZ_Baseline"] = bookHisto1D("Mjj_PS_VBFZ_Baseline", bins_Mjj);
+	_h["Mjj_PS_VBFZ_HighMass"] = bookHisto1D("Mjj_PS_VBFZ_HighMass", bins_Mjj);
+	_h["Mjj_PS_VBFZ_Search"] = bookHisto1D("Mjj_PS_VBFZ_Search", bins_Mjj);
+	_h["Mjj_PS_VBFDM"] = bookHisto1D("Mjj_PS_VBFDM", bins_Mjj);
+	_h["Mjj_PS_VBFDM_100"] = bookHisto1D("Mjj_PS_VBFDM_100", bins_Mjj);
+	_h["Mjj_PS_Monojet"] = bookHisto1D("Mjj_PS_Monojet", bins_Mjj);
+	_h["Mjj_PS_Monojet_HighPt"] = bookHisto1D("Mjj_PS_Monojet_HighPt", bins_Mjj);
+	_h["Mjj_PS_VBFDM_OR_Monojet"] = bookHisto1D("Mjj_PS_VBFDM_OR_Monojet", bins_Mjj);
+	_h["Mjj_PS_VBFDM_OR_Monojet_HighPt"] = bookHisto1D("Mjj_PS_VBFDM_OR_Monojet_HighPt", bins_Mjj);
+
 	//PT of Jet 1
-        _hist_Jet1PT_PS_VBFZ_Baseline = bookHisto1D("Jet1PT_PS_VBFZ_Baseline", 50, 55, 600, "Jet1PT_PS_VBFZ_Baseline", "Jet1PT, GeV", "Probability");
-	_hist_Jet1PT_PS_VBFZ_HighMass = bookHisto1D("Jet1PT_PS_VBFZ_HighMass", 50, 55, 600, "Jet1PT_PS_VBFZ_HighMass", "Jet1PT, GeV", "Probability");
-        _hist_Jet1PT_PS_VBFZ_Search = bookHisto1D("Jet1PT_PS_VBFZ_Search", 50, 55, 600, "Jet1PT_PS_VBFZ_Search", "Jet1PT, GeV", "Probability");
-        _hist_Jet1PT_PS_VBFDM = bookHisto1D("Jet1PT_PS_VBFDM", 50, 55, 600, "Jet1PT_PS_VBFDM", "Jet1PT, GeV", "Probability");
-        _hist_Jet1PT_PS_VBFDM_100 = bookHisto1D("Jet1PT_PS_VBFDM_100", 50, 55, 600, "Jet1PT_PS_VBFDM_100", "Jet1PT, GeV", "Probability");
-	_hist_Jet1PT_PS_Monojet = bookHisto1D("Jet1PT_PS_Monojet", 50, 55, 600, "Jet1PT_PS_Monojet", "Jet1PT, GeV", "Probability");
-	_hist_Jet1PT_PS_Monojet_HighPt = bookHisto1D("Jet1PT_PS_Monojet_HighPt", 50, 55, 600, "Jet1PT_PS_Monojet_HighPt", "Jet1PT, GeV", "Probability");
-	_hist_Jet1PT_PS_VBFDM_OR_Monojet = bookHisto1D("Jet1PT_PS_VBFDM_OR_Monojet", 50, 55, 600, "Jet1PT_PS_VBFDM_OR_Monojet", "Jet1PT, GeV", "Probability");
-	_hist_Jet1PT_PS_VBFDM_OR_Monojet_HighPt = bookHisto1D("Jet1PT_PS_VBFDM_OR_Monojet_HighPt", 50, 55, 600, "Jet1PT_PS_VBFDM_OR_Monojet_HighPt", "Jet1PT, GeV", "Probability");
+	_h["Jet1PT_PS_VBFZ_Baseline"] = bookHisto1D("Jet1PT_PS_VBFZ_Baseline", bins_Jet1PT);
+	_h["Jet1PT_PS_VBFZ_HighMass"] = bookHisto1D("Jet1PT_PS_VBFZ_HighMass", bins_Jet1PT);
+	_h["Jet1PT_PS_VBFZ_Search"] = bookHisto1D("Jet1PT_PS_VBFZ_Search", bins_Jet1PT);
+	_h["Jet1PT_PS_VBFDM"] = bookHisto1D("Jet1PT_PS_VBFDM", bins_Jet1PT);
+	_h["Jet1PT_PS_VBFDM_100"] = bookHisto1D("Jet1PT_PS_VBFDM_100", bins_Jet1PT);
+	_h["Jet1PT_PS_Monojet"] = bookHisto1D("Jet1PT_PS_Monojet", bins_Jet1PT);
+	_h["Jet1PT_PS_Monojet_HighPt"] = bookHisto1D("Jet1PT_PS_Monojet_HighPt", bins_Jet1PT);
+	_h["Jet1PT_PS_VBFDM_OR_Monojet"] = bookHisto1D("Jet1PT_PS_VBFDM_OR_Monojet", bins_Jet1PT);
+	_h["Jet1PT_PS_VBFDM_OR_Monojet_HighPt"] = bookHisto1D("Jet1PT_PS_VBFDM_OR_Monojet_HighPt", bins_Jet1PT);
+
 	//PT of Jet 2
-        _hist_Jet2PT_PS_VBFZ_Baseline = bookHisto1D("Jet2PT_PS_VBFZ_Baseline", 50, 45, 600, "Jet2PT_PS_VBFZ_Baseline", "Jet2PT, GeV", "Probability");
-	_hist_Jet2PT_PS_VBFZ_HighMass = bookHisto1D("Jet2PT_PS_VBFZ_HighMass", 50, 45, 600, "Jet2PT_PS_VBFZ_HighMass", "Jet2PT, GeV", "Probability");
-	_hist_Jet2PT_PS_VBFZ_Search = bookHisto1D("Jet2PT_PS_VBFZ_Search", 50, 45, 600, "Jet2PT_PS_VBFZ_Search", "Jet2PT, GeV", "Probability");
-        _hist_Jet2PT_PS_VBFDM = bookHisto1D("Jet2PT_PS_VBFDM", 50, 45, 600, "Jet2PT_PS_VBFDM", "Jet2PT, GeV", "Probability");
-        _hist_Jet2PT_PS_VBFDM_100 = bookHisto1D("Jet2PT_PS_VBFDM_100", 50, 45, 600, "Jet2PT_PS_VBFDM_100", "Jet2PT, GeV", "Probability");
-	_hist_Jet2PT_PS_Monojet = bookHisto1D("Jet2PT_PS_Monojet", 50, 45, 600, "Jet2PT_PS_Monojet", "Jet2PT, GeV", "Probability");
-	_hist_Jet2PT_PS_Monojet_HighPt = bookHisto1D("Jet2PT_PS_Monojet_HighPt", 50, 45, 600, "Jet2PT_PS_Monojet_HighPt", "Jet2PT, GeV", "Probability");
-        _hist_Jet2PT_PS_VBFDM_OR_Monojet = bookHisto1D("Jet2PT_PS_VBFDM_OR_Monojet", 50, 45, 600, "Jet2PT_PS_VBFDM_OR_Monojet", "Jet2PT, GeV", "Probability");
-	_hist_Jet2PT_PS_VBFDM_OR_Monojet_HighPt = bookHisto1D("Jet2PT_PS_VBFDM_OR_Monojet_HighPt", 50, 45, 600, "Jet2PT_PS_VBFDM_OR_Monojet_HighPt", "Jet2PT, GeV", "Probability");
+	_h["Jet2PT_PS_VBFZ_Baseline"] = bookHisto1D("Jet2PT_PS_VBFZ_Baseline", bins_Jet1PT);
+	_h["Jet2PT_PS_VBFZ_HighMass"] = bookHisto1D("Jet2PT_PS_VBFZ_HighMass", bins_Jet1PT);
+	_h["Jet2PT_PS_VBFZ_Search"] = bookHisto1D("Jet2PT_PS_VBFZ_Search", bins_Jet1PT);
+	_h["Jet2PT_PS_VBFDM"] = bookHisto1D("Jet2PT_PS_VBFDM", bins_Jet1PT);
+	_h["Jet2PT_PS_VBFDM_100"] = bookHisto1D("Jet2PT_PS_VBFDM_100", bins_Jet1PT);
+	_h["Jet2PT_PS_Monojet"] = bookHisto1D("Jet2PT_PS_Monojet", bins_Jet1PT);
+	_h["Jet2PT_PS_Monojet_HighPt"] = bookHisto1D("Jet2PT_PS_Monojet_HighPt", bins_Jet1PT);
+        _h["Jet2PT_PS_VBFDM_OR_Monojet"] = bookHisto1D("Jet2PT_PS_VBFDM_OR_Monojet", bins_Jet1PT);
+	_h["Jet2PT_PS_VBFDM_OR_Monojet_HighPt"] = bookHisto1D("Jet2PT_PS_VBFDM_OR_Monojet_HighPt", bins_Jet1PT);
+
 	//Number of Jets
-        _hist_NumJets_PS_VBFZ_Baseline = bookHisto1D("NumJets_PS_VBFZ_Baseline", 5, 0, 4, "NumJets_PS_VBFZ_Baseline", "NumJets", "Probability");
-	_hist_NumJets_PS_VBFZ_HighMass = bookHisto1D("NumJets_PS_VBFZ_HighMass", 5, 0, 4, "NumJets_PS_VBFZ_HighMass", "NumJets", "Probability");
-	_hist_NumJets_PS_VBFZ_Search = bookHisto1D("NumJets_PS_VBFZ_Search", 5, 0, 4, "NumJets_PS_VBFZ_Search", "NumJets ", "Probability");
-        _hist_NumJets_PS_VBFDM = bookHisto1D("NumJets_PS_VBFDM", 5, 0, 4, "NumJets_PS_VBFDM", "NumJets ", "Probability");
-        _hist_NumJets_PS_VBFDM_100 = bookHisto1D("NumJets_PS_VBFDM_100", 5, 0, 4, "NumJets_PS_VBFDM_100", "NumJets ", "Probability");
-        _hist_NumJets_PS_Monojet = bookHisto1D("NumJets_PS_Monojet", 5, 0, 4, "NumJets_PS_Monojet", "NumJets ", "Probability");
-	_hist_NumJets_PS_Monojet_HighPt = bookHisto1D("NumJets_PS_Monojet_HighPt", 5, 0, 4, "NumJets_PS_Monojet_HighPt", "NumJets ", "Probability");
-        _hist_NumJets_PS_VBFDM_OR_Monojet = bookHisto1D("NumJets_PS_VBFDM_OR_Monojet", 5, 0, 4,"NumJets_PS_VBFDM_OR_Monojet", "NumJets ", "Probability");
-	_hist_NumJets_PS_VBFDM_OR_Monojet_HighPt = bookHisto1D("NumJets_PS_VBFDM_OR_Monojet_HighPt", 5, 0, 4,"NumJets_PS_VBFDM_OR_Monojet_HighPt", "NumJets ", "Probability");
+        _h["NumJets_PS_VBFZ_Baseline"] = bookHisto1D("NumJets_PS_VBFZ_Baseline", bins_NumJets);
+        _h["NumJets_PS_VBFZ_HighMass"] = bookHisto1D("NumJets_PS_VBFZ_HighMass", bins_NumJets);
+        _h["NumJets_PS_VBFZ_Search"] = bookHisto1D("NumJets_PS_VBFZ_Search", bins_NumJets);
+        _h["NumJets_PS_VBFDM"] = bookHisto1D("NumJets_PS_VBFDM", bins_NumJets);
+        _h["NumJets_PS_VBFDM_100"] = bookHisto1D("NumJets_PS_VBFDM_100", bins_NumJets);
+        _h["NumJets_PS_Monojet"] = bookHisto1D("NumJets_PS_Monojet", bins_NumJets);
+        _h["NumJets_PS_Monojet_HighPt"] = bookHisto1D("NumJets_PS_Monojet_HighPt", bins_NumJets);
+        _h["NumJets_PS_VBFDM_OR_Monojet"] = bookHisto1D("NumJets_PS_VBFDM_OR_Monojet", bins_NumJets);
+        _h["NumJets_PS_VBFDM_OR_Monojet_HighPt"] = bookHisto1D("NumJets_PS_VBFDM_OR_Monojet_HighPt", bins_NumJets);
+
 	//Eta Jet 1
-        _hist_Jet1Eta_PS_VBFZ_Baseline = bookHisto1D("Jet1Eta_PS_VBFZ_Baseline", 50, -6, 6, "Jet1Eta_PS_VBFZ_Baseline", "Jet1Eta ", "Probability");
-        _hist_Jet1Eta_PS_VBFZ_HighMass = bookHisto1D("Jet1Eta_PS_VBFZ_HighMass", 50, -6, 6, "Jet1Eta_PS_VBFZ_HighMass", "Jet1Eta ", "Probability");
-        _hist_Jet1Eta_PS_VBFZ_Search = bookHisto1D("Jet1Eta_PS_VBFZ_Search", 50, -6, 6, "Jet1Eta_PS_VBFZ_Search", "Jet1Eta ", "Probability");
-        _hist_Jet1Eta_PS_VBFDM = bookHisto1D("Jet1Eta_PS_VBFDM", 50, -6, 6, "Jet1Eta_PS_VBFDM", "Jet1Eta ", "Probability");
-        _hist_Jet1Eta_PS_VBFDM_100 = bookHisto1D("Jet1Eta_PS_VBFDM_100", 50, -6, 6, "Jet1Eta_PS_VBFDM_100", "Jet1Eta ", "Probability");
-        _hist_Jet1Eta_PS_Monojet = bookHisto1D("Jet1Eta_PS_Monojet", 50, -6, 6, "Jet1Eta_PS_Monojet", "Jet1Eta ", "Probability");
-	_hist_Jet1Eta_PS_Monojet_HighPt = bookHisto1D("Jet1Eta_PS_Monojet_HighPt", 50, -6, 6, "Jet1Eta_PS_Monojet_HighPt", "Jet1Eta ", "Probability");
-        _hist_Jet1Eta_PS_VBFDM_OR_Monojet = bookHisto1D("Jet1Eta_PS_VBFDM_OR_Monojet", 50, -6, 6, "Jet1Eta_PS_VBFDM_OR_Monojet", "Jet1Eta ", "Probability");
-	_hist_Jet1Eta_PS_VBFDM_OR_Monojet_HighPt = bookHisto1D("Jet1Eta_PS_VBFDM_OR_Monojet_HighPt", 50, -6, 6, "Jet1Eta_PS_VBFDM_OR_Monojet_HighPt", "Jet1Eta ", "Probability");
+	_h["Jet1Eta_PS_VBFZ_Baseline"] = bookHisto1D("Jet1Eta_PS_VBFZ_Baseline", bins_Eta);
+        _h["Jet1Eta_PS_VBFZ_HighMass"] = bookHisto1D("Jet1Eta_PS_VBFZ_HighMass", bins_Eta);
+        _h["Jet1Eta_PS_VBFZ_Search"] = bookHisto1D("Jet1Eta_PS_VBFZ_Search", bins_Eta);
+        _h["Jet1Eta_PS_VBFDM"] = bookHisto1D("Jet1Eta_PS_VBFDM", bins_Eta);
+        _h["Jet1Eta_PS_VBFDM_100"] = bookHisto1D("Jet1Eta_PS_VBFDM_100", bins_Eta);
+        _h["Jet1Eta_PS_Monojet"] = bookHisto1D("Jet1Eta_PS_Monojet", bins_Eta);
+        _h["Jet1Eta_PS_Monojet_HighPt"] = bookHisto1D("Jet1Eta_PS_Monojet_HighPt", bins_Eta);
+        _h["Jet1Eta_PS_VBFDM_OR_Monojet"] = bookHisto1D("Jet1Eta_PS_VBFDM_OR_Monojet", bins_Eta);
+        _h["Jet1Eta_PS_VBFDM_OR_Monojet_HighPt"] = bookHisto1D("Jet1Eta_PS_VBFDM_OR_Monojet_HighPt", bins_Eta);
+
 	//Eta Jet 2                                                                                                               
-        _hist_Jet2Eta_PS_VBFZ_Baseline = bookHisto1D("Jet2Eta_PS_VBFZ_Baseline", 50, -6, 6, "Jet2Eta_PS_VBFZ_Baseline", "Jet2Eta ", "Probability");
-        _hist_Jet2Eta_PS_VBFZ_HighMass = bookHisto1D("Jet2Eta_PS_VBFZ_HighMass", 50, -6, 6, "Jet2Eta_PS_VBFZ_HighMass", "Jet2Eta ", "Probability");
-        _hist_Jet2Eta_PS_VBFZ_Search = bookHisto1D("Jet2Eta_PS_VBFZ_Search", 50, -6, 6, "Jet2Eta_PS_VBFZ_Search", "Jet2Eta ", "Probability");
-        _hist_Jet2Eta_PS_VBFDM = bookHisto1D("Jet2Eta_PS_VBFDM", 50, -6, 6, "Jet2Eta_PS_VBFDM", "Jet2Eta ", "Probability");
-        _hist_Jet2Eta_PS_VBFDM_100 = bookHisto1D("Jet2Eta_PS_VBFDM_100", 50, -6, 6, "Jet2Eta_PS_VBFDM_100", "Jet2Eta ", "Probability");
-	_hist_Jet2Eta_PS_Monojet = bookHisto1D("Jet2Eta_PS_Monojet", 50, -6, 6, "Jet2Eta_PS_Monojet", "Jet2Eta ", "Probability");
-	_hist_Jet2Eta_PS_Monojet_HighPt = bookHisto1D("Jet2Eta_PS_Monojet_HighPt", 50, -6, 6, "Jet2Eta_PS_Monojet_HighPt", "Jet2Eta ", "Probability");
-        _hist_Jet2Eta_PS_VBFDM_OR_Monojet = bookHisto1D("Jet2Eta_PS_VBFDM_OR_Monojet", 50, -6, 6, "Jet2Eta_PS_VBFDM_OR_Monojet", "Jet2Eta ", "Probability");
-	_hist_Jet2Eta_PS_VBFDM_OR_Monojet_HighPt = bookHisto1D("Jet2Eta_PS_VBFDM_OR_Monojet_HighPt", 50, -6, 6, "Jet2Eta_PS_VBFDM_OR_Monojet_HighPt", "Jet2Eta ", "Probability");
+        _h["Jet2Eta_PS_VBFZ_Baseline"] = bookHisto1D("Jet2Eta_PS_VBFZ_Baseline", bins_Eta);
+        _h["Jet2Eta_PS_VBFZ_HighMass"] = bookHisto1D("Jet2Eta_PS_VBFZ_HighMass", bins_Eta);
+        _h["Jet2Eta_PS_VBFZ_Search"] = bookHisto1D("Jet2Eta_PS_VBFZ_Search", bins_Eta);
+        _h["Jet2Eta_PS_VBFDM"] = bookHisto1D("Jet2Eta_PS_VBFDM", bins_Eta);
+        _h["Jet2Eta_PS_VBFDM_100"] = bookHisto1D("Jet2Eta_PS_VBFDM_100", bins_Eta);
+        _h["Jet2Eta_PS_Monojet"] = bookHisto1D("Jet2Eta_PS_Monojet", bins_Eta);
+        _h["Jet2Eta_PS_Monojet_HighPt"] = bookHisto1D("Jet2Eta_PS_Monojet_HighPt", bins_Eta);
+        _h["Jet2Eta_PS_VBFDM_OR_Monojet"] = bookHisto1D("Jet2Eta_PS_VBFDM_OR_Monojet", bins_Eta);
+        _h["Jet2Eta_PS_VBFDM_OR_Monojet_HighPt"] = bookHisto1D("Jet2Eta_PS_VBFDM_OR_Monojet_HighPt", bins_Eta);
+
 	//Delta Eta
-        _hist_DeltaEta_PS_VBFZ_Baseline = bookHisto1D("DeltaEta_PS_VBFZ_Baseline", bins_DeltaEta, "DeltaEta_PS_VBFZ_Baseline", "DeltaEta", "Probability");
-	_hist_DeltaEta_PS_VBFZ_HighMass = bookHisto1D("DeltaEta_PS_VBFZ_HighMass", bins_DeltaEta, "DeltaEta_PS_VBFZ_HighMass", "DeltaEta ", "Probability");
-        _hist_DeltaEta_PS_VBFZ_Search = bookHisto1D("DeltaEta_PS_VBFZ_Search", bins_DeltaEta, "DeltaEta_PS_VBFZ_Search", "DeltaEta ", "Probability");
-        _hist_DeltaEta_PS_VBFDM = bookHisto1D("DeltaEta_PS_VBFDM", bins_DeltaEta, "DeltaEta_PS_VBFDM", "DeltaEta ", "Probability");
-        _hist_DeltaEta_PS_VBFDM_100 = bookHisto1D("DeltaEta_PS_VBFDM_100", bins_DeltaEta, "DeltaEta_PS_VBFDM_100", "DeltaEta ", "Probability");
-	_hist_DeltaEta_PS_Monojet = bookHisto1D("DeltaEta_PS_Monojet", bins_DeltaEta, "DeltaEta_PS_Monojet", "DeltaEta ", "Probability");
-	_hist_DeltaEta_PS_Monojet_HighPt = bookHisto1D("DeltaEta_PS_Monojet_HighPt", bins_DeltaEta, "DeltaEta_PS_Monojet_HighPt", "DeltaEta ", "Probability");
-        _hist_DeltaEta_PS_VBFDM_OR_Monojet = bookHisto1D("DeltaEta_PS_VBFDM_OR_Monojet", bins_DeltaEta, "DeltaEta_PS_VBFDM_OR_Monojet", "DeltaEta ", "Probability");
-	_hist_DeltaEta_PS_VBFDM_OR_Monojet_HighPt = bookHisto1D("DeltaEta_PS_VBFDM_OR_Monojet_HighPt", bins_DeltaEta, "DeltaEta_PS_VBFDM_OR_Monojet_HighPt", "DeltaEta ", "Probability");
+        _h["DeltaEta_PS_VBFZ_Baseline"] = bookHisto1D("DeltaEta_PS_VBFZ_Baseline", bins_DeltaEta);
+        _h["DeltaEta_PS_VBFZ_HighMass"] = bookHisto1D("DeltaEta_PS_VBFZ_HighMass", bins_DeltaEta);
+        _h["DeltaEta_PS_VBFZ_Search"] = bookHisto1D("DeltaEta_PS_VBFZ_Search", bins_DeltaEta);
+        _h["DeltaEta_PS_VBFDM"] = bookHisto1D("DeltaEta_PS_VBFDM", bins_DeltaEta);
+        _h["DeltaEta_PS_VBFDM_100"] = bookHisto1D("DeltaEta_PS_VBFDM_100", bins_DeltaEta);
+        _h["DeltaEta_PS_Monojet"] = bookHisto1D("DeltaEta_PS_Monojet", bins_DeltaEta);
+        _h["DeltaEta_PS_Monojet_HighPt"] = bookHisto1D("DeltaEta_PS_Monojet_HighPt", bins_DeltaEta);
+        _h["DeltaEta_PS_VBFDM_OR_Monojet"] = bookHisto1D("DeltaEta_PS_VBFDM_OR_Monojet", bins_DeltaEta);
+        _h["DeltaEta_PS_VBFDM_OR_Monojet_HighPt"] = bookHisto1D("DeltaEta_PS_VBFDM_OR_Monojet_HighPt", bins_DeltaEta);
+
 	//Delta Phi
-        _hist_DeltaPhi_PS_VBFZ_Baseline = bookHisto1D("DeltaPhi_PS_VBFZ_Baseline", 50, 0, 1, "Mjj_PS_VBFZ_Baseline", "DeltaPhi ", "Probability");
-        _hist_DeltaPhi_PS_VBFZ_HighMass = bookHisto1D("DeltaPhi_PS_VBFZ_HighMass", 50, 0, 1, "DeltaPhi_PS_VBFZ_HighMass", "DeltaPhi ", "Probability");
-        _hist_DeltaPhi_PS_VBFZ_Search = bookHisto1D("DeltaPhi_PS_VBFZ_Search", 50, 0, 1, "DeltaPhi_PS_VBFZ_Search", "DeltaPhi ", "Probability");
-        _hist_DeltaPhi_PS_VBFDM = bookHisto1D("DeltaPhi_PS_VBFDM", 50, 0, 1, "DeltaPhi_PS_VBFDM", "DeltaPhi ", "Probability");
-        _hist_DeltaPhi_PS_VBFDM_100 = bookHisto1D("DeltaPhi_PS_VBFDM_100", 50, 0, 1, "DeltaPhi_PS_VBFDM_100", "DeltaPhi ", "Probability");
-	_hist_DeltaPhi_PS_Monojet = bookHisto1D("DeltaPhi_PS_Monojet", 50, 0, 1, "DeltaPhi_PS_Monojet", "DeltaPhi ", "Probability");
-	_hist_DeltaPhi_PS_Monojet_HighPt = bookHisto1D("DeltaPhi_PS_Monojet_HighPt", 50, 0, 1, "DeltaPhi_PS_Monojet_HighPt", "DeltaPhi ", "Probability");
-        _hist_DeltaPhi_PS_VBFDM_OR_Monojet = bookHisto1D("DeltaPhi_PS_VBFDM_OR_Monojet", 50, 0, 1, "DeltaPhi_PS_VBFDM_OR_Monojet", "DeltaPhi ", "Probability");
-	_hist_DeltaPhi_PS_VBFDM_OR_Monojet_HighPt = bookHisto1D("DeltaPhi_PS_VBFDM_OR_Monojet_HighPt", 50, 0, 1, "DeltaPhi_PS_VBFDM_OR_Monojet_HighPt", "DeltaPhi ", "Probability");
+        _h["DeltaPhi_PS_VBFZ_Baseline"] = bookHisto1D("DeltaPhi_PS_VBFZ_Baseline", bins_DeltaPhi);
+        _h["DeltaPhi_PS_VBFZ_HighMass"] = bookHisto1D("DeltaPhi_PS_VBFZ_HighMass", bins_DeltaPhi);
+        _h["DeltaPhi_PS_VBFZ_Search"] = bookHisto1D("DeltaPhi_PS_VBFZ_Search", bins_DeltaPhi);
+        _h["DeltaPhi_PS_VBFDM"] = bookHisto1D("DeltaPhi_PS_VBFDM", bins_DeltaPhi);
+        _h["DeltaPhi_PS_VBFDM_100"] = bookHisto1D("DeltaPhi_PS_VBFDM_100", bins_DeltaPhi);
+        _h["DeltaPhi_PS_Monojet"] = bookHisto1D("DeltaPhi_PS_Monojet", bins_DeltaPhi);
+        _h["DeltaPhi_PS_Monojet_HighPt"] = bookHisto1D("DeltaPhi_PS_Monojet_HighPt", bins_DeltaPhi);
+        _h["DeltaPhi_PS_VBFDM_OR_Monojet"] = bookHisto1D("DeltaPhi_PS_VBFDM_OR_Monojet", bins_DeltaPhi);
+        _h["DeltaPhi_PS_VBFDM_OR_Monojet_HighPt"] = bookHisto1D("DeltaPhi_PS_VBFDM_OR_Monojet_HighPt", bins_DeltaPhi);
+
 	//Missing Energy
-	_hist_met_PS_VBFZ_Baseline = bookHisto1D("Etmiss_PS_VBFZ_Baseline", 50, 0.0, 1500, "ETMiss_PS_VBFZ_Baseline", "ETMiss, GeV", "Probability");
-	_hist_met_PS_VBFZ_HighMass = bookHisto1D("Etmiss_PS_VBFZ_HighMass", 50, 0.0, 1500, "ETMiss_PS_VBFZ_HighMass", "ETMiss, GeV", "Probability");
-	_hist_met_PS_VBFZ_Search = bookHisto1D("Etmiss_PS_VBFZ_Search", 50, 0.0, 1500, "ETMiss_PS_VBFZ_Search", "ETMiss, GeV", "Probability");
-	_hist_met_PS_VBFDM = bookHisto1D("Etmiss_PS_VBFDM", 50, 0.0, 1500, "ETMiss_PS_VBFDM", "ETMiss, GeV", "Probability");
-        _hist_met_PS_VBFDM_100 = bookHisto1D("Etmiss_PS_VBFDM_100", 50, 0.0, 1500, "ETMiss_PS_VBFDM_100", "ETMiss, GeV", "Probability");
-	_hist_met_PS_Monojet = bookHisto1D("Etmiss_PS_Monojet", 50, 0.0, 1500, "ETMiss_PS_Monojet", "ETMiss, GeV", "Probability");
-	_hist_met_PS_Monojet_HighPt = bookHisto1D("Etmiss_PS_Monojet_HighPt", 50, 0.0, 1500, "ETMiss_PS_Monojet_HighPt", "ETMiss, GeV", "Probability");
-	_hist_met_PS_VBFDM_OR_Monojet = bookHisto1D("Etmiss_PS_VBFDM_OR_Monojet", 50, 0.0, 1500, "ETMiss_PS_VBFDM_OR_Monojet", "ETMiss, GeV", "Probability");
-	_hist_met_PS_VBFDM_OR_Monojet_HighPt = bookHisto1D("Etmiss_PS_VBFDM_OR_Monojet_HighPt", 50, 0.0, 1500, "ETMiss_PS_VBFDM_OR_Monojet_HighPt", "ETMiss, GeV", "Probability");
+        _h["MET_PS_VBFZ_Baseline"] = bookHisto1D("MET_PS_VBFZ_Baseline", bins_MET);
+        _h["MET_PS_VBFZ_HighMass"] = bookHisto1D("MET_PS_VBFZ_HighMass", bins_MET);
+        _h["MET_PS_VBFZ_Search"] = bookHisto1D("MET_PS_VBFZ_Search", bins_MET);
+        _h["MET_PS_VBFDM"] = bookHisto1D("MET_PS_VBFDM", bins_MET);
+        _h["MET_PS_VBFDM_100"] = bookHisto1D("MET_PS_VBFDM_100", bins_MET);
+        _h["MET_PS_Monojet"] = bookHisto1D("MET_PS_Monojet", bins_MET);
+        _h["MET_PS_Monojet_HighPt"] = bookHisto1D("MET_PS_Monojet_HighPt", bins_MET);
+        _h["MET_PS_VBFDM_OR_Monojet"] = bookHisto1D("MET_PS_VBFDM_OR_Monojet", bins_MET);
+        _h["MET_PS_VBFDM_OR_Monojet_HighPt"] = bookHisto1D("MET_PS_VBFDM_OR_Monojet_HighPt", bins_MET);
+
 	//Cross Section
-        _hist_Count_for_All_PS_CrossSection = bookHisto1D("Count_for_All_PS_CrossSection", 9, 0, 9, "Count_for_All_PS_CrossSection", "Phase Space", "CrossSectionxAcceptedCounts/TotalCounts");
-
-	//2D Histograms
-	//	_hist_MjjvsDeltaEta_PS_VBFDM_OR_Monojet = bookHisto2D("MjjvsDeltaEta_PS_VBFDM_OR_Monojet", 50, 0., 9., 50, 250., 5000., "MjjvsDeltaEta_PS_VBFDM_OR_Monojet", "DeltaEta", "Mjj (GeV)", "Probability");
-
-	      }
+	_h["Count_for_All_PS_CrossSection"] = bookHisto1D("Count_for_All_PS_CrossSection", bins_Count);
+      }
 
     /// Perform the per-event analysis
     void analyze(const Event& event) {
-      const double weight = event.weight();
-
+      weight = event.weight();
+      //      MSG_WARNING("weight : "<< weight<<"");
       ++Count_Total;
       const FastJets& jetpro = applyProjection<FastJets>(event, "Jets");       
       const MissingMomentum& met = applyProjection<MissingMomentum>(event, "MET");
       const ZFinder& zfinder_mu = applyProjection<ZFinder>(event, "ZFinder_mu");
+      if (!(zfinder_mu.constituents().size() == 0 || zfinder_mu.constituents().size() == 2)) vetoEvent;
+      //      if (zfinder_mu.constituents().size() != 2){ vetoEvent; } 
 
       vector<FourMomentum> jets;
-      foreach (const Jet& jet, jetpro.jetsByPt(45.0*GeV)) {
+      foreach (const Jet& jet, jetpro.jetsByPt(Cuts::pT >25.0*GeV && Cuts::absrap <2.5)) {
 	if ( fabs(jet.momentum().rapidity()) > 4.4 ) continue;
-	//	if ( fabs(deltaR(jet, lepton)) < 0.3 ) continue;
+	/*	if (zfinder_mu.constituents().size() == 2){
+	  for ( int i = 0 ; i < 2 ; ++i ){
+	    if ( fabs(deltaR(jet, zfinder_mu.constituents()[i])) < 0.4 ) continue;
+	    }
+	    }*/
 	jets.push_back(jet.momentum());
       }
 
+      if (zfinder_mu.constituents().size() == 2 ){
+	if( zfinder_mu.constituents()[0].pT()>zfinder_mu.constituents()[1].pT() && zfinder_mu.constituents()[0].pT()<25*GeV){ vetoEvent; }
+	else if (zfinder_mu.constituents()[1].pT()>zfinder_mu.constituents()[0].pT() && zfinder_mu.constituents()[1].pT()<25*GeV){ vetoEvent; }
+	//if(zfinder_mu.constituents()[0].abseta()>2.5 || zfinder_mu.constituents()[1].abseta()>2.5){ vetoEvent; }
+      }
+    
       vector<FourMomentum> muons;
-      if (zfinder_mu.bosons().size() == 1 ){
+      if (zfinder_mu.constituents().size() == 2 ){
         for ( int i = 0 ; i < 2 ; ++i ){
           const FourMomentum& zmom = zfinder_mu.constituents()[i].momentum();
           muons.push_back(zmom);
         }
       }
 
-      muonSize = zfinder_mu.bosons().size();
+      muonSize = muons.size();
 
-      if (muons.size() == 1 ){ vetoEvent; }
       if (jets.size() < 1) { vetoEvent; }
 
-      double Mjj, Jet1PT, Jet2PT, Jet1Eta, Jet2Eta, DeltaEta, dphi, DeltaPhi, Countforhist, JC, LC, MET;
+      double Mjj, Jet1PT, Jet2PT, Jet1Eta, Jet2Eta, DeltaEta, dphi, DeltaPhi1, DeltaPhi, Countforhist, JC, LC, MET;
       
       if (jets.size()>=3){
 	JC = ( jets[2].rapidity() - ( (jets[0].rapidity() + jets[1].rapidity()) /2 ) ) / (jets[0].rapidity() - jets[1].rapidity());
@@ -207,7 +227,8 @@ namespace Rivet {
 	Jet2Eta = jets[1].eta();
 	DeltaEta = Jet1Eta-Jet2Eta;
 	dphi = fabs(jets[0].phi() - jets[1].phi());
-	DeltaPhi = ( dphi<=pi ) ? dphi/pi : (2.*pi-dphi)/pi;
+	DeltaPhi1 = ( dphi<=pi ) ? dphi/pi : (2.*pi-dphi)/pi;
+	DeltaPhi = DeltaPhi1*pi;
 	//	LC = ( met.rapidity() - ( (jets[0].rapidity() + jets[1].rapidity()) /2 ) ) / (jets[0].rapidity() - jets[1].rapidity());
       }
       else{
@@ -223,182 +244,170 @@ namespace Rivet {
 	LC = 0;
       }
 
-      if(Jet2PT!=0*GeV && Jet2PT<=45*GeV) { vetoEvent; }
+      if(jets.size()!=1 && Jet2PT<=50*GeV) { vetoEvent; }
 
       size_t NumJets = jets.size();
 
-      if ( muons.size() == 2 ){
-        muonEnergy = muons[0].pT()+muons[1].pT();
-        if (muonEnergy>150*GeV){ greaterthan150 = true; }
-        if (muonEnergy>250*GeV){ greaterthan250 = true; }
+      if ( muonSize == 2 ){
+      const FourMomentum dilepton = zfinder_mu.constituents()[0].momentum() + zfinder_mu.constituents()[1].momentum();
+      MET = dilepton.pT();
+      MSG_WARNING("Dilepton pT   = " << dilepton.pT()/GeV << " GeV");
+      //if (diLeptonPt>200*GeV){ greaterthan200 = true; }
       }
       else{
-        MET = met.vectorEt().mod();
-        if (MET>150*GeV){ greaterthan150 = true; }
-        if (MET>250*GeV){ greaterthan250 = true; }
+      MET = met.vectorEt().mod();
       }
+      
+      if (MET>200*GeV){ greaterthan200 = true; }
 
       bool PS_VBFZ_Baseline = ( Jet1PT>55*GeV && Jet2PT>45*GeV && NumJets>=2 && abseta<4.4  );
       bool PS_VBFZ_HighMass = ( Mjj>1000*GeV && Jet1PT>55*GeV && Jet2PT>45*GeV && NumJets>=2 && abseta<4.4 );
       bool PS_VBFZ_Search = ( Mjj>250*GeV && Jet1PT>55*GeV && Jet2PT>45*GeV && NumJets>=2 && abseta<4.4 );
-      bool PS_VBFDM = ( Mjj>250*GeV && Jet1PT>55*GeV && Jet2PT>45*GeV && NumJets>=2 && abseta<4.4 && greaterthan150 );
-      bool PS_VBFDM_100 = ( Mjj>250*GeV && Jet1PT>100*GeV && Jet2PT>45*GeV && NumJets>=2 && abseta<4.4 && greaterthan150 );
-      bool PS_Monojet = ( Jet1PT>100*GeV && NumJets>=1 && abseta<4.4 && greaterthan150 );
-      bool PS_Monojet_HighPt = ( Jet1PT>250*GeV && NumJets>=1 && greaterthan250 );
+      bool PS_VBFDM = ( Mjj>200*GeV && Jet1PT>80*GeV && Jet2PT>50*GeV && NumJets>=2 && abseta<4.4 && greaterthan200 );
+      bool PS_VBFDM_100 = ( Mjj>200*GeV && Jet1PT>100*GeV && Jet2PT>45*GeV && NumJets>=2 && abseta<4.4 && greaterthan200 );
+      bool PS_Monojet = ( Jet1PT>120*GeV && NumJets>=1 && abseta<4.4 && greaterthan200 );
+      bool PS_Monojet_HighPt = ( Jet1PT>250*GeV && NumJets>=1 && greaterthan200 );
       bool PS_VBFDM_OR_Monojet = ( PS_VBFDM || PS_Monojet );
       bool PS_VBFDM_OR_Monojet_HighPt = ( PS_VBFDM || PS_Monojet_HighPt );
 
       if (PS_VBFZ_Baseline) {
 	Countforhist = 0;
-	_hist_Count_for_All_PS_CrossSection->fill( Countforhist );
-	_hist_Mjj_PS_VBFZ_Baseline->fill( Mjj , weight );
-	_hist_Jet1PT_PS_VBFZ_Baseline->fill( Jet1PT, weight );
-	_hist_Jet2PT_PS_VBFZ_Baseline->fill( Jet2PT, weight );
-	_hist_NumJets_PS_VBFZ_Baseline->fill( NumJets, weight );
-	_hist_Jet1Eta_PS_VBFZ_Baseline->fill( Jet1Eta, weight );
-	_hist_Jet2Eta_PS_VBFZ_Baseline->fill( Jet2Eta, weight );
-	_hist_DeltaEta_PS_VBFZ_Baseline->fill( DeltaEta, weight );
-	_hist_DeltaPhi_PS_VBFZ_Baseline->fill( DeltaPhi, weight );
-	_hist_met_PS_VBFZ_Baseline->fill( MET, weight );
-
+	_h["Count_for_All_PS_CrossSection"]->fill( Countforhist );
+	_h["Mjj_PS_VBFZ_Baseline"]->fill( Mjj , weight );
+	_h["Jet1PT_PS_VBFZ_Baseline"]->fill( Jet1PT, weight );
+	_h["Jet2PT_PS_VBFZ_Baseline"]->fill( Jet2PT, weight );
+	_h["NumJets_PS_VBFZ_Baseline"]->fill( NumJets, weight );
+	_h["Jet1Eta_PS_VBFZ_Baseline"]->fill( Jet1Eta, weight );
+	_h["Jet2Eta_PS_VBFZ_Baseline"]->fill( Jet2Eta, weight );
+	_h["DeltaEta_PS_VBFZ_Baseline"]->fill( DeltaEta, weight );
+	_h["DeltaPhi_PS_VBFZ_Baseline"]->fill( DeltaPhi, weight );
+	_h["MET_PS_VBFZ_Baseline"]->fill( MET, weight );
 	++Count_VBFZ_Baseline;
       }
       if (PS_VBFZ_HighMass) {
 	Countforhist = 1;
-	_hist_Count_for_All_PS_CrossSection->fill( Countforhist );
-        _hist_Mjj_PS_VBFZ_HighMass->fill( Mjj, weight );
-        _hist_Jet1PT_PS_VBFZ_HighMass->fill( Jet1PT, weight );
-        _hist_Jet2PT_PS_VBFZ_HighMass->fill( Jet2PT, weight );
-        _hist_NumJets_PS_VBFZ_HighMass->fill( NumJets, weight );
-        _hist_Jet1Eta_PS_VBFZ_HighMass->fill( Jet1Eta, weight );
-	_hist_Jet2Eta_PS_VBFZ_HighMass->fill( Jet2Eta, weight );       
-	_hist_DeltaEta_PS_VBFZ_HighMass->fill( DeltaEta, weight );
-        _hist_DeltaPhi_PS_VBFZ_HighMass->fill( DeltaPhi, weight );
-        _hist_met_PS_VBFZ_HighMass->fill( MET, weight );
-
+	_h["Count_for_All_PS_CrossSection"]->fill( Countforhist );
+        _h["Mjj_PS_VBFZ_HighMass"]->fill( Mjj, weight );
+        _h["Jet1PT_PS_VBFZ_HighMass"]->fill( Jet1PT, weight );
+        _h["Jet2PT_PS_VBFZ_HighMass"]->fill( Jet2PT, weight );
+        _h["NumJets_PS_VBFZ_HighMass"]->fill( NumJets, weight );
+        _h["Jet1Eta_PS_VBFZ_HighMass"]->fill( Jet1Eta, weight );
+	_h["Jet2Eta_PS_VBFZ_HighMass"]->fill( Jet2Eta, weight );       
+	_h["DeltaEta_PS_VBFZ_HighMass"]->fill( DeltaEta, weight );
+        _h["DeltaPhi_PS_VBFZ_HighMass"]->fill( DeltaPhi, weight );
+        _h["MET_PS_VBFZ_HighMass"]->fill( MET, weight );
 	++Count_VBFZ_HighMass;
       }
       if (PS_VBFZ_Search) {
 	Countforhist = 2;
-	_hist_Count_for_All_PS_CrossSection->fill( Countforhist );
-        _hist_Mjj_PS_VBFZ_Search->fill( Mjj, weight );
-        _hist_Jet1PT_PS_VBFZ_Search->fill( Jet1PT, weight );
-        _hist_Jet2PT_PS_VBFZ_Search->fill( Jet2PT, weight );
-        _hist_NumJets_PS_VBFZ_Search->fill( NumJets, weight );
-        _hist_Jet1Eta_PS_VBFZ_Search->fill( Jet1Eta, weight );
-        _hist_Jet2Eta_PS_VBFZ_Search->fill( Jet2Eta, weight );
-	_hist_DeltaEta_PS_VBFZ_Search->fill( DeltaEta, weight );
-        _hist_DeltaPhi_PS_VBFZ_Search->fill( DeltaPhi, weight );
-        _hist_met_PS_VBFZ_Search->fill( MET, weight );
-
+	_h["Count_for_All_PS_CrossSection"]->fill( Countforhist );
+        _h["Mjj_PS_VBFZ_Search"]->fill( Mjj, weight );
+        _h["Jet1PT_PS_VBFZ_Search"]->fill( Jet1PT, weight );
+        _h["Jet2PT_PS_VBFZ_Search"]->fill( Jet2PT, weight );
+        _h["NumJets_PS_VBFZ_Search"]->fill( NumJets, weight );
+        _h["Jet1Eta_PS_VBFZ_Search"]->fill( Jet1Eta, weight );
+        _h["Jet2Eta_PS_VBFZ_Search"]->fill( Jet2Eta, weight );
+	_h["DeltaEta_PS_VBFZ_Search"]->fill( DeltaEta, weight );
+        _h["DeltaPhi_PS_VBFZ_Search"]->fill( DeltaPhi, weight );
+        _h["MET_PS_VBFZ_Search"]->fill( MET, weight );
 	++Count_VBFZ_Search;
       }
       if (PS_VBFDM) {
 	Countforhist = 3;
-	_hist_Count_for_All_PS_CrossSection->fill( Countforhist );
-        _hist_Mjj_PS_VBFDM->fill( Mjj, weight );
-        _hist_Jet1PT_PS_VBFDM->fill( Jet1PT, weight );
-        _hist_Jet2PT_PS_VBFDM->fill( Jet2PT, weight );
-        _hist_NumJets_PS_VBFDM->fill( NumJets, weight );
-        _hist_Jet1Eta_PS_VBFDM->fill( Jet1Eta, weight );
-	_hist_Jet2Eta_PS_VBFDM->fill( Jet2Eta, weight );        
-	_hist_DeltaEta_PS_VBFDM->fill( DeltaEta, weight );
-        _hist_DeltaPhi_PS_VBFDM->fill( DeltaPhi, weight );
-        _hist_met_PS_VBFDM->fill( MET, weight );
-
+	_h["Count_for_All_PS_CrossSection"]->fill( Countforhist );
+        _h["Mjj_PS_VBFDM"]->fill( Mjj, weight );
+        _h["Jet1PT_PS_VBFDM"]->fill( Jet1PT, weight );
+        _h["Jet2PT_PS_VBFDM"]->fill( Jet2PT, weight );
+        _h["NumJets_PS_VBFDM"]->fill( NumJets, weight );
+        _h["Jet1Eta_PS_VBFDM"]->fill( Jet1Eta, weight );
+	_h["Jet2Eta_PS_VBFDM"]->fill( Jet2Eta, weight );        
+	_h["DeltaEta_PS_VBFDM"]->fill( DeltaEta, weight );
+        _h["DeltaPhi_PS_VBFDM"]->fill( DeltaPhi, weight );
+        _h["MET_PS_VBFDM"]->fill( MET, weight );
 	++Count_VBFDM;
       }
       if (PS_VBFDM_100) {
         Countforhist = 4;
-        _hist_Count_for_All_PS_CrossSection->fill( Countforhist );
-        _hist_Mjj_PS_VBFDM_100->fill( Mjj, weight );
-        _hist_Jet1PT_PS_VBFDM_100->fill( Jet1PT, weight );
-        _hist_Jet2PT_PS_VBFDM_100->fill( Jet2PT, weight );
-        _hist_NumJets_PS_VBFDM_100->fill( NumJets, weight );
-        _hist_Jet1Eta_PS_VBFDM_100->fill( Jet1Eta, weight );
-        _hist_Jet2Eta_PS_VBFDM_100->fill( Jet2Eta, weight );
-        _hist_DeltaEta_PS_VBFDM_100->fill( DeltaEta, weight );
-        _hist_DeltaPhi_PS_VBFDM_100->fill( DeltaPhi, weight );
-        _hist_met_PS_VBFDM_100->fill( MET, weight );
-
+        _h["Count_for_All_PS_CrossSection"]->fill( Countforhist );
+        _h["Mjj_PS_VBFDM_100"]->fill( Mjj, weight );
+        _h["Jet1PT_PS_VBFDM_100"]->fill( Jet1PT, weight );
+        _h["Jet2PT_PS_VBFDM_100"]->fill( Jet2PT, weight );
+        _h["NumJets_PS_VBFDM_100"]->fill( NumJets, weight );
+        _h["Jet1Eta_PS_VBFDM_100"]->fill( Jet1Eta, weight );
+        _h["Jet2Eta_PS_VBFDM_100"]->fill( Jet2Eta, weight );
+        _h["DeltaEta_PS_VBFDM_100"]->fill( DeltaEta, weight );
+        _h["DeltaPhi_PS_VBFDM_100"]->fill( DeltaPhi, weight );
+        _h["MET_PS_VBFDM_100"]->fill( MET, weight );
         ++Count_VBFDM_100;
       }
-
       if (PS_Monojet) {
 	Countforhist = 5;
-	_hist_Count_for_All_PS_CrossSection->fill( Countforhist );
-        _hist_Jet1PT_PS_Monojet->fill( Jet1PT, weight );
-        _hist_NumJets_PS_Monojet->fill( NumJets, weight );
-        _hist_Jet1Eta_PS_Monojet->fill( Jet1Eta, weight );
-        _hist_met_PS_Monojet->fill( MET, weight );
-	
+	_h["Count_for_All_PS_CrossSection"]->fill( Countforhist );
+        _h["Jet1PT_PS_Monojet"]->fill( Jet1PT, weight );
+        _h["NumJets_PS_Monojet"]->fill( NumJets, weight );
+        _h["Jet1Eta_PS_Monojet"]->fill( Jet1Eta, weight );
+        _h["MET_PS_Monojet"]->fill( MET, weight );       
 	if(NumJets>1){
-	  _hist_Mjj_PS_Monojet->fill( Mjj, weight );
-	  _hist_Jet2PT_PS_Monojet->fill( Jet2PT, weight );
-	  _hist_Jet2Eta_PS_Monojet->fill( Jet2Eta, weight );
-	  _hist_DeltaEta_PS_Monojet->fill( DeltaEta, weight );
-	  _hist_DeltaPhi_PS_Monojet->fill( DeltaPhi, weight );
+	  _h["Mjj_PS_Monojet"]->fill( Mjj, weight );
+	  _h["Jet2PT_PS_Monojet"]->fill( Jet2PT, weight );
+	  _h["Jet2Eta_PS_Monojet"]->fill( Jet2Eta, weight );
+	  _h["DeltaEta_PS_Monojet"]->fill( DeltaEta, weight );
+	  _h["DeltaPhi_PS_Monojet"]->fill( DeltaPhi, weight );
 	}
-       
 	++Count_Monojet;
       }
       if (PS_Monojet_HighPt) {
         Countforhist = 6;
-        _hist_Count_for_All_PS_CrossSection->fill( Countforhist );
-        _hist_Jet1PT_PS_Monojet_HighPt->fill( Jet1PT, weight );
-        _hist_NumJets_PS_Monojet_HighPt->fill( NumJets, weight );
-        _hist_Jet1Eta_PS_Monojet_HighPt->fill( Jet1Eta, weight );
-        _hist_met_PS_Monojet_HighPt->fill( MET, weight );
-
+        _h["Count_for_All_PS_CrossSection"]->fill( Countforhist );
+        _h["Jet1PT_PS_Monojet_HighPt"]->fill( Jet1PT, weight );
+        _h["NumJets_PS_Monojet_HighPt"]->fill( NumJets, weight );
+        _h["Jet1Eta_PS_Monojet_HighPt"]->fill( Jet1Eta, weight );
+        _h["MET_PS_Monojet_HighPt"]->fill( MET, weight );
         if(NumJets>1){
-          _hist_Mjj_PS_Monojet_HighPt->fill( Mjj, weight );
-          _hist_Jet2PT_PS_Monojet_HighPt->fill( Jet2PT, weight );
-          _hist_Jet2Eta_PS_Monojet_HighPt->fill( Jet2Eta, weight );
-          _hist_DeltaEta_PS_Monojet_HighPt->fill( DeltaEta, weight );
-          _hist_DeltaPhi_PS_Monojet_HighPt->fill( DeltaPhi, weight );
+          _h["Mjj_PS_Monojet_HighPt"]->fill( Mjj, weight );
+          _h["Jet2PT_PS_Monojet_HighPt"]->fill( Jet2PT, weight );
+          _h["Jet2Eta_PS_Monojet_HighPt"]->fill( Jet2Eta, weight );
+          _h["DeltaEta_PS_Monojet_HighPt"]->fill( DeltaEta, weight );
+          _h["DeltaPhi_PS_Monojet_HighPt"]->fill( DeltaPhi, weight );
         }
-
         ++Count_Monojet_HighPt;
       }
       if (PS_VBFDM_OR_Monojet) {
 	Countforhist = 7;
-	_hist_Count_for_All_PS_CrossSection->fill( Countforhist );
-        _hist_Jet1PT_PS_VBFDM_OR_Monojet->fill( Jet1PT, weight );
-        _hist_NumJets_PS_VBFDM_OR_Monojet->fill( NumJets, weight );
-        _hist_Jet1Eta_PS_VBFDM_OR_Monojet->fill( Jet1Eta, weight );
-        _hist_met_PS_VBFDM_OR_Monojet->fill( MET, weight );
+	_h["Count_for_All_PS_CrossSection"]->fill( Countforhist );
+        _h["Jet1PT_PS_VBFDM_OR_Monojet"]->fill( Jet1PT, weight );
+        _h["NumJets_PS_VBFDM_OR_Monojet"]->fill( NumJets, weight );
+        _h["Jet1Eta_PS_VBFDM_OR_Monojet"]->fill( Jet1Eta, weight );
+        _h["MET_PS_VBFDM_OR_Monojet"]->fill( MET, weight );
 
 	if(NumJets>1){
-	  _hist_Mjj_PS_VBFDM_OR_Monojet->fill( Mjj, weight );
-	  _hist_Jet2PT_PS_VBFDM_OR_Monojet->fill( Jet2PT, weight );
-	  _hist_Jet2Eta_PS_VBFDM_OR_Monojet->fill( Jet2Eta, weight );
-	  _hist_DeltaEta_PS_VBFDM_OR_Monojet->fill( DeltaEta, weight );
-	  _hist_DeltaPhi_PS_VBFDM_OR_Monojet->fill( DeltaPhi, weight );
-	  //	  _hist_MjjvsDeltaEta_PS_VBFDM_OR_Monojet->fill( DeltaEta, Mjj, weight );
+	  _h["Mjj_PS_VBFDM_OR_Monojet"]->fill( Mjj, weight );
+	  _h["Jet2PT_PS_VBFDM_OR_Monojet"]->fill( Jet2PT, weight );
+	  _h["Jet2Eta_PS_VBFDM_OR_Monojet"]->fill( Jet2Eta, weight );
+	  _h["DeltaEta_PS_VBFDM_OR_Monojet"]->fill( DeltaEta, weight );
+	  _h["DeltaPhi_PS_VBFDM_OR_Monojet"]->fill( DeltaPhi, weight );
+	  //	  _h["MjjvsDeltaEta_PS_VBFDM_OR_Monojet"]->fill( DeltaEta, Mjj, weight );
 	}
 	++Count_VBFDM_OR_Monojet;
       }
       if (PS_VBFDM_OR_Monojet_HighPt) {
         Countforhist = 8;
-        _hist_Count_for_All_PS_CrossSection->fill( Countforhist );
-        _hist_Jet1PT_PS_VBFDM_OR_Monojet_HighPt->fill( Jet1PT, weight );
-        _hist_NumJets_PS_VBFDM_OR_Monojet_HighPt->fill( NumJets, weight );
-        _hist_Jet1Eta_PS_VBFDM_OR_Monojet_HighPt->fill( Jet1Eta, weight );
-        _hist_met_PS_VBFDM_OR_Monojet_HighPt->fill( MET, weight );
+        _h["Count_for_All_PS_CrossSection"]->fill( Countforhist );
+        _h["Jet1PT_PS_VBFDM_OR_Monojet_HighPt"]->fill( Jet1PT, weight );
+        _h["NumJets_PS_VBFDM_OR_Monojet_HighPt"]->fill( NumJets, weight );
+        _h["Jet1Eta_PS_VBFDM_OR_Monojet_HighPt"]->fill( Jet1Eta, weight );
+        _h["MET_PS_VBFDM_OR_Monojet_HighPt"]->fill( MET, weight );
 
         if(NumJets>1){
-          _hist_Mjj_PS_VBFDM_OR_Monojet_HighPt->fill( Mjj, weight );
-          _hist_Jet2PT_PS_VBFDM_OR_Monojet_HighPt->fill( Jet2PT, weight );
-          _hist_Jet2Eta_PS_VBFDM_OR_Monojet_HighPt->fill( Jet2Eta, weight );
-          _hist_DeltaEta_PS_VBFDM_OR_Monojet_HighPt->fill( DeltaEta, weight );
-          _hist_DeltaPhi_PS_VBFDM_OR_Monojet_HighPt->fill( DeltaPhi, weight );
+          _h["Mjj_PS_VBFDM_OR_Monojet_HighPt"]->fill( Mjj, weight );
+          _h["Jet2PT_PS_VBFDM_OR_Monojet_HighPt"]->fill( Jet2PT, weight );
+          _h["Jet2Eta_PS_VBFDM_OR_Monojet_HighPt"]->fill( Jet2Eta, weight );
+          _h["DeltaEta_PS_VBFDM_OR_Monojet_HighPt"]->fill( DeltaEta, weight );
+          _h["DeltaPhi_PS_VBFDM_OR_Monojet_HighPt"]->fill( DeltaPhi, weight );
         }
         ++Count_VBFDM_OR_Monojet_HighPt;
       }
-
-
     }
-
 
     /// Normalise, scale and otherwise manipulate histograms here                     
     void finalize() {
@@ -413,292 +422,24 @@ namespace Rivet {
       cout<<"\nCount with Monojet_HighPt cuts = "<<Count_Monojet_HighPt;
       cout<<"\nCount with VBFDM_OR_Monojet cuts = "<<Count_VBFDM_OR_Monojet<<endl;
       cout<<"\nCount with VBFDM_OR_Monojet_HighPt cuts = "<<Count_VBFDM_OR_Monojet_HighPt<<endl;
-      cout<<"muon pt = "<<muonEnergy<<endl;
       cout<<"muon size = "<<muonSize<<endl;
-      //      double factor = crossSection()/sumOfWeights();
-
-      //      double factor = crossSection()/sumOfWeights();
-      double Count_factor = crossSection()/Count_Total;
 
       // scale(_h_YYYY, crossSection()/sumOfWeights());
-      scale(_hist_Count_for_All_PS_CrossSection, Count_factor);
 
-      scale(_hist_Mjj_PS_VBFZ_Baseline, Count_factor);
-      scale(_hist_Jet1PT_PS_VBFZ_Baseline, Count_factor);
-      scale(_hist_Jet2PT_PS_VBFZ_Baseline, Count_factor);
-      scale(_hist_NumJets_PS_VBFZ_Baseline, Count_factor);
-      scale(_hist_Jet1Eta_PS_VBFZ_Baseline, Count_factor);
-      scale(_hist_Jet2Eta_PS_VBFZ_Baseline, Count_factor);
-      scale(_hist_DeltaEta_PS_VBFZ_Baseline, Count_factor);
-      scale(_hist_DeltaPhi_PS_VBFZ_Baseline, Count_factor);
-      scale(_hist_met_PS_VBFZ_Baseline, Count_factor);
+      typedef map<string, Histo1DPtr>::iterator it_type;
+      const double sf = crossSection() / sumOfWeights();
+      for(it_type it = _h.begin(); it != _h.end(); ++it)  scale(it->second, sf);
 
-      scale(_hist_Mjj_PS_VBFZ_HighMass, Count_factor);
-      scale(_hist_Jet1PT_PS_VBFZ_HighMass, Count_factor);
-      scale(_hist_Jet2PT_PS_VBFZ_HighMass, Count_factor);
-      scale(_hist_NumJets_PS_VBFZ_HighMass, Count_factor);
-      scale(_hist_Jet1Eta_PS_VBFZ_HighMass, Count_factor);
-      scale(_hist_Jet2Eta_PS_VBFZ_HighMass, Count_factor);
-      scale(_hist_DeltaEta_PS_VBFZ_HighMass, Count_factor);
-      scale(_hist_DeltaPhi_PS_VBFZ_HighMass, Count_factor);
-      scale(_hist_met_PS_VBFZ_HighMass, Count_factor);
-
-      scale(_hist_Mjj_PS_VBFZ_Search, Count_factor);
-      scale(_hist_Jet1PT_PS_VBFZ_Search, Count_factor);
-      scale(_hist_Jet2PT_PS_VBFZ_Search, Count_factor);
-      scale(_hist_NumJets_PS_VBFZ_Search, Count_factor);
-      scale(_hist_Jet1Eta_PS_VBFZ_Search, Count_factor);
-      scale(_hist_Jet2Eta_PS_VBFZ_Search, Count_factor);
-      scale(_hist_DeltaEta_PS_VBFZ_Search, Count_factor);
-      scale(_hist_DeltaPhi_PS_VBFZ_Search, Count_factor);
-      scale(_hist_met_PS_VBFZ_Search, Count_factor);
-
-      scale(_hist_Mjj_PS_VBFDM, Count_factor);
-      scale(_hist_Jet1PT_PS_VBFDM, Count_factor);
-      scale(_hist_Jet2PT_PS_VBFDM, Count_factor);
-      scale(_hist_NumJets_PS_VBFDM, Count_factor);
-      scale(_hist_Jet1Eta_PS_VBFDM, Count_factor);
-      scale(_hist_Jet2Eta_PS_VBFDM, Count_factor);
-      scale(_hist_DeltaEta_PS_VBFDM, Count_factor);
-      scale(_hist_DeltaPhi_PS_VBFDM, Count_factor);
-      scale(_hist_met_PS_VBFDM, Count_factor);
-
-      scale(_hist_Mjj_PS_VBFDM_100, Count_factor);
-      scale(_hist_Jet1PT_PS_VBFDM_100, Count_factor);
-      scale(_hist_Jet2PT_PS_VBFDM_100, Count_factor);
-      scale(_hist_NumJets_PS_VBFDM_100, Count_factor);
-      scale(_hist_Jet1Eta_PS_VBFDM_100, Count_factor);
-      scale(_hist_Jet2Eta_PS_VBFDM_100, Count_factor);
-      scale(_hist_DeltaEta_PS_VBFDM_100, Count_factor);
-      scale(_hist_DeltaPhi_PS_VBFDM_100, Count_factor);
-      scale(_hist_met_PS_VBFDM_100, Count_factor);
-
-      scale(_hist_Mjj_PS_Monojet, Count_factor);
-      scale(_hist_Jet1PT_PS_Monojet, Count_factor);
-      scale(_hist_Jet2PT_PS_Monojet, Count_factor);
-      scale(_hist_NumJets_PS_Monojet, Count_factor);
-      scale(_hist_Jet1Eta_PS_Monojet, Count_factor);
-      scale(_hist_Jet2Eta_PS_Monojet, Count_factor);
-      scale(_hist_DeltaEta_PS_Monojet, Count_factor);
-      scale(_hist_DeltaPhi_PS_Monojet, Count_factor);
-      scale(_hist_met_PS_Monojet, Count_factor);
-
-      scale(_hist_Mjj_PS_Monojet_HighPt, Count_factor);
-      scale(_hist_Jet1PT_PS_Monojet_HighPt, Count_factor);
-      scale(_hist_Jet2PT_PS_Monojet_HighPt, Count_factor);
-      scale(_hist_NumJets_PS_Monojet_HighPt, Count_factor);
-      scale(_hist_Jet1Eta_PS_Monojet_HighPt, Count_factor);
-      scale(_hist_Jet2Eta_PS_Monojet_HighPt, Count_factor);
-      scale(_hist_DeltaEta_PS_Monojet_HighPt, Count_factor);
-      scale(_hist_DeltaPhi_PS_Monojet_HighPt, Count_factor);
-      scale(_hist_met_PS_Monojet_HighPt, Count_factor);
-
-      scale(_hist_Mjj_PS_VBFDM_OR_Monojet, Count_factor);
-      scale(_hist_Jet1PT_PS_VBFDM_OR_Monojet, Count_factor);
-      scale(_hist_Jet2PT_PS_VBFDM_OR_Monojet, Count_factor);
-      scale(_hist_NumJets_PS_VBFDM_OR_Monojet, Count_factor);
-      scale(_hist_Jet1Eta_PS_VBFDM_OR_Monojet, Count_factor);
-      scale(_hist_Jet2Eta_PS_VBFDM_OR_Monojet, Count_factor);
-      scale(_hist_DeltaEta_PS_VBFDM_OR_Monojet, Count_factor);
-      scale(_hist_DeltaPhi_PS_VBFDM_OR_Monojet, Count_factor);
-      scale(_hist_met_PS_VBFDM_OR_Monojet, Count_factor);
-      //      scale(_hist_MjjvsDeltaEta_PS_VBFDM_OR_Monojet, 50*9);
-
-      scale(_hist_Mjj_PS_VBFDM_OR_Monojet_HighPt, Count_factor);
-      scale(_hist_Jet1PT_PS_VBFDM_OR_Monojet_HighPt, Count_factor);
-      scale(_hist_Jet2PT_PS_VBFDM_OR_Monojet_HighPt, Count_factor);
-      scale(_hist_NumJets_PS_VBFDM_OR_Monojet_HighPt, Count_factor);
-      scale(_hist_Jet1Eta_PS_VBFDM_OR_Monojet_HighPt, Count_factor);
-      scale(_hist_Jet2Eta_PS_VBFDM_OR_Monojet_HighPt, Count_factor);
-      scale(_hist_DeltaEta_PS_VBFDM_OR_Monojet_HighPt, Count_factor);
-      scale(_hist_DeltaPhi_PS_VBFDM_OR_Monojet_HighPt, Count_factor);
-      scale(_hist_met_PS_VBFDM_OR_Monojet_HighPt, Count_factor);
-
-      /*      
-      // normalize(_h_YYYY); // normalize to unity
-      normalize(_hist_Count_for_All_PS_CrossSection);
-  
-      normalize(_hist_Mjj_PS_VBFZ_Baseline);
-      normalize(_hist_Jet1PT_PS_VBFZ_Baseline);
-      normalize(_hist_Jet2PT_PS_VBFZ_Baseline);
-      normalize(_hist_NumJets_PS_VBFZ_Baseline);
-      normalize(_hist_Jet1Eta_PS_VBFZ_Baseline);
-      normalize(_hist_Jet2Eta_PS_VBFZ_Baseline);
-      normalize(_hist_DeltaEta_PS_VBFZ_Baseline);
-      normalize(_hist_DeltaPhi_PS_VBFZ_Baseline);
-      normalize(_hist_met_PS_VBFZ_Baseline);
-
-      normalize(_hist_Mjj_PS_VBFZ_HighMass);
-      normalize(_hist_Jet1PT_PS_VBFZ_HighMass);
-      normalize(_hist_Jet2PT_PS_VBFZ_HighMass);
-      normalize(_hist_NumJets_PS_VBFZ_HighMass);
-      normalize(_hist_Jet1Eta_PS_VBFZ_HighMass);
-      normalize(_hist_Jet2Eta_PS_VBFZ_HighMass);
-      normalize(_hist_DeltaEta_PS_VBFZ_HighMass);
-      normalize(_hist_DeltaPhi_PS_VBFZ_HighMass);
-      normalize(_hist_met_PS_VBFZ_HighMass);
-
-      normalize(_hist_Mjj_PS_VBFZ_Search);
-      normalize(_hist_Jet1PT_PS_VBFZ_Search);
-      normalize(_hist_Jet2PT_PS_VBFZ_Search);
-      normalize(_hist_NumJets_PS_VBFZ_Search);
-      normalize(_hist_Jet1Eta_PS_VBFZ_Search);
-      normalize(_hist_Jet2Eta_PS_VBFZ_Search);
-      normalize(_hist_DeltaEta_PS_VBFZ_Search);
-      normalize(_hist_DeltaPhi_PS_VBFZ_Search);
-      normalize(_hist_met_PS_VBFZ_Search);
-
-      normalize(_hist_Mjj_PS_VBFDM);
-      normalize(_hist_Jet1PT_PS_VBFDM);
-      normalize(_hist_Jet2PT_PS_VBFDM);
-      normalize(_hist_NumJets_PS_VBFDM);
-      normalize(_hist_Jet1Eta_PS_VBFDM);
-      normalize(_hist_Jet2Eta_PS_VBFDM);
-      normalize(_hist_DeltaEta_PS_VBFDM);
-      normalize(_hist_DeltaPhi_PS_VBFDM);
-      normalize(_hist_met_PS_VBFDM);
-
-      normalize(_hist_Mjj_PS_Monojet);
-      normalize(_hist_Jet1PT_PS_Monojet);
-      normalize(_hist_Jet2PT_PS_Monojet);
-      normalize(_hist_NumJets_PS_Monojet);
-      normalize(_hist_Jet1Eta_PS_Monojet);
-      normalize(_hist_Jet2Eta_PS_Monojet);
-      normalize(_hist_DeltaEta_PS_Monojet);
-      normalize(_hist_DeltaPhi_PS_Monojet);
-      normalize(_hist_met_PS_Monojet);
-
-      normalize(_hist_Mjj_PS_Monojet_HighPt);
-      normalize(_hist_Jet1PT_PS_Monojet_HighPt);
-      normalize(_hist_Jet2PT_PS_Monojet_HighPt);
-      normalize(_hist_NumJets_PS_Monojet_HighPt);
-      normalize(_hist_Jet1Eta_PS_Monojet_HighPt);
-      normalize(_hist_Jet2Eta_PS_Monojet_HighPt);
-      normalize(_hist_DeltaEta_PS_Monojet_HighPt);
-      normalize(_hist_DeltaPhi_PS_Monojet_HighPt);
-      normalize(_hist_met_PS_Monojet_HighPt);
-
-      normalize(_hist_Mjj_PS_VBFDM_OR_Monojet);
-      normalize(_hist_Jet1PT_PS_VBFDM_OR_Monojet);
-      normalize(_hist_Jet2PT_PS_VBFDM_OR_Monojet);
-      normalize(_hist_NumJets_PS_VBFDM_OR_Monojet);
-      normalize(_hist_Jet1Eta_PS_VBFDM_OR_Monojet);
-      normalize(_hist_Jet2Eta_PS_VBFDM_OR_Monojet);
-      normalize(_hist_DeltaEta_PS_VBFDM_OR_Monojet);
-      normalize(_hist_DeltaPhi_PS_VBFDM_OR_Monojet);
-      normalize(_hist_met_PS_VBFDM_OR_Monojet);
-
-      normalize(_hist_Mjj_PS_VBFDM_OR_Monojet_HighPt);
-      normalize(_hist_Jet1PT_PS_VBFDM_OR_Monojet_HighPt);
-      normalize(_hist_Jet2PT_PS_VBFDM_OR_Monojet_HighPt);
-      normalize(_hist_NumJets_PS_VBFDM_OR_Monojet_HighPt);
-      normalize(_hist_Jet1Eta_PS_VBFDM_OR_Monojet_HighPt);
-      normalize(_hist_Jet2Eta_PS_VBFDM_OR_Monojet_HighPt);
-      normalize(_hist_DeltaEta_PS_VBFDM_OR_Monojet_HighPt);
-      normalize(_hist_DeltaPhi_PS_VBFDM_OR_Monojet_HighPt);
-      normalize(_hist_met_PS_VBFDM_OR_Monojet_HighPt);
+      /*
+      typedef map<string, Histo1DPtr>::iterator in_type;
+      for(in_type in = _h.begin(); in != _h.end(); ++in)  normalize(in->second);
       */
     }
 
   private:
     // Data members like post-cuts event weight counters go here
-    /// @name Histograms
-    //@{    
-    Histo1DPtr _hist_Count_for_All_PS_CrossSection;
-
-    Histo1DPtr _hist_Mjj_PS_VBFZ_Baseline;
-    Histo1DPtr _hist_Jet1PT_PS_VBFZ_Baseline;
-    Histo1DPtr _hist_Jet2PT_PS_VBFZ_Baseline;
-    Histo1DPtr _hist_NumJets_PS_VBFZ_Baseline;
-    Histo1DPtr _hist_Jet1Eta_PS_VBFZ_Baseline;
-    Histo1DPtr _hist_Jet2Eta_PS_VBFZ_Baseline;
-    Histo1DPtr _hist_DeltaEta_PS_VBFZ_Baseline;
-    Histo1DPtr _hist_DeltaPhi_PS_VBFZ_Baseline;
-    Histo1DPtr _hist_met_PS_VBFZ_Baseline;
-
-    Histo1DPtr _hist_Mjj_PS_VBFZ_HighMass;
-    Histo1DPtr _hist_Jet1PT_PS_VBFZ_HighMass;
-    Histo1DPtr _hist_Jet2PT_PS_VBFZ_HighMass;
-    Histo1DPtr _hist_NumJets_PS_VBFZ_HighMass;
-    Histo1DPtr _hist_Jet1Eta_PS_VBFZ_HighMass;
-    Histo1DPtr _hist_Jet2Eta_PS_VBFZ_HighMass;
-    Histo1DPtr _hist_DeltaEta_PS_VBFZ_HighMass;
-    Histo1DPtr _hist_DeltaPhi_PS_VBFZ_HighMass;
-    Histo1DPtr _hist_met_PS_VBFZ_HighMass;
-
-    Histo1DPtr _hist_Mjj_PS_VBFZ_Search;
-    Histo1DPtr _hist_Jet1PT_PS_VBFZ_Search;
-    Histo1DPtr _hist_Jet2PT_PS_VBFZ_Search;
-    Histo1DPtr _hist_NumJets_PS_VBFZ_Search;
-    Histo1DPtr _hist_Jet1Eta_PS_VBFZ_Search;
-    Histo1DPtr _hist_Jet2Eta_PS_VBFZ_Search;
-    Histo1DPtr _hist_DeltaEta_PS_VBFZ_Search;
-    Histo1DPtr _hist_DeltaPhi_PS_VBFZ_Search;
-    Histo1DPtr _hist_met_PS_VBFZ_Search;
-
-    Histo1DPtr _hist_Mjj_PS_VBFDM;
-    Histo1DPtr _hist_Jet1PT_PS_VBFDM;
-    Histo1DPtr _hist_Jet2PT_PS_VBFDM;
-    Histo1DPtr _hist_NumJets_PS_VBFDM;
-    Histo1DPtr _hist_Jet1Eta_PS_VBFDM;
-    Histo1DPtr _hist_Jet2Eta_PS_VBFDM;
-    Histo1DPtr _hist_DeltaEta_PS_VBFDM;
-    Histo1DPtr _hist_DeltaPhi_PS_VBFDM;
-    Histo1DPtr _hist_met_PS_VBFDM;
-
-    Histo1DPtr _hist_Mjj_PS_VBFDM_100;
-    Histo1DPtr _hist_Jet1PT_PS_VBFDM_100;
-    Histo1DPtr _hist_Jet2PT_PS_VBFDM_100;
-    Histo1DPtr _hist_NumJets_PS_VBFDM_100;
-    Histo1DPtr _hist_Jet1Eta_PS_VBFDM_100;
-    Histo1DPtr _hist_Jet2Eta_PS_VBFDM_100;
-    Histo1DPtr _hist_DeltaEta_PS_VBFDM_100;
-    Histo1DPtr _hist_DeltaPhi_PS_VBFDM_100;
-    Histo1DPtr _hist_met_PS_VBFDM_100;
-
-    Histo1DPtr _hist_Mjj_PS_Monojet;
-    Histo1DPtr _hist_Jet1PT_PS_Monojet;
-    Histo1DPtr _hist_Jet2PT_PS_Monojet;
-    Histo1DPtr _hist_NumJets_PS_Monojet;
-    Histo1DPtr _hist_Jet1Eta_PS_Monojet;
-    Histo1DPtr _hist_Jet2Eta_PS_Monojet;
-    Histo1DPtr _hist_DeltaEta_PS_Monojet;
-    Histo1DPtr _hist_DeltaPhi_PS_Monojet;
-    Histo1DPtr _hist_met_PS_Monojet;
-
-    Histo1DPtr _hist_Mjj_PS_Monojet_HighPt;
-    Histo1DPtr _hist_Jet1PT_PS_Monojet_HighPt;
-    Histo1DPtr _hist_Jet2PT_PS_Monojet_HighPt;
-    Histo1DPtr _hist_NumJets_PS_Monojet_HighPt;
-    Histo1DPtr _hist_Jet1Eta_PS_Monojet_HighPt;
-    Histo1DPtr _hist_Jet2Eta_PS_Monojet_HighPt;
-    Histo1DPtr _hist_DeltaEta_PS_Monojet_HighPt;
-    Histo1DPtr _hist_DeltaPhi_PS_Monojet_HighPt;
-    Histo1DPtr _hist_met_PS_Monojet_HighPt;
-
-    Histo1DPtr _hist_Mjj_PS_VBFDM_OR_Monojet;
-    Histo1DPtr _hist_Jet1PT_PS_VBFDM_OR_Monojet;
-    Histo1DPtr _hist_Jet2PT_PS_VBFDM_OR_Monojet;
-    Histo1DPtr _hist_NumJets_PS_VBFDM_OR_Monojet;
-    Histo1DPtr _hist_Jet1Eta_PS_VBFDM_OR_Monojet;
-    Histo1DPtr _hist_Jet2Eta_PS_VBFDM_OR_Monojet;
-    Histo1DPtr _hist_DeltaEta_PS_VBFDM_OR_Monojet;
-    Histo1DPtr _hist_DeltaPhi_PS_VBFDM_OR_Monojet;
-    Histo1DPtr _hist_met_PS_VBFDM_OR_Monojet;
-    //    Histo2DPtr _hist_MjjvsDeltaEta_PS_VBFDM_OR_Monojet;
-
-    Histo1DPtr _hist_Mjj_PS_VBFDM_OR_Monojet_HighPt;
-    Histo1DPtr _hist_Jet1PT_PS_VBFDM_OR_Monojet_HighPt;
-    Histo1DPtr _hist_Jet2PT_PS_VBFDM_OR_Monojet_HighPt;
-    Histo1DPtr _hist_NumJets_PS_VBFDM_OR_Monojet_HighPt;
-    Histo1DPtr _hist_Jet1Eta_PS_VBFDM_OR_Monojet_HighPt;
-    Histo1DPtr _hist_Jet2Eta_PS_VBFDM_OR_Monojet_HighPt;
-    Histo1DPtr _hist_DeltaEta_PS_VBFDM_OR_Monojet_HighPt;
-    Histo1DPtr _hist_DeltaPhi_PS_VBFDM_OR_Monojet_HighPt;
-    Histo1DPtr _hist_met_PS_VBFDM_OR_Monojet_HighPt;
-
-    //@}
-
+    map<string, Histo1DPtr> _h;
+   
   };
 
   // The hook for the plugin system
